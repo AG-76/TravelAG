@@ -336,7 +336,7 @@
       <div class="ds-d past"><span class="dn">18</span><span class="dd">W</span></div>
       <div class="ds-d past"><span class="dn">19</span><span class="dd">TH</span></div>
       <div class="ds-d past"><span class="dn">20</span><span class="dd">F</span></div>
-      <div class="ds-d today"><span class="dn">21</span><span class="dd">S</span></div>
+      <div class="ds-d past"><span class="dn">21</span><span class="dd">S</span></div>
       <div class="ds-d future"><span class="dn">22</span><span class="dd">SN</span></div>
       <div class="ds-d future"><span class="dn">23</span><span class="dd">M</span></div>
       <div class="ds-d future"><span class="dn">24</span><span class="dd">T</span></div>
@@ -462,14 +462,14 @@
 <!-- ==================== LEFT SIDEBAR ==================== -->
 <div class="left">
 
-  <!-- Tonight's Hotel -->
-  <div class="card">
+  <!-- Tonight's Hotel — dynamic based on current city -->
+  <div class="card" id="hotelCard">
     <div class="card-label gr">&#9679; Tonight's Hotel</div>
-    <div class="hotel-name">Hotel Indigo Atlanta</div>
-    <div class="hotel-addr">683 Peachtree St NE, Midtown</div>
-    <span class="htag ci">Checked In</span>
-    <span class="htag co">Out: 12 PM (Mar 22)</span><br>
-    <span class="htag bf" style="margin-top:5px;">Breakfast included</span>
+    <div class="hotel-name" id="hotelName">Holiday Inn Express Berkeley</div>
+    <div class="hotel-addr" id="hotelAddr">1175 University Ave, Berkeley, CA 94702</div>
+    <span class="htag ci" id="hotelStatus">Check-in Today</span>
+    <span class="htag co" id="hotelCheckout">Out: 11 AM (Mar 25)</span><br>
+    <span class="htag bf" style="margin-top:5px;" id="hotelPerks">Breakfast included</span>
   </div>
 
   <!-- Events & Conferences -->
@@ -482,9 +482,9 @@
       </a>
     </div>
     <div class="ev-item">
-      <a class="ev-link" href="javascript:void(0)" onclick="showTravelDayDetail()" title="View tomorrow's travel details">
+      <a class="ev-link" href="javascript:void(0)" onclick="showTravelDayDetail()" title="View return flight details">
         <div class="ev-icon" style="background:var(--blue-bg);color:var(--blue);">&#9992;</div>
-        <div><div class="ev-title">Travel Day &rarr; San Jose</div><div class="ev-sub">Tomorrow &bull; Delta DL-809 &bull; 9:50 AM</div></div>
+        <div><div class="ev-title">Return Flight &rarr; Dubai</div><div class="ev-sub">Mar 26 &bull; Emirates EK226 &bull; 4:45 PM SFO</div></div>
       </a>
     </div>
     <div class="ev-item">
@@ -498,8 +498,9 @@
   <!-- Open Actions -->
   <div class="card">
     <div class="card-label or">&#9679; Open Actions</div>
-    <div class="am am-clickable" onclick="sendActionReminder('[URGENT] Etihad EY14 — Date Correction Needed','Action Item: Etihad EY14 return flight currently shows Mar 21 but needs to be changed to approx Mar 26.\nThis is URGENT — wrong date on return flight from San Francisco (SFO) to Abu Dhabi (AUH).\nAlso need AUH → DXB segment confirmation.')"><div class="adot r"></div><div class="am-t"><strong>Etihad EY14</strong> fix date to ~Mar 26 &bull; SFO &rarr; AUH &rarr; DXB</div><div class="am-s ur">Urgent</div></div>
-    <div class="am am-clickable" onclick="sendActionReminder('[Pending] RSAC 2026 Badge Pickup','Action Item: RSAC 2026 badge pickup pending.\nLocations: Moscone South (747 Howard St) or Hilton Union Square (333 O\'Farrell St).\nPhoto ID required. Need to collect before conference starts Mar 22.')"><div class="adot o"></div><div class="am-t"><strong>RSAC badge</strong> Moscone South or Hilton Union Sq &bull; Photo ID req</div><div class="am-s pe">Pending</div></div>
+    <div class="am"><div class="adot" style="background:var(--green);"></div><div class="am-t"><strong>Emirates EK226</strong> SFO&rarr;DXB Mar 26 &bull; Seat 60K &bull; PNR F8WLVF</div><div class="am-s" style="color:var(--green);background:var(--green-bg);">Confirmed</div></div>
+    <div class="am am-clickable" onclick="sendActionReminder('[Pending] RSAC 2026 Badge Pickup','Action Item: RSAC 2026 badge pickup pending.\nLocations: Moscone South (747 Howard St) or Hilton Union Square (333 O\'Farrell St).\nPhoto ID required. Need to collect before conference starts Mar 23.')"><div class="adot o"></div><div class="am-t"><strong>RSAC badge</strong> Moscone South or Hilton Union Sq &bull; Photo ID req</div><div class="am-s pe">Pending</div></div>
+    <div class="am am-clickable" onclick="sendActionReminder('[Info] Etihad EY14 Refund Request','Action Item: Etihad EY14 ticket has been replaced by Emirates EK226.\nPlease initiate refund for Etihad booking.\nNew booking ref: F8WLVF (Emirates).')"><div class="adot" style="background:var(--text-3);"></div><div class="am-t"><strong>Etihad EY14</strong> request refund &bull; Replaced by Emirates</div><div class="am-s" style="color:var(--text-3);background:var(--bg);">Closed</div></div>
   </div>
 
   <!-- Buy List - Inline Dropdown -->
@@ -572,38 +573,38 @@
 
   <!-- Venue Lists (one per category, toggled) -->
   <div class="venue-list active" id="vl-food">
-    <div class="vl-head"><span class="ci">&#127860;</span><h4>Food Near You</h4></div>
+    <div class="vl-head"><span class="ci">&#127860;</span><h4>Food Near You — Berkeley</h4></div>
     <ul class="cl">
-      <li data-venue="south_city" onclick="showDetail('south_city')"><div><div class="cl-n">South City Kitchen <span class="tag" style="background:var(--accent-bg);color:var(--accent);">AI Pick</span><span class="oc-tag" data-v="south_city"></span></div><div class="cl-m">Southern &bull; 4.6&#9733; &bull; Fried Green Tomatoes, She-Crab Soup</div></div><div class="cl-r"><div class="cl-d">7 min</div></div></li>
-      <li data-venue="blue_india" onclick="showDetail('blue_india')"><div><div class="cl-n">Blue India <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian</span><span class="oc-tag" data-v="blue_india"></span></div><div class="cl-m">Veg options &bull; Butter Chicken, Paneer Tikka, Biryani</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
-      <li data-venue="tabla" onclick="showDetail('tabla')"><div><div class="cl-n">Tabla <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian</span><span class="oc-tag" data-v="tabla"></span></div><div class="cl-m">Modern lounge &bull; Lamb Chops, Indian Street Tacos</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+      <li data-venue="vik_chaat" onclick="showDetail('vik_chaat')"><div><div class="cl-n">Vik's Chaat <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian</span><span class="tag" style="background:var(--accent-bg);color:var(--accent);">AI Pick</span><span class="oc-tag" data-v="vik_chaat"></span></div><div class="cl-m">Legendary chaat &bull; Dosa, Pav Bhaji, Chole Bhature</div></div><div class="cl-r"><div class="cl-d">1.2 mi</div></div></li>
+      <li data-venue="gather" onclick="showDetail('gather')"><div><div class="cl-n">Gather <span class="tag" style="background:var(--green-bg);color:var(--green);">Farm-to-Table</span><span class="oc-tag" data-v="gather"></span></div><div class="cl-m">Seasonal California cuisine &bull; 4.5&#9733; &bull; Veg-friendly</div></div><div class="cl-r"><div class="cl-d">0.8 mi</div></div></li>
+      <li data-venue="curry_up_now" onclick="showDetail('curry_up_now')"><div><div class="cl-n">Curry Up Now <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian Fusion</span><span class="oc-tag" data-v="curry_up_now"></span></div><div class="cl-m">Tikka Masala Burrito, Naughty Naan, Craft Cocktails</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
     </ul>
   </div>
 
   <div class="venue-list" id="vl-bar">
-    <div class="vl-head"><span class="ci">&#127867;</span><h4>Bars &amp; Drinks</h4></div>
+    <div class="vl-head"><span class="ci">&#127867;</span><h4>Bars &amp; Drinks — Berkeley</h4></div>
     <ul class="cl">
-      <li data-venue="midtown_bar" onclick="showDetail('midtown_bar')"><div><div class="cl-n">683 Midtown Bar <span class="tag" style="background:var(--green-bg);color:var(--green);">In Hotel</span><span class="oc-tag" data-v="midtown_bar"></span></div><div class="cl-m">Lobby bar &bull; Craft Cocktails, Bourbon Flights</div></div><div class="cl-r"><div class="cl-d">0 min</div></div></li>
-      <li data-venue="red_phone" onclick="showDetail('red_phone')"><div><div class="cl-n">Red Phone Booth <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Speakeasy</span><span class="oc-tag" data-v="red_phone"></span></div><div class="cl-m">Password entry &bull; Classic Cocktails, Cigars</div></div><div class="cl-r"><div class="cl-d">0.4 mi</div></div></li>
-      <li data-venue="livingston" onclick="showDetail('livingston')"><div><div class="cl-n">Livingston Bar <span class="tag" style="background:var(--blue-bg);color:var(--blue);">Rooftop</span><span class="oc-tag" data-v="livingston"></span></div><div class="cl-m">City views &bull; Signature Cocktails, Oysters</div></div><div class="cl-r"><div class="cl-d">200 ft</div></div></li>
+      <li data-venue="jupiter" onclick="showDetail('jupiter')"><div><div class="cl-n">Jupiter <span class="tag" style="background:var(--green-bg);color:var(--green);">Craft Beer</span><span class="oc-tag" data-v="jupiter"></span></div><div class="cl-m">Wood-fired pizza &bull; 20+ craft beers on tap &bull; Patio</div></div><div class="cl-r"><div class="cl-d">0.7 mi</div></div></li>
+      <li data-venue="hotel_bar_bk" onclick="showDetail('hotel_bar_bk')"><div><div class="cl-n">Holiday Inn Lobby Lounge <span class="tag" style="background:var(--green-bg);color:var(--green);">In Hotel</span><span class="oc-tag" data-v="hotel_bar_bk"></span></div><div class="cl-m">Quick drinks &bull; Wine, Beer, Cocktails</div></div><div class="cl-r"><div class="cl-d">0 min</div></div></li>
+      <li data-venue="fieldwork" onclick="showDetail('fieldwork')"><div><div class="cl-n">Fieldwork Brewing <span class="tag" style="background:var(--blue-bg);color:var(--blue);">Brewery</span><span class="oc-tag" data-v="fieldwork"></span></div><div class="cl-m">Award-winning IPAs &bull; Outdoor seating &bull; Food trucks</div></div><div class="cl-r"><div class="cl-d">0.9 mi</div></div></li>
     </ul>
   </div>
 
   <div class="venue-list" id="vl-interesting">
     <div class="vl-head"><span class="ci">&#127775;</span><h4>Interesting Around You</h4></div>
     <ul class="cl">
-      <li data-venue="harry_potter" onclick="showDetail('harry_potter')"><div><div class="cl-n">Harry Potter: Cursed Child <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Theatre</span><span class="oc-tag" data-v="harry_potter"></span></div><div class="cl-m">Fox Theatre &bull; 7:30 PM &bull; 3+ hour show</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
-      <li data-venue="atl_united" onclick="showDetail('atl_united')"><div><div class="cl-n">Atlanta United vs Charlotte <span class="tag" style="background:#dcfce7;color:#166534;">Sports</span><span class="oc-tag" data-v="atl_united"></span></div><div class="cl-m">MLS &bull; 7 PM &bull; Mercedes-Benz Stadium</div></div><div class="cl-r"><div class="cl-d">1.5 mi</div></div></li>
-      <li data-venue="laughing_skull" onclick="showDetail('laughing_skull')"><div><div class="cl-n">Laughing Skull Lounge <span class="tag" style="background:#fce7f3;color:#be185d;">Comedy</span><span class="oc-tag" data-v="laughing_skull"></span></div><div class="cl-m">Shows 8 &amp; 10 PM &bull; 2-drink minimum</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
+      <li data-venue="rsac_moscone" onclick="showDetail('rsac_moscone')"><div><div class="cl-n">RSAC 2026 — Moscone <span class="tag" style="background:var(--red-bg);color:var(--red);">Conference</span><span class="oc-tag" data-v="rsac_moscone"></span></div><div class="cl-m">Day 1 Mar 23 &bull; 747 Howard St, SF &bull; Badge pickup today</div></div><div class="cl-r"><div class="cl-d">14 mi</div></div></li>
+      <li data-venue="uc_berkeley" onclick="showDetail('uc_berkeley')"><div><div class="cl-n">UC Berkeley Campus <span class="tag" style="background:var(--accent-bg);color:var(--accent);">University</span><span class="oc-tag" data-v="uc_berkeley"></span></div><div class="cl-m">Walk the campus &bull; Sather Tower &bull; Free</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+      <li data-venue="telegraph" onclick="showDetail('telegraph')"><div><div class="cl-n">Telegraph Avenue <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Culture</span><span class="oc-tag" data-v="telegraph"></span></div><div class="cl-m">Iconic street &bull; Shops, cafes, bookstores, street art</div></div><div class="cl-r"><div class="cl-d">0.6 mi</div></div></li>
     </ul>
   </div>
 
   <div class="venue-list" id="vl-sightseeing">
-    <div class="vl-head"><span class="ci">&#127961;</span><h4>Sightseeing</h4></div>
+    <div class="vl-head"><span class="ci">&#127961;</span><h4>Sightseeing — Berkeley / SF</h4></div>
     <ul class="cl">
-      <li data-venue="piedmont" onclick="showDetail('piedmont')"><div><div class="cl-n">Piedmont Park <span class="tag" style="background:var(--green-bg);color:var(--green);">Free</span><span class="oc-tag" data-v="piedmont"></span></div><div class="cl-m">Skyline views &bull; Sunset walk &bull; Dog-friendly</div></div><div class="cl-r"><div class="cl-d">0.6 mi</div></div></li>
-      <li data-venue="high_museum" onclick="showDetail('high_museum')"><div><div class="cl-n">High Museum of Art <span class="oc-tag" data-v="high_museum"></span></div><div class="cl-m">Sat till 9 PM &bull; $23.50 &bull; Leading SE museum</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
-      <li data-venue="fox_theatre" onclick="showDetail('fox_theatre')"><div><div class="cl-n">Fox Theatre <span class="tag" style="background:var(--orange-bg);color:#92400e;">Landmark</span><span class="oc-tag" data-v="fox_theatre"></span></div><div class="cl-m">1929 Moorish-Egyptian architecture &bull; Tours</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+      <li data-venue="berkeley_marina" onclick="showDetail('berkeley_marina')"><div><div class="cl-n">Berkeley Marina <span class="tag" style="background:var(--green-bg);color:var(--green);">Free</span><span class="oc-tag" data-v="berkeley_marina"></span></div><div class="cl-m">Bay views &bull; Sunset walk &bull; Golden Gate visible</div></div><div class="cl-r"><div class="cl-d">1.5 mi</div></div></li>
+      <li data-venue="golden_gate" onclick="showDetail('golden_gate')"><div><div class="cl-n">Golden Gate Bridge <span class="tag" style="background:var(--orange-bg);color:#92400e;">Landmark</span><span class="oc-tag" data-v="golden_gate"></span></div><div class="cl-m">SF icon &bull; Walk or drive across &bull; Free</div></div><div class="cl-r"><div class="cl-d">18 mi</div></div></li>
+      <li data-venue="fishermans_wharf" onclick="showDetail('fishermans_wharf')"><div><div class="cl-n">Fisherman's Wharf / Pier 39 <span class="tag" style="background:var(--blue-bg);color:var(--blue);">Tourist</span><span class="oc-tag" data-v="fishermans_wharf"></span></div><div class="cl-m">Sea lions &bull; Clam chowder &bull; Ghirardelli Square</div></div><div class="cl-r"><div class="cl-d">16 mi</div></div></li>
     </ul>
   </div>
 
@@ -614,51 +615,57 @@
   <div id="travelDayPanel" style="display:none;position:absolute;inset:0;background:var(--white);overflow-y:auto;z-index:9;padding:20px 24px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
       <button onclick="document.getElementById('travelDayPanel').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px;">&#10005;</button>
-      <h2 style="font-size:18px;font-weight:800;color:var(--text);margin:0;">&#9992; Tomorrow's Travel Details</h2>
+      <h2 style="font-size:18px;font-weight:800;color:var(--text);margin:0;">&#9992; Return Flight Details</h2>
     </div>
     <div style="background:var(--blue-bg);border-radius:10px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:var(--blue);">Delta DL-809</div>
-      <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:4px;">ATL &rarr; SJC</div>
-      <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Atlanta Hartsfield-Jackson &rarr; San Jose Mineta</div>
+      <div style="font-size:14px;font-weight:800;color:var(--blue);">Emirates EK226</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:4px;">SFO &rarr; DXB</div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:2px;">San Francisco International &rarr; Dubai International (Terminal 3)</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
       <div style="background:var(--bg);border-radius:8px;padding:12px;">
         <div style="font-size:10px;color:var(--text-3);font-weight:700;">DEPARTURE</div>
-        <div style="font-size:18px;font-weight:800;color:var(--text);">9:50 AM</div>
-        <div style="font-size:12px;color:var(--text-2);">Mar 22, 2026</div>
-        <div style="font-size:12px;color:var(--text-2);">Terminal S &bull; Gate TBD</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">4:45 PM</div>
+        <div style="font-size:12px;color:var(--text-2);">Mar 26, 2026</div>
+        <div style="font-size:12px;color:var(--text-2);">International Terminal &bull; Seat 60K</div>
       </div>
       <div style="background:var(--bg);border-radius:8px;padding:12px;">
         <div style="font-size:10px;color:var(--text-3);font-weight:700;">ARRIVAL</div>
-        <div style="font-size:18px;font-weight:800;color:var(--text);">12:30 PM</div>
-        <div style="font-size:12px;color:var(--text-2);">Mar 22, 2026 (local)</div>
-        <div style="font-size:12px;color:var(--text-2);">~5h 40m flight</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">8:45 PM</div>
+        <div style="font-size:12px;color:var(--text-2);">Mar 27, 2026 (local Dubai)</div>
+        <div style="font-size:12px;color:var(--text-2);">~16h nonstop</div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
-        <span style="color:var(--text-2);">PNR</span><span style="font-weight:700;color:var(--text);">HLSHJX</span>
+        <span style="color:var(--text-2);">PNR</span><span style="font-weight:700;color:var(--text);">F8WLVF</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
-        <span style="color:var(--text-2);">Booking</span><span style="font-weight:700;color:var(--text);">MakeMyTrip MyBiz</span>
+        <span style="color:var(--text-2);">Ticket</span><span style="font-weight:700;color:var(--text);">176 9494656594</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
-        <span style="color:var(--text-2);">Class</span><span style="font-weight:700;color:var(--text);">Corporate Fare</span>
+        <span style="color:var(--text-2);">Class</span><span style="font-weight:700;color:var(--text);">Economy Saver</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
-        <span style="color:var(--text-2);">Fare</span><span style="font-weight:700;color:var(--accent);">$2,638.60</span>
+        <span style="color:var(--text-2);">Fare</span><span style="font-weight:700;color:var(--accent);">AED 2,620</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">Baggage</span><span style="font-weight:700;color:var(--text);">2 Pieces checked</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">Skywards</span><span style="font-weight:700;color:var(--text);">Silver — 385 186 244</span>
       </div>
     </div>
     <div style="background:var(--orange-bg);border-radius:8px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#92400e;">&#9201; Pre-flight Checklist</div>
+      <div style="font-size:13px;font-weight:700;color:#92400e;">&#9201; Pre-flight Checklist — Mar 26</div>
       <div style="font-size:12px;color:#92400e;margin-top:4px;line-height:1.6;">
-        &bull; Hotel checkout by 7:30 AM (Hotel Indigo, 12 PM late checkout)<br>
-        &bull; Cab to ATL Airport by 8:00 AM (~30 min ride)<br>
-        &bull; Use South Checkpoint for Delta terminal<br>
-        &bull; Arrive San Jose ~12:30 PM &rarr; Holiday Inn Express Berkeley
+        &bull; Check-in opens at 12:45 PM at SFO International Terminal<br>
+        &bull; Arrive 3 hours early (by 1:45 PM) for international flight<br>
+        &bull; Passport + visa ready &bull; 2 checked bags allowed<br>
+        &bull; Gate ready: 60 min before departure (Economy)
       </div>
     </div>
-    <a href="https://www.delta.com/flight-search/book-a-flight" target="_blank" style="display:block;text-align:center;padding:12px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">Check Live Flight Status on Delta.com &#8599;</a>
+    <a href="https://www.emirates.com/english/manage-booking/" target="_blank" style="display:block;text-align:center;padding:12px;background:#c60c30;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">Manage Booking on Emirates.com &#8599;</a>
   </div>
 
   <!-- ===== SEARCH RESULTS PANEL (inline in center) ===== -->
@@ -1125,29 +1132,28 @@
     <div class="crit-detail" id="critDetail"></div>
   </div>
 
-  <!-- Departure Timeline -->
-  <ul class="tl">
-    <li><span class="tt" style="color:var(--red);">5:50 AM</span>Pre-flight push notification</li>
-    <li><span class="tt">6:00 AM</span>Wake up, pack, grab-and-go</li>
-    <li><span class="tt">6:15 AM</span>Cab &rarr; ATL South Terminal</li>
-    <li><span class="tt">6:40 AM</span>TSA Security (budget 2 hrs)</li>
-    <li><span class="tt">8:40 AM</span>Clear TSA &rarr; food at gate</li>
-    <li><span class="tt">9:50 AM</span>Depart ATL</li>
-    <li><span class="tt" style="color:var(--green);">12:08 PT</span>Land SJC (3hr behind)</li>
+  <!-- Berkeley/RSAC Schedule -->
+  <ul class="tl" id="contextTimeline">
+    <li><span class="tt" style="color:var(--accent);">Today</span>Settle into Holiday Inn Berkeley</li>
+    <li><span class="tt">Mar 23</span>RSAC 2026 — Day 1, Moscone South</li>
+    <li><span class="tt">Mar 24</span>RSAC 2026 — Day 2</li>
+    <li><span class="tt">Mar 25</span>RSAC 2026 — Day 3 &bull; Checkout Berkeley</li>
+    <li><span class="tt" style="color:var(--red);">Mar 26</span>Emirates EK226 SFO 4:45 PM &rarr; DXB</li>
+    <li><span class="tt" style="color:var(--green);">Mar 27</span>Arrive Dubai 8:45 PM &#127968;</li>
   </ul>
 
-  <!-- TSA Alert -->
-  <div class="ab w">
-    <h4>&#9888; TSA Alert &mdash; ATL Airport</h4>
-    350K+ weekend travelers. 2-hour wait times. Staffing shortages. Use <strong>South Checkpoint</strong> for Delta. Leave hotel by 6:15 AM.
+  <!-- RSAC Info -->
+  <div class="ab" style="background:var(--accent-bg);border-left:3px solid var(--accent);">
+    <h4 style="color:var(--accent);">&#128737; RSAC 2026 Info</h4>
+    <span style="font-size:11px;color:var(--text-2);">Moscone South, 747 Howard St, SF. Badge pickup today at registration. BART: Downtown Berkeley &rarr; Powell St (~30 min). Photo ID required.</span>
   </div>
 
-  <!-- Tomorrow's Flight -->
+  <!-- Return Flight -->
   <div class="fc">
-    <div class="fc-l">Tomorrow's Flight</div>
-    <div class="fc-r"><span class="fc-c">ATL</span><span class="fc-a">&rarr;</span><span class="fc-c">SJC</span></div>
-    <div class="fc-t">9:50 AM ET &rarr; 12:08 PM PT</div>
-    <div class="fc-d">Delta DL-809 &bull; PNR: HLSHJX</div>
+    <div class="fc-l" style="color:var(--green);">Return Flight — Confirmed</div>
+    <div class="fc-r"><span class="fc-c">SFO</span><span class="fc-a">&rarr;</span><span class="fc-c">DXB</span></div>
+    <div class="fc-t">Mar 26 &bull; 4:45 PM &rarr; 8:45 PM+1</div>
+    <div class="fc-d">Emirates EK226 &bull; Seat 60K &bull; PNR: F8WLVF</div>
   </div>
 
   <!-- Live Weather Widget -->
@@ -1173,14 +1179,14 @@
 <!-- BOTTOM QUERY BAR -->
 <div class="qbar">
   <div class="qa" id="searchHistory">
+    <span class="qc" onclick="reSearch(this)">RSAC badge</span>
+    <span class="qc" onclick="reSearch(this)">BART to SF</span>
+    <span class="qc" onclick="reSearch(this)">Indian food</span>
+    <span class="qc" onclick="reSearch(this)">Emirates EK226</span>
     <span class="qc" onclick="reSearch(this)">Mac Mini</span>
-    <span class="qc" onclick="reSearch(this)">ATL TSA</span>
-    <span class="qc" onclick="reSearch(this)">Breakfast</span>
-    <span class="qc" onclick="reSearch(this)">Policy</span>
-    <span class="qc" onclick="reSearch(this)">Voucher</span>
   </div>
   <div class="q-row">
-    <input class="qi" id="queryInput" type="text" placeholder="Ask anything &mdash; &quot;Indian veg near hotel&quot;, &quot;Uber cost to ATL&quot;...">
+    <input class="qi" id="queryInput" type="text" placeholder="Ask anything &mdash; &quot;Indian veg nearby&quot;, &quot;BART to Moscone&quot;, &quot;return flight&quot;...">
     <button class="qs" onclick="submitSearch()">&#10148;</button>
   </div>
 </div>
@@ -1500,42 +1506,46 @@ function switchTab(cat, el) {
 
 // Venue detail data
 var venues = {
-  south_city: {name:'South City Kitchen Midtown',type:'Southern American',rating:'4.6',price:'$$$',dist:'0.4 mi (7 min walk)',addr:'1144 Crescent Ave NE, Atlanta, GA 30309',hours:'Mon-Thu 11AM-9PM, Fri 11AM-10PM, Sat 10AM-10PM, Sun 10AM-9PM',
-    menu:['Fried Green Tomatoes','Buttermilk Fried Chicken','She-Crab Soup','Shrimp & Grits','Pimento Cheese','Pecan Pie','Bourbon Old Fashioned'],note:'Reservations recommended for Saturday evening. Walk south on Peachtree, turn right on 12th.',
-    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/South+City+Kitchen+Midtown/@33.7866,-84.3838,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/south-city-kitchen-midtown-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Search Google',url:'https://www.google.com/search?q=South+City+Kitchen+Midtown+Atlanta+menu+reservations',cls:'secondary',icon:'&#128269;'}]},
-  blue_india: {name:'Blue India',type:'Indian Restaurant',rating:'4.3',price:'$$',dist:'0.3 mi (5 min walk)',addr:'933 Peachtree St NE, Atlanta, GA 30309',hours:'Mon-Sun 11:30AM-10PM',
-    menu:['Butter Chicken','Paneer Tikka','Biryani','Dal Makhani','Naan Basket','Mango Lassi','Gulab Jamun'],note:'Good vegetarian options. North on Peachtree St, 5 min walk.',
-    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Blue+India/@33.7831,-84.3830,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/blue-india-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Order on DoorDash',url:'https://www.doordash.com/store/blue-india-atlanta-171410/',cls:'secondary',icon:'&#127860;'}]},
-  tabla: {name:'Tabla',type:'Modern Indian Lounge',rating:'4.4',price:'$$',dist:'0.5 mi (9 min walk)',addr:'77 12th St NE, Atlanta, GA 30309',hours:'Tue-Sun 5PM-11PM, Closed Mon',
-    menu:['Lamb Chops','Chicken Tikka Masala','Samosa Chaat','Tandoori Salmon','Craft Cocktails','Indian Street Tacos','Mango Cheesecake'],note:'Modern Indian with lounge vibe. Good for drinks + dinner combo.',
-    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Tabla/@33.7870,-84.3810,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/tabla-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Search Google',url:'https://www.google.com/search?q=Tabla+Atlanta+Indian+restaurant+menu',cls:'secondary',icon:'&#128269;'}]},
-  midtown_bar: {name:'683 Midtown Bar',type:'Hotel Bar',rating:'4.1',price:'$$',dist:'In hotel (lobby level)',addr:'683 Peachtree St NE (Hotel Indigo lobby)',hours:'Daily 4PM-12AM',
-    menu:['Craft Cocktails','Local Draft Beers','Wine Selection','Bourbon Flights','Bar Bites','Charcuterie Board'],note:'No walking needed. Downstairs in your hotel lobby. Relaxed atmosphere.',
-    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Hotel+Indigo+Atlanta+Midtown/@33.7726,-84.3853,17z/',cls:'primary',icon:'&#128205;'}]},
-  red_phone: {name:'Red Phone Booth',type:'Speakeasy Bar',rating:'4.5',price:'$$$',dist:'0.4 mi (7 min walk)',addr:'17 Andrew Young International Blvd, Atlanta, GA 30303',hours:'Mon-Sat 5PM-2AM, Sun 5PM-12AM',
-    menu:['Classic Cocktails','Prohibition-era Drinks','Cigars','Premium Whiskey','Champagne'],note:'Secret code required for entry. Ask hotel concierge for tonight\'s code, or visit their website.',
-    links:[{label:'Get Access Code',url:'https://www.redphonebooth.com/',cls:'primary',icon:'&#128222;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Red+Phone+Booth/@33.7580,-84.3910,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/red-phone-booth-atlanta',cls:'secondary',icon:'&#11088;'}]},
-  livingston: {name:'Livingston Restaurant & Bar',type:'Rooftop Bar',rating:'4.2',price:'$$',dist:'200 ft from hotel',addr:'659 Peachtree St NE, Atlanta, GA 30308',hours:'Daily 5PM-1AM',
-    menu:['Signature Cocktails','Southern Tapas','Oysters','Flatbreads','Craft Beer'],note:'Rooftop terrace with city views. Steps from your hotel. Great sunset spot.',
-    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Livingston+Restaurant+%26+Bar/@33.7718,-84.3855,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/livingston-restaurant-and-bar-atlanta',cls:'secondary',icon:'&#11088;'}]},
-  harry_potter: {name:'Harry Potter and the Cursed Child',type:'Theatre / Broadway Show',rating:'4.8',price:'$$$$',ticketRange:'$49 \u2013 $299',dist:'0.5 mi (8 min walk)',addr:'Fox Theatre, 660 Peachtree St NE',hours:'Tonight: 7:30 PM (Sat matinee 2 PM also available)',
-    menu:['Concessions available','Pre-show dining at nearby restaurants recommended'],note:'3+ hour show in 2 parts. Arrive 30 min early. No photography during performance. Tickets from $49 (rear balcony) to $299 (premium orchestra).',
-    links:[{label:'Buy Tickets \u2014 Fox Theatre',url:'https://www.foxtheatre.org/events',cls:'primary',icon:'&#127915;'},{label:'Search Tickets on Google',url:'https://www.google.com/search?q=Harry+Potter+Cursed+Child+Fox+Theatre+Atlanta+tickets',cls:'green',icon:'&#127903;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Fox+Theatre/@33.7726,-84.3857,17z/',cls:'secondary',icon:'&#128205;'}]},
-  atl_united: {name:'Atlanta United vs Charlotte FC',type:'MLS Soccer Match',rating:'4.7',price:'$$-$$$',ticketRange:'$25 \u2013 $180',dist:'1.5 mi (Uber 6 min)',addr:'Mercedes-Benz Stadium, 1 AMB Dr NW',hours:'Tonight: 7 PM kickoff, Gates open 5:30 PM',
-    menu:['Stadium concessions','Molly B pub inside','King of Pops','Craft beer stations','Fox Bros BBQ stand'],note:'MLS regular season. Take Uber or MARTA to Dome/GWCC station. Tickets from $25 (upper deck) to $180 (lower sideline).',
-    links:[{label:'Buy Tickets \u2014 atlutd.com',url:'https://www.atlutd.com/tickets/',cls:'primary',icon:'&#9917;'},{label:'Search Tickets on Google',url:'https://www.google.com/search?q=Atlanta+United+vs+Charlotte+FC+tickets+tonight',cls:'green',icon:'&#127903;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Mercedes-Benz+Stadium/@33.7553,-84.4006,17z/',cls:'secondary',icon:'&#128205;'}]},
-  laughing_skull: {name:'Laughing Skull Lounge',type:'Comedy Club',rating:'4.4',price:'$$',ticketRange:'$15 \u2013 $25',dist:'0.3 mi (5 min walk)',addr:'878 Peachtree St NE, Atlanta, GA 30309',hours:'Shows at 8 PM & 10 PM tonight',
-    menu:['2-drink minimum','Craft Beer','Wine','Cocktails','Light Snacks'],note:'Intimate venue, arrive 20 min early for good seats. 2-drink minimum. Tickets $15\u2013$25 depending on show.',
-    links:[{label:'Buy Tickets',url:'https://www.google.com/search?q=Laughing+Skull+Lounge+Atlanta+tickets+tonight',cls:'primary',icon:'&#127911;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Laughing+Skull+Lounge/@33.7806,-84.3832,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/laughing-skull-lounge-atlanta',cls:'secondary',icon:'&#11088;'}]},
-  piedmont: {name:'Piedmont Park',type:'Public Park',rating:'4.8',price:'Free',dist:'0.6 mi (11 min walk)',addr:'400 Park Dr NE, Atlanta, GA 30309',hours:'Daily 6AM-11PM',
-    menu:['Park Tavern restaurant on-site','Food trucks on weekends','Bring your own picnic'],note:'Best skyline views from the meadow. Great sunset walk tonight. Dog-friendly. Free entry.',
-    links:[{label:'Park Website',url:'https://piedmontpark.org/',cls:'primary',icon:'&#127795;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Piedmont+Park/@33.7879,-84.3748,16z/',cls:'secondary',icon:'&#128205;'}]},
-  high_museum: {name:'High Museum of Art',type:'Art Museum',rating:'4.6',price:'$$ ($23.50)',ticketRange:'$23.50 general',dist:'0.3 mi (5 min walk)',addr:'1280 Peachtree St NE, Atlanta, GA 30309',hours:'Sat 10AM-9PM (late night!), Sun 12-5PM',
-    menu:['Table 1280 restaurant inside','Museum cafe for coffee & light bites'],note:'Leading Southeast art museum. Open late on Saturdays until 9 PM. Free parking garage.',
-    links:[{label:'Buy Tickets \u2014 high.org',url:'https://high.org/',cls:'primary',icon:'&#127912;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/High+Museum+of+Art/@33.7901,-84.3856,17z/',cls:'secondary',icon:'&#128205;'}]},
-  fox_theatre: {name:'Fox Theatre',type:'Historic Theatre',rating:'4.9',price:'$$-$$$$',ticketRange:'$20 tour / $40\u2013$200 shows',dist:'0.5 mi (8 min walk)',addr:'660 Peachtree St NE, Atlanta, GA 30308',hours:'Box office: 10AM-6PM, Evening shows vary',
-    menu:['Marquee Club lounge','Concessions','Egyptian Ballroom bar'],note:'Iconic 1929 Moorish-Egyptian architecture. Take a guided tour ($20) or catch a show tonight.',
-    links:[{label:'Events & Tickets',url:'https://www.foxtheatre.org/events',cls:'primary',icon:'&#127915;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Fox+Theatre/@33.7726,-84.3857,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/fox-theatre-atlanta',cls:'secondary',icon:'&#11088;'}]}
+  // === BERKELEY FOOD ===
+  vik_chaat: {name:'Vik\'s Chaat',type:'Indian Street Food',rating:'4.5',price:'$',dist:'1.2 mi (5 min drive)',addr:'2390 4th St, Berkeley, CA 94710',hours:'Mon-Sun 11AM-6PM',
+    menu:['Dosa','Pav Bhaji','Chole Bhature','Samosa Chaat','Chai','Vada Pav','Aloo Tikki'],note:'Legendary Berkeley Indian spot. Warehouse-style, order at counter. Cash/card. Very popular at lunch — go early.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Vik\'s+Chaat/@37.8697,-122.2986,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/viks-chaat-berkeley',cls:'secondary',icon:'&#11088;'}]},
+  gather: {name:'Gather',type:'Farm-to-Table California',rating:'4.5',price:'$$$',dist:'0.8 mi (15 min walk)',addr:'2200 Oxford St, Berkeley, CA 94704',hours:'Mon-Thu 11:30AM-9PM, Fri-Sat 11:30AM-10PM, Sun 10AM-9PM',
+    menu:['Seasonal Salads','Wood-fired Pizza','Local Fish','Craft Cocktails','Vegan Options','Housemade Pasta'],note:'Upscale farm-to-table. Great for dinner. Reservations recommended on weekends.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Gather/@37.8718,-122.2667,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/gather-berkeley',cls:'secondary',icon:'&#11088;'},{label:'Reservations',url:'https://www.google.com/search?q=Gather+Berkeley+reservations',cls:'secondary',icon:'&#128197;'}]},
+  curry_up_now: {name:'Curry Up Now',type:'Indian Fusion',rating:'4.3',price:'$$',dist:'0.5 mi',addr:'2020 Shattuck Ave, Berkeley, CA 94704',hours:'Mon-Sun 11AM-9PM',
+    menu:['Tikka Masala Burrito','Naughty Naan','Deconstructed Samosa','Sexy Fries','Mango Lassi'],note:'Indian fusion fast-casual. Great for quick lunch. Walk down Shattuck Ave.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Curry+Up+Now/@37.8712,-122.2687,17z/',cls:'primary',icon:'&#128205;'},{label:'Order on DoorDash',url:'https://www.doordash.com/store/curry-up-now-berkeley/',cls:'secondary',icon:'&#127860;'}]},
+  // === BERKELEY BARS ===
+  jupiter: {name:'Jupiter',type:'Craft Beer + Pizza',rating:'4.3',price:'$$',dist:'0.7 mi',addr:'2181 Shattuck Ave, Berkeley, CA 94704',hours:'Mon-Thu 11:30AM-12AM, Fri-Sat 11:30AM-1AM, Sun 12PM-11PM',
+    menu:['20+ Craft Beers on Tap','Wood-fired Pizza','Salads','Live Jazz (some nights)'],note:'Great outdoor patio. Live music on some weeknights. Walk down Shattuck from Downtown Berkeley BART.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Jupiter/@37.8714,-122.2683,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/jupiter-berkeley',cls:'secondary',icon:'&#11088;'}]},
+  hotel_bar_bk: {name:'Holiday Inn Lobby Lounge',type:'Hotel Bar',rating:'3.8',price:'$$',dist:'In hotel',addr:'1175 University Ave, Berkeley (lobby)',hours:'Daily 5PM-11PM',
+    menu:['Wine','Beer','Cocktails','Light Snacks'],note:'Convenient — no walking needed. Quick drink before dinner.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Holiday+Inn+Express+Berkeley/@37.8762,-122.2852,17z/',cls:'primary',icon:'&#128205;'}]},
+  fieldwork: {name:'Fieldwork Brewing Company',type:'Craft Brewery',rating:'4.6',price:'$$',dist:'0.9 mi',addr:'1160 6th St, Berkeley, CA 94710',hours:'Mon-Thu 12PM-9PM, Fri-Sat 12PM-10PM, Sun 12PM-8PM',
+    menu:['Award-winning IPAs','Pilsners','Sours','Stouts','Food Trucks rotate daily'],note:'Top Berkeley brewery. Outdoor seating with food trucks. Near 4th St shopping area.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Fieldwork+Brewing+Company/@37.8789,-122.3003,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/fieldwork-brewing-company-berkeley',cls:'secondary',icon:'&#11088;'}]},
+  // === INTERESTING ===
+  rsac_moscone: {name:'RSAC 2026 Conference',type:'Cybersecurity Conference',rating:'4.7',price:'Badge Required',dist:'14 mi (BART 30 min)',addr:'Moscone South, 747 Howard St, San Francisco, CA 94103',hours:'Mar 23-27, 9AM-6PM daily',
+    menu:['Expo floor','Keynotes','Hands-on Labs','Networking Events','Vendor Demos'],note:'Take BART from Downtown Berkeley to Powell St station (~30 min). Walk 10 min to Moscone. Badge pickup at registration desk. Photo ID required.',
+    links:[{label:'RSAC Website',url:'https://www.rsaconference.com/usa',cls:'primary',icon:'&#128737;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Moscone+Center/@37.7841,-122.4012,17z/',cls:'secondary',icon:'&#128205;'},{label:'BART Directions',url:'https://www.bart.gov/planner',cls:'secondary',icon:'&#128646;'}]},
+  uc_berkeley: {name:'UC Berkeley Campus',type:'University',rating:'4.8',price:'Free',dist:'0.5 mi walk',addr:'UC Berkeley, Berkeley, CA 94720',hours:'Campus open daily, Sather Tower tours 10AM-3:30PM ($5)',
+    menu:['Caffe Strada (coffee)','Free Speech Movement Cafe','Food trucks on Sproul Plaza'],note:'Walk through Sather Gate, see the Campanile (Sather Tower), stroll through the eucalyptus grove. Free.',
+    links:[{label:'Campus Map',url:'https://www.berkeley.edu/map',cls:'primary',icon:'&#127891;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/University+of+California,+Berkeley/@37.8719,-122.2585,16z/',cls:'secondary',icon:'&#128205;'}]},
+  telegraph: {name:'Telegraph Avenue',type:'Cultural Street',rating:'4.2',price:'Free',dist:'0.6 mi',addr:'Telegraph Ave, Berkeley (from Bancroft to Dwight)',hours:'Shops 10AM-9PM, always walkable',
+    menu:['Amoeba Music','Moe\'s Books','Street vendors','Cafes','People watching'],note:'Iconic Berkeley counterculture strip. Start at Bancroft Way (campus edge) and walk south. Great bookstores, vinyl, street art.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Telegraph+Ave,+Berkeley,+CA/',cls:'primary',icon:'&#128205;'}]},
+  // === SIGHTSEEING ===
+  berkeley_marina: {name:'Berkeley Marina',type:'Waterfront Park',rating:'4.6',price:'Free',dist:'1.5 mi (5 min drive)',addr:'201 University Ave, Berkeley, CA 94710',hours:'Daily sunrise to sunset',
+    menu:['Skates on the Bay (restaurant)','Adventure Playground (kids)','Kite flying'],note:'Stunning bay views with Golden Gate Bridge visible on clear days. Best at sunset. Free parking.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Berkeley+Marina/@37.8655,-122.3110,16z/',cls:'primary',icon:'&#128205;'}]},
+  golden_gate: {name:'Golden Gate Bridge',type:'Landmark',rating:'4.9',price:'Free (toll southbound only)',dist:'18 mi (35 min drive)',addr:'Golden Gate Bridge, San Francisco, CA',hours:'Pedestrian walkway 5AM-6:30PM (extended in summer)',
+    menu:['Walk or bike across','Vista Point on north side','Battery Spencer for photos'],note:'Best visited on a clear day. Go early morning to avoid fog. Can combine with Sausalito visit. Toll is $8.75 southbound (electronic only).',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Golden+Gate+Bridge/@37.8199,-122.4783,16z/',cls:'primary',icon:'&#128205;'},{label:'Live Fog Cam',url:'https://www.google.com/search?q=golden+gate+bridge+fog+cam',cls:'secondary',icon:'&#127780;'}]},
+  fishermans_wharf: {name:'Fisherman\'s Wharf / Pier 39',type:'Tourist Attraction',rating:'4.3',price:'Free entry (activities extra)',dist:'16 mi (30 min drive / BART+bus)',addr:'Pier 39, San Francisco, CA 94133',hours:'Daily 10AM-9PM',
+    menu:['Clam Chowder in bread bowl','Dungeness crab','Ghirardelli chocolate','Boudin sourdough'],note:'Sea lions at Pier 39, Ghirardelli Square nearby. Touristy but fun. Buy Ghirardelli chocolates here as gifts. BART to Embarcadero + F-line streetcar.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Pier+39/@37.8087,-122.4098,17z/',cls:'primary',icon:'&#128205;'},{label:'Pier 39 Website',url:'https://www.pier39.com/',cls:'secondary',icon:'&#127754;'}]}
 };
 
 function showDetail(id) {
@@ -1633,18 +1643,18 @@ var searchIndex = [
    title:'Food Near You', desc:'Restaurants near your hotel in current city',
    hours:'Most open 11 AM – 10 PM',
    action:function(){ switchTab('food',document.querySelector('.cat-tab')); closeSearchResults(); }},
-  {keywords:['south city','southern','fried green','she-crab','american food','american restaurant'],
-   group:'food', category:'Food', venue:'south_city', icon:'&#127860;',
-   title:'South City Kitchen Midtown', desc:'Southern American • 4.6★ • 7 min walk • Fried Green Tomatoes, She-Crab Soup',
-   hours:'Mon–Sun 11 AM – 10 PM'},
-  {keywords:['blue india','indian food','butter chicken','dal','paneer tikka','indian restaurant','curry','tandoori'],
-   group:'food', category:'Food', venue:'blue_india', icon:'&#127860;',
-   title:'Blue India', desc:'Indian Restaurant • 4.3★ • 0.3 mi • Butter Chicken, Paneer Tikka, Biryani',
-   hours:'Mon–Sun 11:30 AM – 10:30 PM'},
-  {keywords:['tabla','modern indian','lamb chops','indian lounge','street tacos','fusion'],
-   group:'food', category:'Food', venue:'tabla', icon:'&#127860;',
-   title:'Tabla', desc:'Modern Indian Lounge • 4.4★ • 0.5 mi • Lamb Chops, Indian Street Tacos',
-   hours:'Tue–Sun 5 PM – 11 PM'},
+  {keywords:['vik','chaat','dosa','pav bhaji','chole','indian street food','samosa'],
+   group:'food', category:'Food', venue:'vik_chaat', icon:'&#127860;',
+   title:'Vik\'s Chaat', desc:'Legendary Indian street food • 4.5★ • 1.2 mi • Dosa, Pav Bhaji, Chole Bhature',
+   hours:'Mon–Sun 11 AM – 6 PM'},
+  {keywords:['gather','farm to table','california cuisine','seasonal','pasta','pizza'],
+   group:'food', category:'Food', venue:'gather', icon:'&#127860;',
+   title:'Gather', desc:'Farm-to-Table • 4.5★ • 0.8 mi • Seasonal California, Wood-fired Pizza',
+   hours:'Mon–Sat 11:30 AM – 10 PM, Sun 10 AM – 9 PM'},
+  {keywords:['curry up now','indian fusion','tikka burrito','naughty naan','fusion indian'],
+   group:'food', category:'Food', venue:'curry_up_now', icon:'&#127860;',
+   title:'Curry Up Now', desc:'Indian Fusion • 4.3★ • 0.5 mi • Tikka Masala Burrito, Naughty Naan',
+   hours:'Mon–Sun 11 AM – 9 PM'},
 
   // Bars
   {keywords:['bar','drink','cocktail','beer','wine','bourbon','nightlife','pub','lounge','happy hour'],
@@ -1652,14 +1662,14 @@ var searchIndex = [
    title:'Bars Near You', desc:'Bars and lounges near your hotel',
    hours:'Most open 4 PM – 2 AM',
    action:function(){ switchTab('bar',document.querySelectorAll('.cat-tab')[1]); closeSearchResults(); }},
-  {keywords:['midtown bar','hotel bar','lobby bar','683','in-hotel'],
-   group:'bar', category:'Bar', venue:'midtown_bar', icon:'&#127867;',
-   title:'683 Midtown Bar', desc:'Hotel Bar • In Hotel Indigo lobby • Craft Cocktails, Bourbon Flights',
-   hours:'Daily 4 PM – 12 AM'},
-  {keywords:['red phone','speakeasy','prohibition','cigar','secret bar'],
-   group:'bar', category:'Bar', venue:'red_phone', icon:'&#127867;',
-   title:'Red Phone Booth', desc:'Speakeasy Bar • 4.5★ • Secret code required',
-   hours:'Mon–Sat 5 PM – 2 AM'},
+  {keywords:['jupiter','craft beer','brewery','pizza','patio','beer garden'],
+   group:'bar', category:'Bar', venue:'jupiter', icon:'&#127867;',
+   title:'Jupiter', desc:'Craft Beer + Pizza • 4.3★ • 20+ beers on tap, Wood-fired pizza',
+   hours:'Mon–Sat 11:30 AM – 1 AM, Sun 12 PM – 11 PM'},
+  {keywords:['fieldwork','brewing','ipa','brewery','craft','beer'],
+   group:'bar', category:'Bar', venue:'fieldwork', icon:'&#127867;',
+   title:'Fieldwork Brewing', desc:'Award-winning Brewery • 4.6★ • IPAs, Sours, Food Trucks',
+   hours:'Mon–Sun 12 PM – 10 PM'},
 
   // Sightseeing & Interesting
   {keywords:['sightseeing','visit','tourist','attraction','see','explore','walk','park','museum','aquarium','monument'],
@@ -1674,12 +1684,12 @@ var searchIndex = [
   // Hotel
   {keywords:['hotel','room','checkout','check-in','check in','stay','accommodation','hotel indigo','holiday inn','doubletree','wifi','pool','gym'],
    group:'hotel', category:'Hotel', icon:'&#127976;',
-   title:'Tonight\'s Hotel — Hotel Indigo Atlanta Midtown', desc:'683 Peachtree St NE • Checked In • Checkout 12 PM (Mar 22) • Breakfast included'},
+   title:'Tonight\'s Hotel — Holiday Inn Express Berkeley', desc:'1175 University Ave • Check-in Today • Checkout 11 AM (Mar 25) • Breakfast included'},
 
   // Flight & Travel
   {keywords:['flight','fly','delta','dl-809','travel day','tomorrow flight','airport','atl','sjc','departure','pnr','boarding pass'],
    group:'flight', category:'Travel', icon:'&#9992;',
-   title:'Tomorrow\'s Flight — Delta DL-809', desc:'ATL→SJC • Mar 22 • Departs 9:50 AM • PNR: HLSHJX',
+   title:'Return Flight — Emirates EK226', desc:'SFO→DXB • Mar 26 • Departs 4:45 PM • Seat 60K • PNR: F8WLVF',
    action:function(){ showTravelDayDetail(); closeSearchResults(); }},
   {keywords:['return flight','go home','trip home','emirates','etihad','turkish','plan trip','home flight','dxb','dubai flight','sfo dubai'],
    group:'return', category:'Return Flight', icon:'&#128747;',
@@ -1687,7 +1697,7 @@ var searchIndex = [
    action:function(){ showTripHome(); closeSearchResults(); }},
   {keywords:['tsa','security checkpoint','gate','terminal','boarding','airport security'],
    group:'flight', category:'Airport', icon:'&#128680;',
-   title:'ATL Airport — TSA & Security', desc:'Use South Checkpoint for Delta. 350K+ weekend travelers. Leave hotel by 6:15 AM.'},
+   title:'SFO Airport — For Return Flight', desc:'Emirates EK226 departs International Terminal. Check-in by 12:45 PM on Mar 26. Seat 60K.'},
 
   // Expenses & Policy
   {keywords:['expense','cost','money','spend','budget','receipt','happay','reimbursement','bill','track spending'],
@@ -1724,7 +1734,7 @@ var searchIndex = [
   // Weather
   {keywords:['weather','rain','temperature','cold','hot','forecast','umbrella','sunny','humid'],
    group:'weather', category:'Weather', icon:'&#127780;',
-   title:'Weather in Atlanta', desc:'Check current conditions for your city'},
+   title:'Weather in Berkeley / SF', desc:'Check current conditions for your city'},
 
   // Transport
   {keywords:['cab','taxi','uber','lyft','ride','transport','car','drive','bus','bart','muni','metro','train','rental'],
@@ -1892,11 +1902,11 @@ document.getElementById('queryInput').addEventListener('keypress', function(e){ 
 // Edit Trip
 // ===== EDIT TRIP — Conversational Flow =====
 var tripRoute = [
-  {city:'Las Vegas', start:'2026-03-08', end:'2026-03-10', status:'past', tz:'America/Los_Angeles', tzLabel:'PT'},
-  {city:'Redmond', start:'2026-03-10', end:'2026-03-14', status:'past', tz:'America/Los_Angeles', tzLabel:'PT'},
-  {city:'Atlanta', start:'2026-03-14', end:'2026-03-22', status:'current', tz:'America/New_York', tzLabel:'EST'},
-  {city:'Berkeley', start:'2026-03-22', end:'2026-03-25', status:'future', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'Holiday Inn Express Berkeley', hotelAddr:'1175 University Ave, Berkeley, CA 94702'},
-  {city:'San Francisco', start:'2026-03-25', end:'2026-03-26', status:'future', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'TBD — near Moscone Center'}
+  {city:'Las Vegas', start:'2026-03-08', end:'2026-03-10', tz:'America/Los_Angeles', tzLabel:'PT'},
+  {city:'Redmond', start:'2026-03-10', end:'2026-03-14', tz:'America/Los_Angeles', tzLabel:'PT'},
+  {city:'Atlanta', start:'2026-03-14', end:'2026-03-22', tz:'America/New_York', tzLabel:'EST'},
+  {city:'Berkeley', start:'2026-03-22', end:'2026-03-25', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'Holiday Inn Express Berkeley', hotelAddr:'1175 University Ave, Berkeley, CA 94702'},
+  {city:'San Francisco', start:'2026-03-25', end:'2026-03-27', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'TBD — near Moscone Center'}
 ];
 
 // Parse 'YYYY-MM-DD' as LOCAL midnight (avoids UTC offset bugs)
@@ -1919,15 +1929,50 @@ function getCurrentCity(){
 renderTzBrackets();
 setInterval(updateTzBrackets, 30000);
 
+// ===== DYNAMIC DATE STRIP — move "today" marker based on actual date =====
+function updateDateStrip() {
+  var today = new Date();
+  var todayDate = today.getDate();
+  var todayMonth = today.getMonth(); // 0-based (2 = March)
+  var tripMonth = parseInt(tripRoute[0].start.split('-')[1], 10) - 1;
+  var tripStartDay = parseInt(tripRoute[0].start.split('-')[2], 10);
+  var tripEndDay = parseInt(tripRoute[tripRoute.length - 1].end.split('-')[2], 10);
+  var totalDays = tripEndDay - tripStartDay;
+
+  var dayCells = document.querySelectorAll('.ds-dates .ds-d');
+  dayCells.forEach(function(cell) {
+    var dayNum = parseInt(cell.querySelector('.dn').textContent, 10);
+    cell.classList.remove('today', 'past', 'future');
+    if (todayMonth === tripMonth && dayNum === todayDate) {
+      cell.classList.add('today');
+    } else if (todayMonth > tripMonth || (todayMonth === tripMonth && dayNum < todayDate)) {
+      cell.classList.add('past');
+    } else {
+      cell.classList.add('future');
+    }
+  });
+
+  // Update day counter
+  if (todayMonth === tripMonth && todayDate >= tripStartDay && todayDate <= tripEndDay) {
+    var dayOfTrip = todayDate - tripStartDay + 1;
+    var dsRight = document.querySelector('.ds-right');
+    if (dsRight) dsRight.innerHTML = '<strong>Day ' + dayOfTrip + '</strong> of ' + totalDays;
+  }
+}
+updateDateStrip();
+
 // ===== LIVE CRITICAL ACTIVITY COUNTDOWN =====
 // Upcoming critical events — add/remove as trip progresses
 // Times are in LOCAL time of the event's city (parsed explicitly)
 var criticalEvents = [
-  {label:'Cab to ATL Airport', year:2026, month:3, day:22, hour:6, min:15, tz:'America/New_York'},
-  {label:'Delta DL-809 Departure ATL→SJC', year:2026, month:3, day:22, hour:9, min:50, tz:'America/New_York'},
   {label:'Check-in Holiday Inn Berkeley', year:2026, month:3, day:22, hour:15, min:0, tz:'America/Los_Angeles'},
-  {label:'RSAC 2026 — Day 1', year:2026, month:3, day:23, hour:9, min:0, tz:'America/Los_Angeles'},
-  {label:'Fly Home SFO→Dubai', year:2026, month:3, day:26, hour:0, min:0, tz:'America/Los_Angeles'}
+  {label:'RSAC 2026 — Day 1 (Moscone South)', year:2026, month:3, day:23, hour:9, min:0, tz:'America/Los_Angeles'},
+  {label:'RSAC 2026 — Day 2', year:2026, month:3, day:24, hour:9, min:0, tz:'America/Los_Angeles'},
+  {label:'RSAC 2026 — Day 3 + Checkout Berkeley', year:2026, month:3, day:25, hour:9, min:0, tz:'America/Los_Angeles'},
+  {label:'Check-in SFO area hotel', year:2026, month:3, day:25, hour:15, min:0, tz:'America/Los_Angeles'},
+  {label:'Emirates EK226 Check-in SFO', year:2026, month:3, day:26, hour:12, min:45, tz:'America/Los_Angeles'},
+  {label:'Emirates EK226 Departure SFO→DXB', year:2026, month:3, day:26, hour:16, min:45, tz:'America/Los_Angeles'},
+  {label:'Arrive Dubai DXB T3 🏠', year:2026, month:3, day:27, hour:20, min:45, tz:'Asia/Dubai'}
 ];
 
 function critEventToDate(ev) {
@@ -2127,22 +2172,22 @@ setInterval(fetchWeather, 1800000);
 // Schedule: {days:[0=Sun..6=Sat], open:hour(24h), close:hour(24h)}
 // For venues that close after midnight, close > 24 (e.g. 26 = 2AM)
 var venueSchedule = {
-  // Restaurants
-  south_city:   [{days:[0,1,2,3,4,5,6], open:11, close:22}],
-  blue_india:   [{days:[0,1,2,3,4,5,6], open:11.5, close:22.5}],
-  tabla:        [{days:[2,3,4,5,6], open:17, close:23}, {days:[0], open:17, close:22}], // closed Mon
-  // Bars
-  midtown_bar:  [{days:[0,1,2,3,4,5,6], open:16, close:24}],
-  red_phone:    [{days:[1,2,3,4,5], open:17, close:26}, {days:[6], open:17, close:26}, {days:[0], open:17, close:24}],
-  livingston:   [{days:[0,1,2,3,4,5,6], open:17, close:25}],
-  // Events (time-specific, not recurring)
-  harry_potter: [{days:[6], open:19.5, close:23}], // Sat 7:30 PM show
-  atl_united:   [{days:[6], open:17.5, close:22}], // Sat gates 5:30 PM
-  laughing_skull:[{days:[4,5,6], open:20, close:23.5}],
+  // Berkeley Restaurants
+  vik_chaat:    [{days:[0,1,2,3,4,5,6], open:11, close:18}],
+  gather:       [{days:[1,2,3,4], open:11.5, close:21}, {days:[5,6], open:11.5, close:22}, {days:[0], open:10, close:21}],
+  curry_up_now: [{days:[0,1,2,3,4,5,6], open:11, close:21}],
+  // Berkeley Bars
+  jupiter:      [{days:[1,2,3,4], open:11.5, close:24}, {days:[5,6], open:11.5, close:25}, {days:[0], open:12, close:23}],
+  hotel_bar_bk: [{days:[0,1,2,3,4,5,6], open:17, close:23}],
+  fieldwork:    [{days:[1,2,3,4], open:12, close:21}, {days:[5,6], open:12, close:22}, {days:[0], open:12, close:20}],
+  // Interesting
+  rsac_moscone: [{days:[1,2,3,4,5], open:9, close:18}], // Mar 23-27 (Mon-Fri)
+  uc_berkeley:  [{days:[0,1,2,3,4,5,6], open:6, close:22}], // campus always open
+  telegraph:    [{days:[0,1,2,3,4,5,6], open:10, close:21}],
   // Sightseeing
-  piedmont:     [{days:[0,1,2,3,4,5,6], open:6, close:23}],
-  high_museum:  [{days:[6], open:10, close:21}, {days:[0], open:12, close:17}, {days:[2,3,4,5], open:10, close:17}], // closed Mon
-  fox_theatre:  [{days:[1,2,3,4,5], open:10, close:18}] // box office hours
+  berkeley_marina:[{days:[0,1,2,3,4,5,6], open:5, close:20}], // sunrise to sunset
+  golden_gate:  [{days:[0,1,2,3,4,5,6], open:5, close:18.5}], // pedestrian hours
+  fishermans_wharf:[{days:[0,1,2,3,4,5,6], open:10, close:21}]
 };
 
 function getVenueStatus(venueId) {
@@ -2224,6 +2269,7 @@ setInterval(function() {
   updateCritCountdown();
   updateTzBrackets();
   refreshVenueStatus();
+  updateDateStrip();
 }, 300000);
 
 function openEditTrip(){
@@ -2466,6 +2512,7 @@ document.addEventListener('visibilitychange', function(){
       try { updateTzBrackets(); } catch(e){}
       try { refreshVenueStatus(); } catch(e){}
       try { fetchWeather(); } catch(e){}
+      try { updateDateStrip(); } catch(e){}
     }
   }
   _lastActive = Date.now();
