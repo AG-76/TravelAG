@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG Travel — Other Details & Expenses</title>
+<style>
+  :root {
+    --white:#fff; --bg:#f5f6f8; --accent:#4f46e5; --accent-bg:#eef2ff;
+    --text:#1a1a2e; --text-2:#4a4a68; --text-3:#8b8ba7;
+    --red:#ef4444; --red-bg:#fef2f2; --orange:#f59e0b; --orange-bg:#fffbeb;
+    --green:#10b981; --green-bg:#ecfdf5; --blue:#3b82f6; --blue-bg:#eff6ff;
+    --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,0.08); --radius:12px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+  .topbar a{font-size:12px;color:var(--accent);text-decoration:none;font-weight:700;display:flex;align-items:center;gap:4px;}
+  .topbar a:hover{text-decoration:underline;}
+  .topbar h1{font-size:16px;font-weight:800;flex:1;}
+  .topbar .trip-id{font-size:10px;color:var(--text-3);font-weight:500;}
+
+  .layout{flex:1;display:flex;overflow:hidden;}
+
+  /* LEFT MENU */
+  .menu{width:220px;background:var(--white);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:14px 0;}
+  .menu::-webkit-scrollbar{width:3px;} .menu::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .menu-section{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-3);font-weight:700;padding:10px 18px 5px;margin-top:4px;}
+  .menu-section:first-child{margin-top:0;}
+  .menu-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-2);border-left:3px solid transparent;transition:all 0.15s;}
+  .menu-item:hover{background:var(--accent-bg);color:var(--accent);}
+  .menu-item.active{background:var(--accent-bg);color:var(--accent);border-left-color:var(--accent);font-weight:700;}
+  .menu-item .mi{font-size:15px;width:22px;text-align:center;flex-shrink:0;}
+  .menu-item .mbadge{margin-left:auto;font-size:8px;padding:2px 6px;border-radius:10px;font-weight:700;}
+  .mbadge.done{background:var(--green-bg);color:var(--green);}
+  .mbadge.live{background:var(--red-bg);color:var(--red);}
+  .mbadge.pending{background:var(--orange-bg);color:#92400e;}
+  .mbadge.info{background:var(--blue-bg);color:var(--blue);}
+
+  /* RIGHT CONTENT */
+  .content{flex:1;overflow-y:auto;padding:24px 32px;}
+  .content::-webkit-scrollbar{width:4px;} .content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .page{display:none;}
+  .page.active{display:block;}
+
+  .section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;}
+  .section-head{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:8px;}
+  .section-head h2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-2);}
+  .section-head .sh-badge{margin-left:auto;font-size:8px;padding:2px 8px;border-radius:10px;font-weight:700;}
+  .section-body{padding:20px;}
+
+  /* RSAC / FABCON info cards */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .info-card{background:var(--bg);border-radius:8px;padding:14px;}
+  .info-card h4{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent);font-weight:700;margin-bottom:6px;}
+  .info-card p{font-size:11px;color:var(--text-2);line-height:1.6;}
+  .info-card strong{color:var(--text);}
+  .info-card.full{grid-column:1/-1;}
+  .info-card.highlight{background:var(--accent-bg);border:1px solid #c7d2fe;}
+
+  /* QR section */
+  .qr-box{display:flex;align-items:center;gap:16px;padding:16px;background:var(--accent-bg);border-radius:10px;border:1px solid #c7d2fe;}
+  .qr-placeholder{width:80px;height:80px;background:var(--white);border:2px dashed var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .qr-info h4{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:3px;}
+  .qr-info p{font-size:11px;color:var(--text-2);line-height:1.5;}
+  .qr-info .qr-id{font-size:14px;font-weight:800;color:var(--text);margin-top:4px;font-family:monospace;letter-spacing:2px;}
+
+  /* Flight cards */
+  .flight-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;}
+  .flight-route{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .flight-city{text-align:center;}
+  .flight-city .fc-code{font-size:18px;font-weight:800;color:var(--text);}
+  .flight-city .fc-name{font-size:9px;color:var(--text-3);}
+  .flight-arrow{font-size:16px;color:var(--accent);}
+  .flight-meta{display:flex;gap:20px;flex-wrap:wrap;}
+  .flight-meta div{font-size:10px;color:var(--text-2);}
+  .flight-meta div strong{display:block;font-size:12px;color:var(--text);}
+  .flight-status{display:inline-block;font-size:8px;padding:2px 8px;border-radius:4px;font-weight:700;margin-top:6px;}
+  .flight-status.confirmed{background:var(--green-bg);color:var(--green);}
+  .flight-status.warning{background:var(--red-bg);color:var(--red);}
+  .flight-status.pending{background:var(--orange-bg);color:#92400e;}
+
+  /* Upload area */
+  .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px;}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-bg);}
+  .upload-zone .uz-icon{font-size:28px;margin-bottom:6px;}
+  .upload-zone .uz-title{font-size:13px;font-weight:700;color:var(--text);}
+  .upload-zone .uz-sub{font-size:10px;color:var(--text-3);margin-top:2px;}
+  .upload-zone input{display:none;}
+  .uploaded-list{list-style:none;}
+  .uploaded-list li{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--green-bg);border-radius:6px;margin-bottom:4px;font-size:11px;font-weight:600;color:var(--green);}
+  .uploaded-list li .uname{flex:1;color:var(--text);}
+  .uploaded-list li .usize{color:var(--text-3);font-weight:400;}
+
+  /* Expense table */
+  /* ===== EXCEL-STYLE EXPENSE TABLE ===== */
+  .xl-wrap{border:1px solid #8eaadb;border-radius:0;overflow-x:auto;font-family:'Segoe UI',Calibri,Arial,sans-serif;}
+  .xl-header{background:#4472c4;color:#fff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;}
+  .xl-header h3{font-size:13px;font-weight:700;letter-spacing:0.3px;}
+  .xl-subheader{background:#d6e4f0;padding:6px 14px;font-size:11px;color:#1f3864;border-bottom:1px solid #8eaadb;}
+  .xl{width:100%;border-collapse:collapse;font-size:12px;color:#1f2937;}
+  .xl th{position:relative;background:#d6e4f0;color:#1f3864;font-weight:700;font-size:11px;padding:7px 10px;border:1px solid #8eaadb;text-align:left;white-space:nowrap;cursor:pointer;user-select:none;}
+  .xl th:hover{background:#bdd0e8;}
+  .xl th .xl-arrow{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:8px;color:#4472c4;opacity:0.7;}
+  .xl td{padding:6px 10px;border:1px solid #d6e4f0;vertical-align:middle;}
+  .xl tr:nth-child(even){background:#eaf1fb;}
+  .xl tr:nth-child(odd){background:#fff;}
+  .xl tr.xl-yellow td{background:#fff2cc !important;}
+  .xl tr.xl-total{background:#d6e4f0 !important;}
+  .xl tr.xl-total td{font-weight:800;font-size:13px;border-top:2px solid #4472c4;}
+  .xl .xl-bold{font-weight:700;}
+  .xl .xl-num{text-align:right;font-variant-numeric:tabular-nums;font-family:'Segoe UI',Consolas,monospace;}
+  .xl .xl-confirmed{color:#548235;font-weight:700;font-size:10px;}
+  .xl .xl-pending{color:#bf8c00;font-weight:700;font-size:10px;}
+  .xl input[type=text]{width:100%;padding:3px 6px;border:1px solid #d6a800;border-radius:0;font-size:11px;font-family:inherit;outline:none;background:#fff2cc;text-align:right;}
+  .xl input:focus{border-color:#4472c4;background:#fff;}
+  .xl-filter-dd{display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #8eaadb;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;min-width:160px;max-height:220px;overflow-y:auto;padding:6px 0;font-size:11px;font-weight:400;color:#1f2937;}
+  .xl-filter-dd.open{display:block;}
+  .xl-filter-dd label{display:flex;align-items:center;gap:6px;padding:4px 10px;cursor:pointer;}
+  .xl-filter-dd label:hover{background:#eaf1fb;}
+  .xl-filter-dd input[type=checkbox]{accent-color:#4472c4;}
+  .xl-filter-dd .xl-dd-sep{border-top:1px solid #d6e4f0;margin:4px 0;}
+  .xl-footer{background:#d6e4f0;padding:6px 14px;font-size:10px;color:#1f3864;border-top:1px solid #8eaadb;display:flex;gap:16px;}
+
+  /* Hotel table */
+  .hotel-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .hotel-table th{text-align:left;padding:6px 8px;font-size:8px;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-3);font-weight:700;border-bottom:1px solid var(--border);}
+  .hotel-table td{padding:7px 8px;border-bottom:1px solid #f1f5f9;color:var(--text-2);}
+  .hotel-table .hn{font-weight:700;color:var(--text);}
+  .hb{font-size:8px;padding:2px 6px;border-radius:3px;font-weight:700;}
+  .hb.p{background:var(--blue-bg);color:var(--blue);} .hb.a{background:var(--green-bg);color:var(--green);} .hb.u{background:var(--orange-bg);color:var(--orange);}
+
+  /* Links */
+  .link-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);font-size:12px;font-weight:600;margin-bottom:8px;border:1px solid transparent;transition:all 0.15s;}
+  .link-row:hover{background:var(--accent-bg);border-color:var(--accent);}
+  .link-icon{font-size:16px;width:24px;text-align:center;}
+  .link-arrow{color:var(--text-3);font-size:13px;margin-left:auto;}
+
+  .btn-save{padding:10px 24px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;}
+  .btn-save:hover{background:#4338ca;}
+  .iq-btn{padding:5px 10px;border:1px solid var(--border);border-radius:16px;background:var(--white);font-size:10px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .iq-btn:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent);}
+  .btn-dl{padding:8px 16px;border-radius:6px;background:var(--green);color:#fff;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="Travel_App_Design.html">&larr; Back to Dashboard</a>
+  <h1>Other Details &amp; Expenses</h1>
+  <span class="trip-id">Trip ID: TR260225AP58</span>
+</div>
+
+<div class="layout">
+
+<!-- ==================== LEFT MENU ==================== -->
+<div class="menu">
+  <div class="menu-section">Conferences</div>
+  <div class="menu-item active" onclick="showPage('fabcon')">
+    <span class="mi">&#9733;</span>FABCON Badge
+    <span class="mbadge done">Done</span>
+  </div>
+  <div class="menu-item" onclick="showPage('rsac')">
+    <span class="mi">&#128737;</span>RSAC 2026
+    <span class="mbadge live">Live</span>
+  </div>
+
+  <div class="menu-section">Travel</div>
+  <div class="menu-item" onclick="showPage('flights')">
+    <span class="mi">&#9992;</span>All Flights
+    <span class="mbadge info">5</span>
+  </div>
+  <div class="menu-item" onclick="showPage('hotels')">
+    <span class="mi">&#127968;</span>All Hotels
+    <span class="mbadge info">5</span>
+  </div>
+
+  <div class="menu-section">Finance</div>
+  <div class="menu-item" onclick="showPage('expenses')">
+    <span class="mi">&#128202;</span>Expenses
+    <span class="mbadge pending">6 pending</span>
+  </div>
+  <div class="menu-item" onclick="showPage('receipts')">
+    <span class="mi">&#128247;</span>Receipts
+  </div>
+
+  <div class="menu-section">Policy</div>
+  <div class="menu-item" onclick="showPage('policy')">
+    <span class="mi">&#128203;</span>Travel Policy
+    <span class="mbadge info">G7</span>
+  </div>
+
+  <div class="menu-section">Resources</div>
+  <div class="menu-item" onclick="showPage('documents')">
+    <span class="mi">&#128196;</span>Documents
+  </div>
+</div>
+
+<!-- ==================== CONTENT PANEL ==================== -->
+<div class="content">
+
+<!-- ===== FABCON BADGE PAGE ===== -->
+<div class="page active" id="page-fabcon">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#9733;</span>
+      <h2>FABCON / SQLCON 2026 &mdash; Atlanta</h2>
+      <span class="sh-badge" style="background:var(--green-bg);color:var(--green);">Completed</span>
+    </div>
+    <div class="section-body">
+      <div class="info-grid">
+        <div class="info-card highlight" style="grid-column:1/-1;">
+          <div class="qr-box">
+            <div class="qr-placeholder">&#128737;</div>
+            <div class="qr-info">
+              <h4>Your FABCON Badge QR Code</h4>
+              <p>Scan at Pre-registered Counter for fast check-in.<br>Save to Apple Wallet / Google Wallet. Print or show on phone.</p>
+              <div class="qr-id">FastTrack ID: 93675923</div>
+            </div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h4>Event Details</h4>
+          <p><strong>FABCON / SQLCON 2026</strong><br>
+          March 16&ndash;20, 2026<br>
+          Georgia World Congress Center<br>
+          Atlanta, Georgia</p>
+        </div>
+        <div class="info-card">
+          <h4>Registration</h4>
+          <p><strong>Registrant:</strong> Abhishek Goyal<br>
+          <strong>Company:</strong> Celebal Technologies<br>
+          <strong>Status:</strong> <span style="color:var(--green);font-weight:700;">Confirmed</span><br>
+          <strong>QR sent by:</strong> Lavleen Bagga</p>
+        </div>
+        <div class="info-card full">
+          <h4>Check-in Instructions</h4>
+          <p>Bring this QR code (printed or on phone) to the registration area. Scan at the <strong>Pre-registered Counter</strong> for express badge pickup. No separate ID check required &mdash; QR code is your fast track entry.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RSAC 2026 PAGE ===== -->
+<div class="page" id="page-rsac">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#128737;</span>
+      <h2>RSAC 2026 Conference &mdash; San Francisco</h2>
+      <span class="sh-badge" style="background:var(--red-bg);color:var(--red);">This Week</span>
+    </div>
+    <div class="section-body">
+      <div class="info-grid">
+        <div class="info-card highlight" style="grid-column:1/-1;">
+          <div class="qr-box">
+            <div class="qr-placeholder">&#128737;</div>
+            <div class="qr-info">
+              <h4>Your RSAC Badge QR Code</h4>
+              <p>Scan at "Already Registered? Check in Here" counters.<br>Save to <strong>Apple Wallet</strong> or <strong>Google Wallet</strong> (new this year).</p>
+              <p style="margin-top:4px;color:var(--red);font-weight:600;">Photo ID required &mdash; last name must match registration.</p>
+            </div>
+          </div>
+        </div>
+        <div class="info-card" style="grid-column:1/-1;background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-color:#a5b4fc;">
+          <h4 style="color:var(--accent);">&#128241; RSAC Mobile App &mdash; Log In Now</h4>
+          <p>Credentials shared by <strong>Lavleen</strong> via Teams (Mar 19). Download the <a href="https://www.rsaconference.com/usa/us-2026/mobile-app" target="_blank" style="color:var(--accent);font-weight:700;text-decoration:underline;">RSAC Events Mobile App</a> and log in to:</p>
+          <p style="margin-top:6px;">&bull; Access your <strong>digital badge &amp; QR code</strong><br>&bull; Build your <strong>personal session schedule</strong><br>&bull; Get <strong>real-time venue maps &amp; notifications</strong><br>&bull; Network via <strong>attendee directory</strong></p>
+          <div style="margin-top:10px;padding:10px 14px;background:var(--white);border-radius:8px;border:1px solid #a5b4fc;font-size:11px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:14px;">&#128272;</span>
+              <strong style="color:var(--accent);">Your Login Credentials</strong>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr;gap:4px 10px;">
+              <span style="color:var(--text-3);font-weight:600;">Email ID:</span>
+              <span style="font-weight:700;">abhishek.goyal@celebaltech.com</span>
+              <span style="color:var(--text-3);font-weight:600;">Password:</span>
+              <span style="font-weight:700;font-family:monospace;letter-spacing:0.5px;">
+                <span id="rsacPwdMask">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                <span id="rsacPwdText" style="display:none;">Celebal@123$...</span>
+                <button onclick="var m=document.getElementById('rsacPwdMask'),t=document.getElementById('rsacPwdText');if(m.style.display!=='none'){m.style.display='none';t.style.display='inline';this.textContent='Hide';}else{m.style.display='inline';t.style.display='none';this.textContent='Show';}" style="margin-left:8px;padding:2px 8px;border:1px solid #c7d2fe;border-radius:4px;background:var(--accent-bg);color:var(--accent);font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;">Show</button>
+              </span>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:var(--text-3);">&#128161; Source: Lavleen via Microsoft Teams, Thu Mar 19, 2026 at 1:32 PM.<br>Password may be truncated &mdash; check full Teams message if login fails.</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h4>Badge Pickup &mdash; Moscone South</h4>
+          <p><strong>747 Howard Street, San Francisco</strong><br>
+          Sat: 12 PM &ndash; 7 PM<br>Sun: 7 AM &ndash; 7 PM<br>Mon: 7 AM &ndash; 7 PM<br>Tue: 7 AM &ndash; 6:30 PM<br>Wed: 7:30 AM &ndash; 6 PM<br>Thu: 7:30 AM &ndash; 3:30 PM</p>
+        </div>
+        <div class="info-card">
+          <h4>Badge Pickup &mdash; Hilton Union Square</h4>
+          <p><strong>333 O'Farrell St, San Francisco</strong><br>Plaza A (also a Conference shuttle stop)<br>
+          Sat: 1 PM &ndash; 7 PM<br>Sun: 8 AM &ndash; 8 PM<br>Mon: 7 AM &ndash; 6 PM</p>
+        </div>
+        <div class="info-card">
+          <h4>Check-In Process</h4>
+          <p>Scan <strong>QR code</strong> at "Already Registered?" counters from your mobile device. Save QR to Apple Wallet / Google Wallet. <strong>Photo ID required</strong> &mdash; last name must match registration.</p>
+        </div>
+        <div class="info-card">
+          <h4>Security</h4>
+          <p><strong>Weapons detection screening</strong> at each Moscone building. Allow extra time. No significant delays expected. <br><br><strong>Tip:</strong> Pick up badge on Saturday or Sunday to avoid Monday congestion.</p>
+        </div>
+        <div class="info-card full">
+          <h4>Conference Venue</h4>
+          <p><strong>RSA Conference LLC</strong> &bull; 28 Geary Street, Suite 650 #1500, San Francisco, CA 94108<br>
+          Conference dates: March 22&ndash;27, 2026 &bull; Multiple Moscone buildings + satellite locations</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FLIGHTS PAGE ===== -->
+<div class="page" id="page-flights">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#9992;</span>
+      <h2>All Flights &mdash; This Trip</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="flight-card">
+        <div class="flight-route">
+          <div class="flight-city"><div class="fc-code">DXB</div><div class="fc-name">Dubai</div></div>
+          <span class="flight-arrow">&rarr;</span>
+          <div class="flight-city"><div class="fc-code">ATL</div><div class="fc-name">Atlanta</div></div>
+        </div>
+        <div class="flight-meta">
+          <div>Airline<strong>Etihad + Delta</strong></div>
+          <div>Date<strong>Mar 8, 2026</strong></div>
+          <div>PNR<strong>Via MakeMyTrip</strong></div>
+          <div>Booked by<strong>Happay / Celebal</strong></div>
+        </div>
+        <span class="flight-status confirmed">Confirmed &bull; Completed</span>
+      </div>
+
+      <div class="flight-card" style="border-color:var(--green);">
+        <div class="flight-route">
+          <div class="flight-city"><div class="fc-code">ATL</div><div class="fc-name">Atlanta</div></div>
+          <span class="flight-arrow">&rarr;</span>
+          <div class="flight-city"><div class="fc-code">SJC</div><div class="fc-name">San Jose</div></div>
+        </div>
+        <div class="flight-meta">
+          <div>Airline<strong>Delta DL-809</strong></div>
+          <div>Date<strong>Sun, Mar 22</strong></div>
+          <div>Depart<strong>09:50 AM ET</strong></div>
+          <div>Terminal<strong>S (Hartsfield)</strong></div>
+          <div>PNR<strong>HLSHJX</strong></div>
+          <div>Cost<strong>AED 2,638.60</strong></div>
+        </div>
+        <span class="flight-status confirmed">Confirmed &bull; Tomorrow</span>
+      </div>
+
+      <div class="flight-card">
+        <div class="flight-route">
+          <div class="flight-city"><div class="fc-code">SAN</div><div class="fc-name">San Diego</div></div>
+          <span class="flight-arrow">&rarr;</span>
+          <div class="flight-city"><div class="fc-code">SEA</div><div class="fc-name">Seattle</div></div>
+        </div>
+        <div class="flight-meta">
+          <div>Airline<strong>Via MakeMyTrip</strong></div>
+          <div>Date<strong>Mar 19</strong></div>
+          <div>Booked by<strong>Celebal Traveldesk</strong></div>
+        </div>
+        <span class="flight-status confirmed">Confirmed &bull; Completed</span>
+      </div>
+
+      <div class="flight-card" style="border-color:var(--red);">
+        <div class="flight-route">
+          <div class="flight-city"><div class="fc-code">SFO</div><div class="fc-name">San Francisco</div></div>
+          <span class="flight-arrow">&rarr;</span>
+          <div class="flight-city"><div class="fc-code">AUH</div><div class="fc-name">Abu Dhabi</div></div>
+        </div>
+        <div class="flight-meta">
+          <div>Airline<strong>Etihad EY14</strong></div>
+          <div>Date<strong>~Mar 26 (WRONG: shows Mar 21)</strong></div>
+          <div>Time<strong>20:15</strong></div>
+          <div>Status<strong style="color:var(--red);">Needs date change</strong></div>
+        </div>
+        <span class="flight-status warning">Action Required &bull; Chinmay to modify</span>
+      </div>
+
+      <div class="flight-card" style="border-color:var(--orange);">
+        <div class="flight-route">
+          <div class="flight-city"><div class="fc-code">AUH</div><div class="fc-name">Abu Dhabi</div></div>
+          <span class="flight-arrow">&rarr;</span>
+          <div class="flight-city"><div class="fc-code">DXB</div><div class="fc-name">Dubai</div></div>
+        </div>
+        <div class="flight-meta">
+          <div>Connection<strong>Post Etihad EY14</strong></div>
+          <div>Status<strong style="color:var(--orange);">Pending confirmation</strong></div>
+        </div>
+        <span class="flight-status pending">Pending</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOTELS PAGE ===== -->
+<div class="page" id="page-hotels">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#127968;</span>
+      <h2>All Hotels &mdash; This Trip</h2>
+    </div>
+    <div class="section-body">
+      <table class="hotel-table">
+        <thead><tr><th>Hotel</th><th>City</th><th>Dates</th><th>Nights</th><th>AED</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="hn">Hotel Indigo Atlanta</td><td>Atlanta</td><td>Mar 9&ndash;14</td><td>5</td><td>2,934</td><td><span class="hb p">Past</span></td></tr>
+          <tr><td class="hn">First Hotel Atlanta</td><td>Atlanta</td><td>Mar 19&ndash;21</td><td>2</td><td>1,555</td><td><span class="hb p">Past</span></td></tr>
+          <tr><td class="hn">Seattle Hotel</td><td>Seattle</td><td>Mar 19</td><td>1</td><td>438</td><td><span class="hb p">Past</span></td></tr>
+          <tr><td class="hn">Hotel Indigo (Extension)</td><td>Atlanta</td><td>Mar 21&ndash;22</td><td>1</td><td>1,081</td><td><span class="hb a">Tonight</span></td></tr>
+          <tr><td class="hn">Hotels.com California</td><td>East Bay</td><td>Mar 22+</td><td>TBC</td><td>TBC</td><td><span class="hb u">Upcoming</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px;padding:12px;background:var(--orange-bg);border-radius:8px;font-size:11px;color:#78350f;">
+        <strong>Action:</strong> San Jose / SFO hotel closer to Moscone Center still pending. Current booking is East Bay area. Consider rebooking near downtown SF for RSAC week.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXPENSES PAGE ===== -->
+<div class="page" id="page-expenses">
+  <div class="xl-wrap">
+    <!-- Excel-style ribbon header -->
+    <div class="xl-header">
+      <h3>&#128202; AG Trip Expenses &mdash; Happay Upload</h3>
+      <a href="AG_Trip_Expenses_Mar2026.xlsx" download style="background:#fff;color:#4472c4;padding:6px 14px;border-radius:4px;font-size:11px;font-weight:700;text-decoration:none;border:1px solid #fff;">&#8595; Download Excel</a>
+    </div>
+    <div class="xl-subheader">Employee: <strong>Abhishek Goyal</strong> &nbsp;|&nbsp; Dept: Celebal Technologies &nbsp;|&nbsp; Trip: FABCON 2026 + RSAC (US)</div>
+
+    <!-- The spreadsheet table -->
+    <table class="xl" id="expTable">
+      <thead>
+        <tr>
+          <th onclick="toggleFilter(this,0)" style="width:80px;">Date<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf0"></div>
+          </th>
+          <th onclick="toggleFilter(this,1)" style="width:100px;">Category<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf1"></div>
+          </th>
+          <th onclick="toggleFilter(this,2)" style="min-width:220px;">Description<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf2"></div>
+          </th>
+          <th onclick="toggleFilter(this,3)" style="width:120px;">Vendor / Hotel<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf3"></div>
+          </th>
+          <th onclick="toggleFilter(this,4)" style="width:100px;">City<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf4"></div>
+          </th>
+          <th onclick="toggleFilter(this,5)" style="width:90px;">Currency<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf5"></div>
+          </th>
+          <th onclick="toggleFilter(this,6)" style="width:100px;">Amount<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf6"></div>
+          </th>
+          <th onclick="toggleFilter(this,7)" style="width:100px;">Amount (USD)<span class="xl-arrow">&#9660;</span>
+            <div class="xl-filter-dd" id="xlf7"></div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="expBody">
+        <tr><td>Mar 9</td><td>Hotel</td><td class="xl-bold">Hotel Indigo Atlanta Midtown (5 nights, FABCON)</td><td>Hotel Indigo</td><td>Atlanta, GA</td><td>USD</td><td class="xl-num">2,934.18</td><td class="xl-num">2,934.18</td></tr>
+        <tr><td>Mar 19</td><td>Hotel</td><td class="xl-bold">First Hotel Atlanta (2 nights)</td><td>First Hotel</td><td>Atlanta, GA</td><td>USD</td><td class="xl-num">1,554.97</td><td class="xl-num">1,554.97</td></tr>
+        <tr><td>Mar 19</td><td>Hotel</td><td class="xl-bold">Seattle Hotel (1 night, client visit)</td><td>Hotels.com</td><td>Seattle, WA</td><td>USD</td><td class="xl-num">438.33</td><td class="xl-num">438.33</td></tr>
+        <tr><td>Mar 20</td><td>Flight</td><td class="xl-bold">Delta DL-809 ATL&rarr;SJC (Corporate Fare)</td><td>MakeMyTrip MyBiz</td><td>ATL&rarr;SJC</td><td>USD</td><td class="xl-num">2,638.60</td><td class="xl-num">2,638.60</td></tr>
+        <tr><td>Mar 21</td><td>Hotel</td><td class="xl-bold">Hotel Indigo Atlanta Extension (1 night)</td><td>Hotel Indigo</td><td>Atlanta, GA</td><td>USD</td><td class="xl-num">1,080.54</td><td class="xl-num">1,080.54</td></tr>
+        <tr class="xl-yellow"><td>Mar 22</td><td>Hotel</td><td class="xl-bold">San Jose / California Hotel (hotels.com booking)</td><td>Hotels.com</td><td>San Jose, CA</td><td>USD</td><td class="xl-num"><input type="text" placeholder="Enter amount"></td><td class="xl-num"><input type="text" placeholder="Enter amount"></td></tr>
+        <tr class="xl-yellow"><td>Mar 15</td><td>Meals</td><td class="xl-bold">Meals &amp; Incidentals (Atlanta, FABCON week)</td><td>Various</td><td>Atlanta, GA</td><td>USD</td><td class="xl-num"><input type="text" placeholder="Enter amount"></td><td class="xl-num"><input type="text" placeholder="Enter amount"></td></tr>
+        <tr class="xl-yellow"><td>Mar 22</td><td>Meals</td><td class="xl-bold">Meals &amp; Incidentals (San Jose)</td><td>Various</td><td>San Jose, CA</td><td>USD</td><td class="xl-num"><input type="text" placeholder="Enter amount"></td><td class="xl-num"><input type="text" placeholder="Enter amount"></td></tr>
+        <tr id="addExpRow" style="background:#e8f5e9 !important;">
+          <td><input type="date" id="addDate" style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;"></td>
+          <td><select id="addCat" style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;background:#fff;">
+            <option value="">Select...</option><option>Hotel</option><option>Flight</option><option>Meals</option><option>Transport</option><option>Conference</option><option>Shopping</option><option>Visa</option><option>Insurance</option><option>Miscellaneous</option>
+          </select></td>
+          <td><input type="text" id="addDesc" placeholder="Description..." style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;"></td>
+          <td><input type="text" id="addVendor" placeholder="Vendor..." style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;"></td>
+          <td><select id="addCity" style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;background:#fff;">
+            <option value="">Select...</option><option>Atlanta, GA</option><option>Berkeley, CA</option><option>San Jose, CA</option><option>San Francisco, CA</option><option>Seattle, WA</option><option>Other</option>
+          </select></td>
+          <td><select id="addCur" style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;background:#fff;">
+            <option selected>USD</option><option>AED</option><option>INR</option>
+          </select></td>
+          <td><input type="text" id="addAmt" placeholder="0.00" style="width:100%;padding:3px;border:1px solid #4caf50;border-radius:3px;font-size:10px;font-family:inherit;text-align:right;"></td>
+          <td><button onclick="addExpenseRow()" style="width:100%;padding:4px 6px;background:#4caf50;color:#fff;border:none;border-radius:3px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add</button></td>
+        </tr>
+        <tr class="xl-total"><td colspan="6" style="text-align:right;font-weight:800;">TOTAL</td><td class="xl-num" id="totalAmt">8,646.62</td><td class="xl-num" id="totalAed">8,646.62</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Excel-style footer -->
+    <div class="xl-footer">
+      <span>&#128308; Yellow rows = pending receipts / amounts to be filled</span>
+      <span>&#128994; White/blue rows = confirmed from booking data</span>
+      <span style="margin-left:auto;"><strong>Sheet:</strong> AG Trip Expenses</span>
+    </div>
+  </div>
+
+  <!-- Action buttons below the spreadsheet -->
+  <div style="display:flex;gap:10px;margin-top:12px;">
+    <button class="btn-save" onclick="recalcTotal()">&#128260; Recalculate Total</button>
+    <button class="btn-save" onclick="alert('Saved! Ready for Happay upload.')">&#128228; Save &amp; Prepare for Happay</button>
+  </div>
+</div>
+
+<!-- ===== RECEIPTS PAGE ===== -->
+<div class="page" id="page-receipts">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#128247;</span>
+      <h2>Upload Receipts &amp; Food Bills</h2>
+    </div>
+    <div class="section-body">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');handleFiles(event.dataTransfer.files)">
+        <div class="uz-icon">&#128228;</div>
+        <div class="uz-title">Drop receipt images here or click to upload</div>
+        <div class="uz-sub">JPG, PNG, PDF &mdash; food bills, hotel receipts, transport receipts</div>
+        <input type="file" id="fileInput" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)">
+      </div>
+      <ul class="uploaded-list" id="uploadedList"></ul>
+      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--text-2);line-height:1.6;">
+        <strong>Tip:</strong> Upload all receipts here. They will be organized by date and matched to expense line items above for Happay submission. Accepted formats: JPG, PNG, PDF.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TRAVEL POLICY PAGE (G7) ===== -->
+<div class="page" id="page-policy">
+
+  <!-- Per Diem + Accommodation — Side-by-Side Widgets -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+    <!-- LEFT WIDGET: Per Diem -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#4f46e5,#6366f1);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:#fff;font-size:13px;font-weight:800;letter-spacing:0.3px;">&#128176; Per Diem (G7 Tier)</div>
+        <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700;">A-City Rates</span>
+      </div>
+      <div style="padding:16px;">
+        <div style="font-size:10px;color:var(--text-3);margin-bottom:12px;">Atlanta, San Jose &amp; SF = A-Cities (Annexure VI)</div>
+        <!-- Rate items -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);">
+          <span style="font-size:12px;color:var(--text-2);">&#127869; Meals</span>
+          <div style="display:flex;gap:12px;align-items:baseline;">
+            <span style="font-size:16px;font-weight:800;color:var(--accent);">$80</span>
+            <span style="font-size:10px;color:var(--text-3);">/ $70 other</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);">
+          <span style="font-size:12px;color:var(--text-2);">&#128178; Incidental</span>
+          <div style="display:flex;gap:12px;align-items:baseline;">
+            <span style="font-size:16px;font-weight:800;color:var(--accent);">$25</span>
+            <span style="font-size:10px;color:var(--text-3);">/ $20 other</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);">
+          <span style="font-size:12px;color:var(--text-2);">&#127860; Full Meals</span>
+          <div style="display:flex;gap:12px;align-items:baseline;">
+            <span style="font-size:16px;font-weight:800;color:var(--accent);">$90</span>
+            <span style="font-size:10px;color:var(--text-3);">/ $80 other</span>
+          </div>
+        </div>
+        <!-- Total highlight -->
+        <div style="margin-top:10px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;font-weight:700;color:#065f46;">Daily Max</span>
+          <span style="font-size:22px;font-weight:900;color:var(--green);">$105<span style="font-size:11px;font-weight:600;color:#065f46;">/day</span></span>
+        </div>
+        <div style="font-size:9px;color:var(--text-3);margin-top:8px;line-height:1.4;">Half-day rate for travel days &lt;12 hrs. No receipts needed for per diem under standard limits.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT WIDGET: Accommodation -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#0891b2,#06b6d4);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:#fff;font-size:13px;font-weight:800;letter-spacing:0.3px;">&#127976; Accommodation (G7)</div>
+        <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700;">USD / Night</span>
+      </div>
+      <div style="padding:16px;">
+        <!-- Limits -->
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;background:var(--accent-bg);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;color:var(--accent);margin-bottom:4px;">A-Cities</div>
+            <div style="font-size:24px;font-weight:900;color:var(--accent);">$220</div>
+            <div style="font-size:9px;color:var(--text-3);margin-top:2px;">ATL, SJC, SF, NYC, LA</div>
+          </div>
+          <div style="flex:1;background:var(--bg);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;color:var(--text-3);margin-bottom:4px;">Other Cities</div>
+            <div style="font-size:24px;font-weight:900;color:var(--text-2);">$200</div>
+            <div style="font-size:9px;color:var(--text-3);margin-top:2px;">All other US locations</div>
+          </div>
+        </div>
+        <!-- Your hotels -->
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--text-3);margin-bottom:6px;">Your Bookings</div>
+        <div style="background:var(--blue-bg);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;font-weight:700;">Hotel Indigo Midtown</div>
+            <div style="font-size:10px;color:var(--text-2);">Atlanta &bull; Mar 21&ndash;22 &bull; 1 night</div>
+          </div>
+          <span style="font-size:10px;padding:3px 8px;background:var(--green-bg);color:var(--green);border-radius:4px;font-weight:700;">Breakfast</span>
+        </div>
+        <div style="background:var(--blue-bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;font-weight:700;">Holiday Inn Express Berkeley</div>
+            <div style="font-size:10px;color:var(--text-2);">Bay Area &bull; Mar 22&ndash;26 &bull; 4 nights</div>
+          </div>
+          <span style="font-size:10px;padding:3px 8px;background:var(--accent-bg);color:var(--accent);border-radius:4px;font-weight:700;">2 Queen</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Key Rules + Conveyance — Side-by-Side Widgets -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+    <!-- LEFT: Key Rules & Deadlines -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#dc2626,#ef4444);padding:12px 16px;color:#fff;font-size:13px;font-weight:800;">&#9200; Key Rules &amp; Deadlines</div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--red-bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#128680;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--red);">90-Day Claims Window</div>
+            <div style="font-size:10px;color:var(--text-2);">File within 90 days or forfeit</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--orange-bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#128197;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:#92400e;">FY Cutoff: Apr 30, 2026</div>
+            <div style="font-size:10px;color:var(--text-2);">All FY25-26 claims settled by then</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--accent-bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#9992;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--accent);">G7 = Business Class</div>
+            <div style="font-size:10px;color:var(--text-2);">International sectors &gt;4 hrs</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--green-bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#127870;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--green);">Entertainment: $80/person</div>
+            <div style="font-size:10px;color:var(--text-2);">CFO pre-approval, max 8 pax</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Conveyance & Transport -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#7c3aed,#8b5cf6);padding:12px 16px;color:#fff;font-size:13px;font-weight:800;">&#128663; Conveyance &amp; Transport</div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#128665;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--text);">Airport Transfers</div>
+            <div style="font-size:10px;color:var(--text-2);">Cab at actuals + receipt. G7: premium sedan OK</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#128661;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--text);">Daily Local Transport</div>
+            <div style="font-size:10px;color:var(--text-2);">Corporate cab account. Personal car: $0.67/mi</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#128664;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--text);">Rental Cars</div>
+            <div style="font-size:10px;color:var(--text-2);">Prior approval req. CDW/LDW mandatory</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;">
+          <span style="font-size:20px;">&#127359;</span>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:800;color:var(--text);">Parking &amp; Tolls</div>
+            <div style="font-size:10px;color:var(--text-2);">Actuals + receipts. Airport: long-term lot</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Reimbursement Process — Compact Horizontal -->
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;">
+    <div style="background:linear-gradient(135deg,#059669,#10b981);padding:12px 16px;color:#fff;font-size:13px;font-weight:800;">&#128179; Reimbursement Process (Happay)</div>
+    <div style="padding:14px;">
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <div style="flex:1;background:var(--bg);border-radius:8px;padding:10px;text-align:center;position:relative;">
+          <div style="font-size:20px;">&#9312;</div>
+          <div style="font-size:11px;font-weight:700;margin-top:2px;">Collect Receipts</div>
+          <div style="font-size:9px;color:var(--text-3);">Food, hotel, transport</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--text-3);font-size:16px;">&#8594;</div>
+        <div style="flex:1;background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:20px;">&#9313;</div>
+          <div style="font-size:11px;font-weight:700;margin-top:2px;">Upload to Happay</div>
+          <div style="font-size:9px;color:var(--text-3);">expense.happay.in</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--text-3);font-size:16px;">&#8594;</div>
+        <div style="flex:1;background:var(--bg);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:20px;">&#9314;</div>
+          <div style="font-size:11px;font-weight:700;margin-top:2px;">Manager Approval</div>
+          <div style="font-size:9px;color:var(--text-3);">Auto-routed</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--text-3);font-size:16px;">&#8594;</div>
+        <div style="flex:1;background:var(--green-bg);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:20px;">&#9315;</div>
+          <div style="font-size:11px;font-weight:700;margin-top:2px;color:var(--green);">Reimbursed</div>
+          <div style="font-size:9px;color:var(--text-3);">Next payroll cycle</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text-2);background:var(--bg);border-radius:6px;padding:8px 10px;line-height:1.5;">
+        <strong>Docs needed:</strong> Receipts, boarding passes, hotel folios, GST invoices. Per diem = no receipts. FX receipts for amounts &gt;$500.
+      </div>
+    </div>
+  </div>
+
+  <!-- SPOC Contacts + Raise Issue -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+    <!-- LEFT: SPOC Contact Cards -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#1e40af,#3b82f6);padding:12px 16px;color:#fff;font-size:13px;font-weight:800;">&#128222; Travel Desk SPOC</div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;cursor:pointer;" onclick="prefillIssue('pranav')">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;">PS</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">Pranav Sharma</div>
+            <div style="font-size:10px;color:var(--accent);font-weight:600;">Travel Desk Lead</div>
+            <div style="font-size:9px;color:var(--text-3);">Bookings, policy queries, flight changes</div>
+          </div>
+          <span style="font-size:16px;color:var(--text-3);" title="Raise issue with Pranav">&#9993;</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;cursor:pointer;" onclick="prefillIssue('anjali')">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;">AB</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">Anjali Bharti</div>
+            <div style="font-size:10px;color:var(--green);font-weight:600;">Finance — Reimbursements</div>
+            <div style="font-size:9px;color:var(--text-3);">Happay claims, payroll, advance money</div>
+          </div>
+          <span style="font-size:16px;color:var(--text-3);" title="Raise issue with Anjali">&#9993;</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;cursor:pointer;" onclick="prefillIssue('krish')">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#ef4444);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex-shrink:0;">KA</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">Krish Ankudinov</div>
+            <div style="font-size:10px;color:var(--red);font-weight:600;">US Operations</div>
+            <div style="font-size:9px;color:var(--text-3);">On-ground support, logistics, emergencies</div>
+          </div>
+          <span style="font-size:16px;color:var(--text-3);" title="Raise issue with Krish">&#9993;</span>
+        </div>
+        <div style="font-size:9px;color:var(--text-3);padding:4px 4px 0;text-align:center;">Click any contact to draft an issue email &rarr;</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Raise an Issue — Smart Email Composer -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);">
+      <div style="background:linear-gradient(135deg,#b45309,#f59e0b);padding:12px 16px;color:#fff;font-size:13px;font-weight:800;">&#9888; Raise an Issue</div>
+      <div style="padding:14px;">
+        <div style="font-size:11px;color:var(--text-2);margin-bottom:10px;">Describe your problem in a few words. We'll draft a professional email with policy references, attach relevant vouchers, and route it to the right SPOC.</div>
+
+        <!-- Quick Issue Templates -->
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;color:var(--text-3);margin-bottom:6px;">Common Issues (click to auto-fill)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
+          <button class="iq-btn" onclick="fillIssueTemplate('meals')">&#127869; Meals too expensive</button>
+          <button class="iq-btn" onclick="fillIssueTemplate('advance')">&#128176; Need more advance</button>
+          <button class="iq-btn" onclick="fillIssueTemplate('hotel')">&#127976; Hotel issue</button>
+          <button class="iq-btn" onclick="fillIssueTemplate('flight')">&#9992; Flight change</button>
+          <button class="iq-btn" onclick="fillIssueTemplate('receipt')">&#128196; Missing receipt</button>
+          <button class="iq-btn" onclick="fillIssueTemplate('policy')">&#128203; Policy clarification</button>
+        </div>
+
+        <!-- Issue Input -->
+        <div style="margin-bottom:8px;">
+          <label style="font-size:10px;font-weight:700;color:var(--text);display:block;margin-bottom:4px;">To:</label>
+          <select id="issueTo" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:var(--bg);">
+            <option value="pranav">Pranav Sharma — Travel Desk (bookings, policy)</option>
+            <option value="anjali">Anjali Bharti — Finance (claims, advance, reimbursement)</option>
+            <option value="krish">Krish Ankudinov — US Ops (on-ground, logistics)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <label style="font-size:10px;font-weight:700;color:var(--text);display:block;margin-bottom:4px;">Describe your issue:</label>
+          <textarea id="issueDesc" rows="3" placeholder="e.g. Meals in Atlanta are costing $95/day which exceeds my $80 per diem. Thursday lunch was $42 at a basic restaurant. Need policy exception or more advance money." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label style="font-size:10px;font-weight:700;color:var(--text);display:block;margin-bottom:4px;">Attach vouchers / receipts (optional):</label>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:10px;background:var(--bg);padding:4px 8px;border-radius:4px;cursor:pointer;"><input type="checkbox" id="attMeals" style="accent-color:var(--accent);"> Last 2 days meals</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:10px;background:var(--bg);padding:4px 8px;border-radius:4px;cursor:pointer;"><input type="checkbox" id="attHotel" style="accent-color:var(--accent);"> Hotel voucher</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:10px;background:var(--bg);padding:4px 8px;border-radius:4px;cursor:pointer;"><input type="checkbox" id="attFlight" style="accent-color:var(--accent);"> Flight booking</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:10px;background:var(--bg);padding:4px 8px;border-radius:4px;cursor:pointer;"><input type="checkbox" id="attPolicy" style="accent-color:var(--accent);"> Policy reference</label>
+          </div>
+        </div>
+
+        <button onclick="generateIssueDraft()" style="width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">&#128231; Generate Email Draft</button>
+
+        <!-- Preview area -->
+        <div id="issuePreview" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <div style="background:var(--accent-bg);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:10px;font-weight:700;color:var(--accent);">&#128231; Email Preview</span>
+            <span style="font-size:9px;color:var(--text-3);">Edit below, then send</span>
+          </div>
+          <div style="padding:10px 12px;">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:2px;">To: <strong id="previewTo" style="color:var(--text);"></strong></div>
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:6px;">Subject: <strong id="previewSubject" style="color:var(--text);"></strong></div>
+            <textarea id="previewBody" rows="8" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:inherit;outline:none;resize:vertical;box-sizing:border-box;line-height:1.5;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button onclick="sendIssueDraft()" style="flex:1;padding:8px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">&#128228; Open in Outlook &amp; Send</button>
+              <button onclick="document.getElementById('issuePreview').style.display='none';" style="padding:8px 14px;background:var(--bg);color:var(--text-2);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Full Policy Download -->
+  <div style="text-align:center;padding:16px 0;">
+    <a href="Travel Policy Mar 2026.docx" download style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+      &#128196; Download Full Travel Policy (DOCX)
+    </a>
+    <div style="font-size:10px;color:var(--text-3);margin-top:8px;">CTPL_HR_Global Travel_V3_R3 &mdash; Celebal Technologies Private Limited</div>
+  </div>
+
+</div>
+
+<!-- ===== DOCUMENTS PAGE ===== -->
+<div class="page" id="page-documents">
+  <div class="section">
+    <div class="section-head">
+      <span style="font-size:16px;">&#128196;</span>
+      <h2>Documents &amp; Links</h2>
+    </div>
+    <div class="section-body">
+      <a class="link-row" href="https://celebaltech.sharepoint.com" target="_blank"><span class="link-icon">&#128196;</span>Travel Policy &mdash; Celebal SharePoint (India, INR)<span class="link-arrow">&rarr;</span></a>
+      <a class="link-row" href="AG_Trip_Expenses_Mar2026.xlsx" download><span class="link-icon">&#128202;</span>AG Expense Sheet &mdash; Excel for Happay upload<span class="link-arrow">&#8595;</span></a>
+      <a class="link-row" href="https://expense.happay.in/dashboard" target="_blank"><span class="link-icon">&#128176;</span>Happay Dashboard &mdash; Upload expenses &amp; receipts<span class="link-arrow">&rarr;</span></a>
+      <a class="link-row" href="Travel_Intelligence.html"><span class="link-icon">&#128200;</span>Travel Intelligence &mdash; Full trip details (tabbed view)<span class="link-arrow">&rarr;</span></a>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+function showPage(id) {
+  // Deactivate all menu items
+  document.querySelectorAll('.menu-item').forEach(function(m){m.classList.remove('active');});
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  // Activate clicked
+  event.currentTarget.classList.add('active');
+  var page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+}
+
+function handleFiles(files) {
+  var list = document.getElementById('uploadedList');
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    var li = document.createElement('li');
+    var size = f.size < 1024*1024 ? (f.size/1024).toFixed(0) + ' KB' : (f.size/(1024*1024)).toFixed(1) + ' MB';
+    li.innerHTML = '<span style="font-size:14px;">&#9989;</span><span class="uname">' + f.name + '</span><span class="usize">' + size + '</span>';
+    list.appendChild(li);
+  }
+}
+
+// ===== EXCEL AUTOFILTER DROPDOWNS =====
+var xlFilterState = {}; // col -> Set of visible values
+var xlOpenFilter = null;
+
+function toggleFilter(thEl, colIdx) {
+  event.stopPropagation();
+  var dd = document.getElementById('xlf' + colIdx);
+  // Close any other open dropdown
+  document.querySelectorAll('.xl-filter-dd.open').forEach(function(d){ if(d!==dd) d.classList.remove('open'); });
+
+  if (dd.classList.contains('open')) { dd.classList.remove('open'); return; }
+
+  // Build unique values for this column (skip add-expense row)
+  var rows = document.querySelectorAll('#expBody tr:not(.xl-total):not(#addExpRow)');
+  var vals = [];
+  rows.forEach(function(r) {
+    var cells = r.querySelectorAll('td');
+    if (cells[colIdx]) {
+      var sel = cells[colIdx].querySelector('select');
+      var txt = sel ? sel.value : cells[colIdx].textContent.trim();
+      if (txt && txt !== 'Enter amount' && vals.indexOf(txt) === -1) vals.push(txt);
+    }
+  });
+  vals.sort();
+
+  // Current filter state
+  if (!xlFilterState[colIdx]) {
+    xlFilterState[colIdx] = new Set(vals);
+  }
+
+  var html = '<label style="font-weight:700;padding:4px 10px;"><input type="checkbox" onchange="xlToggleAll('+colIdx+',this.checked)" ' + (xlFilterState[colIdx].size === vals.length ? 'checked' : '') + '> (Select All)</label>';
+  html += '<div class="xl-dd-sep"></div>';
+  vals.forEach(function(v) {
+    var checked = xlFilterState[colIdx].has(v) ? 'checked' : '';
+    html += '<label><input type="checkbox" ' + checked + ' onchange="xlToggleVal('+colIdx+',\'' + v.replace(/'/g,"\\'") + '\',this.checked)"> ' + v + '</label>';
+  });
+  dd.innerHTML = html;
+  dd.classList.add('open');
+}
+
+function xlToggleAll(col, checked) {
+  var rows = document.querySelectorAll('#expBody tr:not(.xl-total):not(#addExpRow)');
+  var vals = [];
+  rows.forEach(function(r) {
+    var cells = r.querySelectorAll('td');
+    if (cells[col]) {
+      var sel = cells[col].querySelector('select');
+      var txt = sel ? sel.value : cells[col].textContent.trim();
+      if (txt && txt !== 'Enter amount' && vals.indexOf(txt) === -1) vals.push(txt);
+    }
+  });
+  xlFilterState[col] = checked ? new Set(vals) : new Set();
+  // Update checkboxes in dropdown
+  var dd = document.getElementById('xlf' + col);
+  dd.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.checked = checked; });
+  applyXlFilters();
+}
+
+function xlToggleVal(col, val, checked) {
+  if (!xlFilterState[col]) xlFilterState[col] = new Set();
+  if (checked) xlFilterState[col].add(val); else xlFilterState[col].delete(val);
+  applyXlFilters();
+}
+
+function applyXlFilters() {
+  var rows = document.querySelectorAll('#expBody tr:not(.xl-total):not(#addExpRow)');
+  rows.forEach(function(r) {
+    var show = true;
+    var cells = r.querySelectorAll('td');
+    for (var col in xlFilterState) {
+      var c = parseInt(col);
+      if (cells[c]) {
+        var sel = cells[c].querySelector('select');
+        var txt = sel ? sel.value : cells[c].textContent.trim();
+        if (txt === '' || txt === 'Enter amount') continue;
+        if (!xlFilterState[c].has(txt)) { show = false; break; }
+      }
+    }
+    r.style.display = show ? '' : 'none';
+  });
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.xl-filter-dd') && !e.target.closest('th')) {
+    document.querySelectorAll('.xl-filter-dd.open').forEach(function(d){ d.classList.remove('open'); });
+  }
+});
+
+// Recalculate total from visible confirmed amounts + input values
+// ===== RAISE ISSUE — Smart Email Composer =====
+var spocMap = {
+  pranav: {name:'Pranav Sharma', email:'pranav.sharma@celebaltech.com', role:'Travel Desk Lead'},
+  anjali: {name:'Anjali Bharti', email:'anjali.bharti@celebaltech.com', role:'Finance — Reimbursements'},
+  krish:  {name:'Krish Ankudinov', email:'krish.ankudinov@celebaltech.com', role:'US Operations'}
+};
+
+function prefillIssue(spoc) {
+  document.getElementById('issueTo').value = spoc;
+  document.getElementById('issueDesc').focus();
+}
+
+function fillIssueTemplate(type) {
+  var desc = '';
+  var spoc = 'pranav';
+  if (type==='meals') {
+    desc = 'Meals in Atlanta are exceeding my G7 per diem limit of $80/day. Thursday lunch alone was $42 at a standard restaurant. With breakfast ($18) and dinner ($45), daily spend is ~$105 vs $80 allowed. Please advise — do I need a policy exception, or can I get additional advance money to cover the gap? Attaching last 2 days meal vouchers for reference.';
+    spoc = 'anjali';
+    document.getElementById('attMeals').checked = true;
+    document.getElementById('attPolicy').checked = true;
+  } else if (type==='advance') {
+    desc = 'Current travel advance is insufficient for remaining trip days. With hotel costs, daily meals, and incidental expenses, I am running short. Per policy (Section 6), I am eligible for additional advance. Please process an additional advance of $500-$800 to cover the remaining 5 days.';
+    spoc = 'anjali';
+  } else if (type==='hotel') {
+    desc = 'Issue with my current hotel booking. [Please describe: room quality, check-in problems, location too far, need to extend/cancel, or pricing discrepancy]. Attaching hotel voucher for reference.';
+    spoc = 'pranav';
+    document.getElementById('attHotel').checked = true;
+  } else if (type==='flight') {
+    desc = 'Need to change my flight booking. [Describe: reschedule date, cancel & rebook, seat upgrade request, baggage issue, or missed connection]. Current booking details attached.';
+    spoc = 'pranav';
+    document.getElementById('attFlight').checked = true;
+  } else if (type==='receipt') {
+    desc = 'I am missing the receipt for [describe: which meal/transport/hotel on which date]. The vendor did not provide a printed receipt. Can I submit a bank/card statement as proof instead? Please advise on the Happay submission process for missing receipts.';
+    spoc = 'anjali';
+  } else if (type==='policy') {
+    desc = 'I need clarification on the travel policy regarding [describe: per diem calculation for partial days, entertainment expense limits, rental car pre-approval process, or reimbursement timeline]. Reference: CTPL_HR_Global Travel_V3_R3.';
+    spoc = 'pranav';
+    document.getElementById('attPolicy').checked = true;
+  }
+  document.getElementById('issueTo').value = spoc;
+  document.getElementById('issueDesc').value = desc;
+}
+
+function generateIssueDraft() {
+  var spocKey = document.getElementById('issueTo').value;
+  var spoc = spocMap[spocKey];
+  var desc = document.getElementById('issueDesc').value.trim();
+  if (!desc) { alert('Please describe your issue first.'); return; }
+
+  // Build attachments note
+  var attachments = [];
+  if (document.getElementById('attMeals').checked) attachments.push('Last 2 days meal receipts/vouchers');
+  if (document.getElementById('attHotel').checked) attachments.push('Hotel booking voucher');
+  if (document.getElementById('attFlight').checked) attachments.push('Flight booking confirmation');
+  if (document.getElementById('attPolicy').checked) attachments.push('Travel Policy reference (CTPL_HR_Global Travel_V3_R3)');
+
+  var subject = '[Travel Support] ' + desc.split('.')[0].substring(0, 60);
+
+  var body = 'Hi ' + spoc.name.split(' ')[0] + ',\n\n';
+  body += 'I am writing regarding an issue during my current US business trip.\n\n';
+  body += '--- Issue Description ---\n' + desc + '\n\n';
+  body += '--- Trip Details ---\n';
+  body += 'Employee: Abhishek Goyal (G7)\n';
+  body += 'Trip: FABCON 2026 + RSAC 2026 (US)\n';
+  body += 'Route: Atlanta → Berkeley → San Francisco\n';
+  body += 'Dates: Mar 8–28, 2026\n';
+  body += 'Current Location: Atlanta, GA\n\n';
+
+  if (attachments.length > 0) {
+    body += '--- Attachments ---\n';
+    attachments.forEach(function(a) { body += '• ' + a + '\n'; });
+    body += '\n';
+  }
+
+  body += '--- Policy Reference ---\n';
+  body += 'Per Celebal Global Travel Policy (V3_R3), G5–G7 tier:\n';
+  body += '• Per diem (USA A-Cities): $80 meals + $25 incidental = $105/day\n';
+  body += '• Accommodation: $220/night (A-Cities)\n';
+  body += '• Claims deadline: 90 days from trip end\n\n';
+
+  body += 'Please advise on the next steps. Happy to provide any additional documentation.\n\n';
+  body += 'Best regards,\nAbhishek Goyal\nCelebal Technologies\nabhishek.goyal@celebaltech.com';
+
+  // Show preview
+  document.getElementById('previewTo').textContent = spoc.name + ' <' + spoc.email + '>';
+  document.getElementById('previewSubject').textContent = subject;
+  document.getElementById('previewBody').value = body;
+  document.getElementById('issuePreview').style.display = 'block';
+  document.getElementById('issuePreview').scrollIntoView({behavior:'smooth'});
+}
+
+function sendIssueDraft() {
+  var spocKey = document.getElementById('issueTo').value;
+  var spoc = spocMap[spocKey];
+  var subject = document.getElementById('previewSubject').textContent;
+  var body = document.getElementById('previewBody').value;
+  window.location.href = 'mailto:' + spoc.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+// ===== ADD EXPENSE ROW =====
+function addExpenseRow() {
+  var d = document.getElementById('addDate').value;
+  var cat = document.getElementById('addCat').value;
+  var desc = document.getElementById('addDesc').value.trim();
+  var vendor = document.getElementById('addVendor').value.trim();
+  var city = document.getElementById('addCity').value;
+  var cur = document.getElementById('addCur').value;
+  var amt = document.getElementById('addAmt').value.trim();
+
+  if (!cat || !desc) { alert('Please select a category and enter a description.'); return; }
+
+  // Format date
+  var dateStr = '';
+  if (d) {
+    var parts = d.split('-');
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    dateStr = months[parseInt(parts[1])-1] + ' ' + parseInt(parts[2]);
+  }
+
+  var tr = document.createElement('tr');
+  tr.className = 'xl-yellow';
+  var amtDisplay = amt ? parseFloat(amt).toLocaleString('en-US',{minimumFractionDigits:2}) : '<input type="text" placeholder="Enter amount">';
+  tr.innerHTML = '<td>'+(dateStr||'—')+'</td><td>'+cat+'</td><td class="xl-bold">'+desc+'</td><td>'+(vendor||'—')+'</td><td>'+(city||'—')+'</td><td>'+cur+'</td><td class="xl-num">'+amtDisplay+'</td><td class="xl-num">'+amtDisplay+'</td>';
+
+  // Insert before the add-row
+  var addRow = document.getElementById('addExpRow');
+  addRow.parentNode.insertBefore(tr, addRow);
+
+  // Clear inputs
+  document.getElementById('addDate').value = '';
+  document.getElementById('addCat').value = '';
+  document.getElementById('addDesc').value = '';
+  document.getElementById('addVendor').value = '';
+  document.getElementById('addCity').value = '';
+  document.getElementById('addAmt').value = '';
+
+  recalcTotal();
+}
+
+function recalcTotal() {
+  var rows = document.querySelectorAll('#expBody tr:not(.xl-total)');
+  var total = 0;
+  rows.forEach(function(r) {
+    if (r.style.display === 'none') return;
+    var amtCell = r.querySelectorAll('td')[7]; // Amount (USD) column
+    if (!amtCell) return;
+    var inp = amtCell.querySelector('input');
+    var val = inp ? parseFloat(inp.value) || 0 : parseFloat(amtCell.textContent.replace(/,/g,'')) || 0;
+    total += val;
+  });
+  document.getElementById('totalAed').textContent = total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('totalAmt').textContent = total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+</script>
+</body>
+</html>

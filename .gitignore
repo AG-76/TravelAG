@@ -1,0 +1,15 @@
+# Old versions
+AI_Travel_Companion.html
+AI_Travel_Companion_v2.html
+Travel_Intelligence.html
+
+# Data extraction artifacts
+real_trip_data.json
+trip_output.json
+
+# Icon generator (not needed in prod)
+generate-icons.html
+
+# OS files
+.DS_Store
+Thumbs.db

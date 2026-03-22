@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAVELAG</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --white:#fff; --bg:#f5f6f8; --accent:#4f46e5; --accent-hover:#4338ca; --accent-bg:#eef2ff;
+    --text:#1a1a2e; --text-2:#4a4a68; --text-3:#8b8ba7;
+    --red:#ef4444; --red-bg:#fef2f2; --orange:#f59e0b; --orange-bg:#fffbeb;
+    --green:#10b981; --green-bg:#ecfdf5; --blue:#3b82f6; --blue-bg:#eff6ff;
+    --border:#e5e7eb; --shadow-sm:0 1px 2px rgba(0,0,0,0.05); --shadow:0 1px 3px rgba(0,0,0,0.08);
+    --radius:12px; --radius-sm:8px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:14px;}
+
+  /* DATE STRIP */
+  .date-strip{background:var(--white);border-bottom:1px solid var(--border);padding:8px 20px 4px;display:flex;align-items:flex-start;flex-shrink:0;}
+  .ds-badge{background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:6px 16px;border-radius:20px;white-space:nowrap;margin-right:14px;letter-spacing:0.5px;margin-top:4px;}
+  .ds-month{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent);margin-right:10px;white-space:nowrap;margin-top:8px;}
+  .ds-dates-wrap{flex:1;display:flex;flex-direction:column;}
+  .ds-dates{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;}
+  .ds-d{display:flex;flex-direction:column;align-items:center;padding:4px 5px;border-radius:8px;cursor:default;min-width:0;}
+  .ds-d .dn{font-size:13px;font-weight:700;color:var(--text-2);line-height:1.3;}
+  .ds-d .dd{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);line-height:1.3;margin-top:1px;}
+  .ds-d.today{background:var(--accent);border-radius:10px;padding:4px 6px;}
+  .ds-d.today .dn{color:#fff;} .ds-d.today .dd{color:rgba(255,255,255,0.75);}
+  .ds-d.past .dn{color:var(--green);} .ds-d.past .dd{color:#86efac;}
+  .ds-d.future .dn{color:var(--text-3);} .ds-d.future .dd{color:var(--border);}
+  .ds-tz-row{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:1px;}
+  .ds-tz{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#5b7083;border:1.5px solid #90a4ae;border-top:none;border-radius:0 0 6px 6px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ds-right{margin-left:auto;font-size:13px;color:var(--text-2);font-weight:600;white-space:nowrap;padding-left:16px;margin-top:4px;}
+  .ds-right strong{color:var(--text);}
+
+  /* 3-COLUMN MAIN */
+  .main{flex:1;display:grid;grid-template-columns:260px 1fr 280px;overflow:hidden;min-height:0;}
+
+  /* LEFT SIDEBAR */
+  .left{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+  .left::-webkit-scrollbar{width:3px;} .left::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px;}
+  .card-label{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .card-label.gr{color:var(--green);} .card-label.bl{color:var(--blue);} .card-label.or{color:var(--orange);} .card-label.pr{color:var(--accent);}
+
+  .hotel-name{font-size:17px;font-weight:800;margin-bottom:2px;}
+  .hotel-addr{font-size:13px;color:var(--text-2);margin-bottom:8px;}
+  .htag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-right:5px;}
+  .htag.ci{background:var(--green-bg);color:var(--green);}
+  .htag.co{background:var(--orange-bg);color:#92400e;}
+  .htag.bf{background:var(--red-bg);color:var(--red);}
+
+  .ev-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg);}
+  .ev-item:last-child{border-bottom:none;}
+  a.ev-link{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;border-radius:6px;padding:2px 4px;margin:-2px -4px;transition:background 0.15s;}
+  a.ev-link:hover{background:var(--accent-bg);}
+  .ev-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--bg);}
+  .ev-title{font-size:14px;font-weight:700;}
+  .ev-sub{font-size:12px;color:var(--text-3);margin-top:1px;}
+
+  .venue-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg);font-size:13px;}
+  .venue-row:last-child{border-bottom:none;}
+  .venue-name{font-weight:700;}
+  .venue-city{color:var(--text-3);font-size:12px;}
+
+  .exp-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bg);font-size:13px;}
+  .exp-row:last-child{border-bottom:none;}
+  .exp-label{font-weight:600;}
+  .exp-val{color:var(--text-3);}
+  .exp-row.total .exp-label,.exp-row.total .exp-val{font-weight:800;color:var(--text);font-size:12px;}
+
+  /* Actions compact */
+  .am{background:var(--bg);border-radius:6px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;gap:8px;font-size:13px;}
+  .adot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .adot.r{background:var(--red);} .adot.o{background:var(--orange);} .adot.g{background:var(--green);}
+  .am-t{flex:1;color:var(--text-2);} .am-t strong{color:var(--text);}
+  .am-s{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;min-width:56px;text-align:right;}
+  .am-s.ur{color:var(--red);} .am-s.pe{color:var(--orange);} .am-s.dn{color:var(--green);}
+
+  /* Buy list split */
+  .buy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .buy-col{background:var(--bg);border-radius:8px;padding:8px;}
+  .buy-col h5{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:4px;}
+  .buy-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:10px;border-bottom:1px solid var(--border);}
+  .buy-item:last-child{border-bottom:none;}
+  .buy-item label{flex:1;cursor:pointer;}
+  .buy-item .bn{font-weight:600;color:var(--text);}
+  .buy-item .bm{font-size:8px;color:var(--text-3);margin-top:1px;}
+  .buy-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--green);cursor:pointer;}
+  .buy-item .bn:hover{color:var(--accent);text-decoration:underline;}
+  /* Buy Detail Popup */
+  .buy-detail{display:none;background:var(--white);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-top:8px;box-shadow:0 4px 16px rgba(79,70,229,0.15);animation:fadeIn 0.2s ease;}
+  .buy-detail.open{display:block;}
+  .buy-detail h4{font-size:12px;font-weight:800;color:var(--text);margin-bottom:2px;}
+  .buy-detail .bd-sub{font-size:9px;color:var(--text-3);margin-bottom:10px;}
+  .bd-section{margin-bottom:10px;}
+  .bd-section h5{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700;margin-bottom:5px;}
+  .bd-store{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg);border-radius:6px;margin-bottom:4px;font-size:10px;transition:background 0.15s;}
+  .bd-store:hover{background:var(--accent-bg);}
+  .bd-store .bs-icon{font-size:14px;flex-shrink:0;}
+  .bd-store .bs-info{flex:1;}
+  .bd-store .bs-name{font-weight:700;color:var(--text);}
+  .bd-store .bs-addr{font-size:9px;color:var(--text-3);}
+  .bd-store .bs-price{font-size:10px;font-weight:700;color:var(--green);flex-shrink:0;}
+  .bd-store a{text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;width:100%;}
+  .bd-delivery{display:flex;gap:6px;flex-wrap:wrap;}
+  .bd-dlv{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:9px;font-weight:600;color:var(--text-2);text-decoration:none;transition:all 0.15s;}
+  .bd-dlv:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+  .bd-suggest{display:flex;gap:4px;margin-top:8px;}
+  .bd-suggest input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:9px;font-family:inherit;outline:none;}
+  .bd-suggest input:focus{border-color:var(--accent);}
+  .bd-suggest button{padding:5px 10px;border-radius:4px;background:var(--accent);color:#fff;border:none;font-size:9px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .bd-close{float:right;cursor:pointer;font-size:12px;color:var(--text-3);padding:2px 6px;border-radius:4px;}
+  .bd-close:hover{background:var(--red-bg);color:var(--red);}
+  .buy-add{display:flex;gap:4px;margin-top:6px;}
+  .buy-add input{flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:9px;font-family:inherit;outline:none;background:var(--white);}
+  .buy-add button{padding:4px 8px;border-radius:4px;background:var(--accent);color:#fff;border:none;font-size:9px;font-weight:700;cursor:pointer;}
+
+  /* Other Details collapsible */
+  .od{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);}
+  .od-h{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
+  .od-h h3{font-size:11px;font-weight:700;} .od-ch{font-size:10px;color:var(--text-3);transition:transform 0.2s;}
+  .od.open .od-ch{transform:rotate(180deg);}
+  .od-b{max-height:0;overflow:hidden;transition:max-height 0.4s ease;}
+  .od.open .od-b{max-height:900px;}
+  .od-in{padding:0 14px 14px;}
+  .od-sub{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);font-weight:700;margin:10px 0 5px;}
+  .od-sub:first-child{margin-top:0;}
+  .od-lk{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--bg);border-radius:5px;text-decoration:none;color:var(--text);font-size:10px;font-weight:500;margin-bottom:4px;border:1px solid transparent;transition:all 0.15s;}
+  .od-lk:hover{background:var(--accent-bg);border-color:var(--accent);}
+  .od-lk .oi{font-size:13px;width:18px;text-align:center;} .od-lk .oa{color:var(--text-3);font-size:11px;margin-left:auto;}
+  .ht{width:100%;border-collapse:collapse;font-size:9px;}
+  .ht th{text-align:left;padding:4px 5px;font-size:7px;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-3);font-weight:700;border-bottom:1px solid var(--border);}
+  .ht td{padding:5px;border-bottom:1px solid #f1f5f9;color:var(--text-2);}
+  .ht tr:last-child td{border-bottom:none;}
+  .ht .hn{font-weight:600;color:var(--text);}
+  .hb{font-size:7px;padding:1px 4px;border-radius:3px;font-weight:700;}
+  .hb.p{background:var(--blue-bg);color:var(--blue);} .hb.a{background:var(--green-bg);color:var(--green);} .hb.u{background:var(--orange-bg);color:var(--orange);}
+
+  /* CENTER */
+  .center{overflow-y:auto;padding:16px;}
+  .center::-webkit-scrollbar{width:3px;} .center::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .hero{border-radius:var(--radius);overflow:hidden;position:relative;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;min-height:180px;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;}
+  .hero-tag{position:absolute;top:14px;left:14px;background:rgba(79,70,229,0.9);color:#fff;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:4px;}
+  .hero h2{font-size:22px;font-weight:800;margin-bottom:2px;}
+  .hero p{font-size:12px;opacity:0.8;}
+  .hero-desc{margin-top:12px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px 14px;font-size:11px;line-height:1.5;backdrop-filter:blur(4px);}
+  .hero-stats{display:flex;gap:20px;margin-top:14px;}
+  .hero-stat{text-align:center;}
+  .hero-stat .sv{font-size:16px;font-weight:800;}
+  .hero-stat .sl{font-size:8px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.7;margin-top:1px;}
+  .hero-btns{display:flex;gap:10px;margin-top:14px;}
+  .hero-btn{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .hero-btn.primary{background:#fff;color:var(--text);}
+  .hero-btn.secondary{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);}
+
+  .rest-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .rest-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow-sm);cursor:pointer;transition:all 0.15s;}
+  .rest-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(79,70,229,0.1);}
+  .rest-name{font-size:13px;font-weight:700;}
+  .rest-type{font-size:10px;color:var(--text-3);margin-top:1px;}
+  .rest-dist{font-size:10px;color:var(--accent);font-weight:600;margin-top:4px;}
+
+  /* Category tab strip at top */
+  .cat-tabs{display:flex;gap:6px;flex-shrink:0;margin-bottom:10px;}
+  .cat-tab{flex:1;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm);}
+  .cat-tab:hover{border-color:var(--accent);background:var(--accent-bg);}
+  .cat-tab.active{border-color:var(--accent);background:var(--accent-bg);box-shadow:0 2px 8px rgba(79,70,229,0.15);}
+  .cat-tab .ct-icon{font-size:22px;display:block;margin-bottom:4px;}
+  .cat-tab .ct-name{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);}
+  .cat-tab.active .ct-name{color:var(--accent);}
+  .cat-tab .ct-count{font-size:10px;color:var(--text-3);margin-top:2px;}
+
+  /* Venue list below tabs */
+  .venue-list{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);overflow:hidden;display:none;flex-shrink:0;}
+  .venue-list.active{display:block;}
+  .vl-head{padding:6px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid var(--border);background:var(--bg);}
+  .vl-head .ci{font-size:13px;} .vl-head h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);}
+  .cl{list-style:none;}
+  .cl li{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:10px;cursor:pointer;transition:all 0.12s;}
+  .cl li:hover{background:var(--accent-bg);} .cl li:last-child{border-bottom:none;}
+  .cl li.active{background:var(--accent-bg);border-left:3px solid var(--accent);}
+
+  /* Detail panel in bottom half */
+  .detail-panel{padding:14px;overflow-y:auto;border-top:1px solid var(--border);display:none;animation:slideUp 0.2s ease;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .dp-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+  .dp-name{font-size:16px;font-weight:800;}
+  .dp-type{font-size:10px;color:var(--text-3);margin-top:1px;}
+  .dp-close{width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text-3);flex-shrink:0;}
+  .dp-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+  .dp-stats{display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;}
+  .dp-stat{text-align:center;}
+  .dp-sv{font-size:14px;font-weight:800;color:var(--accent);}
+  .dp-sl{font-size:7px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);font-weight:700;}
+  .dp-section{margin-bottom:10px;}
+  .dp-section h5{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);font-weight:700;margin-bottom:4px;}
+  .dp-section p{font-size:10px;color:var(--text-2);line-height:1.5;}
+  .dp-menu{display:flex;flex-wrap:wrap;gap:4px;}
+  .dp-menu span{padding:3px 8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:8px;font-weight:600;color:var(--text-2);}
+  .dp-addr{font-size:10px;color:var(--text-2);background:var(--bg);padding:8px 10px;border-radius:6px;margin-top:8px;display:flex;align-items:center;gap:6px;}
+  .dp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .dp-link{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:10px;font-weight:700;text-decoration:none;border:1px solid var(--border);transition:all 0.15s;cursor:pointer;}
+  .dp-link:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+  .dp-link.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .dp-link.primary:hover{background:#4338ca;}
+  .dp-link.secondary{background:var(--white);color:var(--accent);border-color:var(--accent);}
+  .dp-link.secondary:hover{background:var(--accent-bg);}
+  .dp-link.green{background:var(--green);color:#fff;border-color:var(--green);}
+  .dp-link.green:hover{background:#059669;}
+  .cl-n{font-weight:600;color:var(--text);font-size:13px;} .cl-m{font-size:11px;color:var(--text-3);margin-top:1px;}
+  .cl-r{text-align:right;flex-shrink:0;margin-left:8px;}
+  .cl-d{font-size:12px;color:var(--accent);font-weight:600;}
+  .tag{font-size:10px;padding:2px 5px;border-radius:3px;font-weight:700;display:inline-block;margin-left:3px;}
+
+  /* RIGHT PANEL */
+  .right{background:var(--white);border-left:1px solid var(--border);overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+  .right::-webkit-scrollbar{width:3px;} .right::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .crit-card{background:var(--white);border:2px solid var(--red);border-radius:var(--radius);padding:16px;text-align:center;}
+  .crit-label{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--red);font-weight:800;margin-bottom:6px;}
+  .crit-num{font-size:42px;font-weight:900;color:var(--red);line-height:1;}
+  @keyframes critPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.3);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+  .oc-tag{font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:4px;letter-spacing:0.3px;vertical-align:middle;}
+  .oc-open{background:#dcfce7;color:#166534;}
+  .oc-closing{background:#fef9c3;color:#854d0e;}
+  .oc-closed{background:#fee2e2;color:#991b1b;}
+  .oc-event{background:#ede9fe;color:#5b21b6;}
+  .crit-unit{font-size:10px;color:var(--text-3);margin-top:2px;}
+  .crit-detail{font-size:11px;font-weight:700;margin-top:6px;}
+
+  .rp-s{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);font-weight:700;margin-top:4px;}
+  .tl{list-style:none;font-size:10px;}
+  .tl li{display:flex;gap:6px;padding:5px 0;border-bottom:1px solid var(--bg);color:var(--text-2);}
+  .tl li:last-child{border-bottom:none;}
+  .tt{font-weight:700;color:var(--accent);min-width:55px;font-size:9px;}
+
+  .ab{border-radius:var(--radius-sm);padding:10px;font-size:10px;line-height:1.4;}
+  .ab.w{background:var(--orange-bg);border:1px solid #fde68a;color:#78350f;}
+  .ab.d{background:var(--red-bg);border:1px solid #fecaca;color:#7f1d1d;}
+  .ab h4{font-size:11px;font-weight:700;margin-bottom:3px;}
+  .ab.w h4{color:#92400e;} .ab.d h4{color:#991b1b;}
+
+  .fc{background:var(--accent-bg);border:1px solid #c7d2fe;border-radius:var(--radius-sm);padding:12px;text-align:center;}
+  .fc-l{font-size:8px;color:var(--red);font-weight:800;text-transform:uppercase;letter-spacing:1px;}
+  .fc-r{display:flex;justify-content:center;align-items:center;gap:10px;margin:6px 0;}
+  .fc-c{font-size:20px;font-weight:800;} .fc-a{color:var(--accent);font-size:14px;}
+  .fc-t{font-size:10px;color:var(--accent);font-weight:600;}
+  .fc-d{font-size:9px;color:var(--text-3);margin-top:2px;}
+  .fc-det{font-size:9px;color:var(--text-2);margin-top:4px;}
+
+  .tz{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:10px;color:var(--text-2);line-height:1.5;}
+  .tz strong{color:var(--text);} .tz .th{color:var(--accent);font-weight:700;}
+
+  /* BOTTOM */
+  .qbar{background:var(--white);border-top:1px solid var(--border);padding:6px 24px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 -2px 6px rgba(0,0,0,0.03);flex-shrink:0;}
+  .qa{display:flex;gap:6px;align-items:center;}
+  .qc{padding:4px 12px;border-radius:20px;font-size:9px;font-weight:600;background:var(--bg);color:var(--text-3);border:1px solid var(--border);cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+  .qc:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+  .q-row{display:flex;align-items:center;gap:10px;width:100%;max-width:560px;}
+  .qi{flex:1;padding:10px 18px;border:1px solid var(--border);border-radius:24px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;}
+  .qi:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(79,70,229,0.1);}
+  .qi::placeholder{color:var(--text-3);}
+  .qs{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+
+  /* EDIT TRIP BUTTON */
+  .edit-trip-btn{display:flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;background:var(--white);border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text-2);cursor:pointer;transition:all 0.15s;margin-left:10px;flex-shrink:0;}
+  .edit-trip-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+
+  /* EDIT PANEL OVERLAY */
+  .edit-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-start;justify-content:center;padding-top:60px;backdrop-filter:blur(2px);}
+  .edit-overlay.open{display:flex;}
+  .edit-panel{background:var(--white);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.15);width:480px;max-height:80vh;overflow-y:auto;animation:slideDown 0.25s ease;}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+  .ep-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--white);z-index:1;border-radius:14px 14px 0 0;}
+  .ep-head h3{font-size:14px;font-weight:800;}
+  .ep-close{width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text-3);}
+  .ep-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+  .ep-body{padding:20px;}
+  .ep-section{margin-bottom:16px;}
+  .ep-section h4{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);font-weight:700;margin-bottom:8px;}
+  .ep-field{margin-bottom:10px;}
+  .ep-field label{display:block;font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:3px;}
+  .ep-field input,.ep-field select,.ep-field textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;outline:none;}
+  .ep-field input:focus,.ep-field select:focus,.ep-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(79,70,229,0.1);}
+  .ep-field textarea{resize:vertical;min-height:50px;}
+  .ep-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .ep-save{width:100%;padding:10px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;}
+  .ep-save:hover{background:var(--accent-hover);}
+  .ep-add{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;background:var(--accent-bg);color:var(--accent);border:1px solid #c7d2fe;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;}
+  .ep-add:hover{background:var(--accent);color:#fff;}
+  .ep-reason{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.15s;background:var(--white);}
+  .ep-reason:hover{border-color:var(--accent);background:var(--accent-bg);}
+  .ep-reason.selected{border-color:var(--accent);background:var(--accent-bg);box-shadow:0 2px 8px rgba(79,70,229,0.12);}
+  .epr-icon{font-size:20px;flex-shrink:0;}
+  .epr-title{font-size:12px;font-weight:700;color:var(--text);}
+  .epr-sub{font-size:10px;color:var(--text-3);margin-top:1px;}
+  .ep-city-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--white);}
+  .ep-city-pill.current{border-color:var(--green);background:var(--green-bg);color:#065f46;}
+  .ep-city-pill.future{border-color:var(--blue);background:var(--blue-bg);color:#1e40af;}
+  .ep-city-pill.past{border-color:var(--border);background:var(--bg);color:var(--text-3);}
+  .ep-city-arrow{font-size:10px;color:var(--text-3);}
+  .ep-smart-field{margin-bottom:10px;}
+  .ep-smart-field label{display:block;font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:3px;}
+  .ep-smart-field input,.ep-smart-field textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;outline:none;}
+  .ep-smart-field input:focus,.ep-smart-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(79,70,229,0.1);}
+  .ep-smart-field textarea{resize:vertical;min-height:50px;}
+  .am-clickable{cursor:pointer;transition:background 0.15s;border-radius:6px;padding:4px 6px;margin:-4px -6px;}
+  .am-clickable:hover{background:var(--accent-bg);}
+</style>
+</head>
+<body>
+
+<!-- DATE STRIP -->
+<div class="date-strip">
+  <span class="ds-badge" id="tripBadge">&#127482;&#127480; US &bull; TRIP 2026</span>
+  <span class="ds-month">March</span>
+  <div class="ds-dates-wrap">
+    <div class="ds-dates">
+      <div class="ds-d past"><span class="dn">8</span><span class="dd">SN</span></div>
+      <div class="ds-d past"><span class="dn">9</span><span class="dd">M</span></div>
+      <div class="ds-d past"><span class="dn">10</span><span class="dd">T</span></div>
+      <div class="ds-d past"><span class="dn">11</span><span class="dd">W</span></div>
+      <div class="ds-d past"><span class="dn">12</span><span class="dd">TH</span></div>
+      <div class="ds-d past"><span class="dn">13</span><span class="dd">F</span></div>
+      <div class="ds-d past"><span class="dn">14</span><span class="dd">S</span></div>
+      <div class="ds-d past"><span class="dn">15</span><span class="dd">SN</span></div>
+      <div class="ds-d past"><span class="dn">16</span><span class="dd">M</span></div>
+      <div class="ds-d past"><span class="dn">17</span><span class="dd">T</span></div>
+      <div class="ds-d past"><span class="dn">18</span><span class="dd">W</span></div>
+      <div class="ds-d past"><span class="dn">19</span><span class="dd">TH</span></div>
+      <div class="ds-d past"><span class="dn">20</span><span class="dd">F</span></div>
+      <div class="ds-d today"><span class="dn">21</span><span class="dd">S</span></div>
+      <div class="ds-d future"><span class="dn">22</span><span class="dd">SN</span></div>
+      <div class="ds-d future"><span class="dn">23</span><span class="dd">M</span></div>
+      <div class="ds-d future"><span class="dn">24</span><span class="dd">T</span></div>
+      <div class="ds-d future"><span class="dn">25</span><span class="dd">W</span></div>
+      <div class="ds-d future"><span class="dn">26</span><span class="dd">TH</span></div>
+      <div class="ds-d future"><span class="dn">27</span><span class="dd">F</span></div>
+      <div class="ds-d future"><span class="dn">28</span><span class="dd">S</span></div>
+      <div class="ds-d future"><span class="dn">29</span><span class="dd">SN</span></div>
+      <div class="ds-d future"><span class="dn">30</span><span class="dd">M</span></div>
+      <div class="ds-d future"><span class="dn">31</span><span class="dd">T</span></div>
+    </div>
+    <!-- Timezone brackets — auto-generated from tripRoute -->
+    <div class="ds-tz-row" id="tzBracketRow"></div>
+  </div>
+  <button class="edit-trip-btn" onclick="openEditTrip()">&#9998; Edit Trip</button>
+  <div class="ds-right"><strong>Day 14</strong> of 19</div>
+</div>
+
+<!-- EDIT TRIP OVERLAY -->
+<div class="edit-overlay" id="editOverlay" onclick="if(event.target===this)closeEditTrip()">
+  <div class="edit-panel">
+    <div class="ep-head"><h3>&#9998; Edit Trip</h3><div class="ep-close" onclick="closeEditTrip()">&times;</div></div>
+    <div class="ep-body">
+
+      <!-- WHERE YOU ARE NOW (auto-detected) -->
+      <div style="background:var(--green-bg);border:1px solid #a7f3d0;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">&#128205;</span>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#065f46;">You're currently in <span id="epCurrentCity">Atlanta</span></div>
+          <div style="font-size:10px;color:#047857;" id="epCurrentInfo">Day 14 of 19 &bull; Mar 8&ndash;26 &bull; Next: San Jose (Mar 22)</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: WHAT CHANGED? -->
+      <div id="epStep1">
+        <div class="ep-section">
+          <h4>What's changing?</h4>
+          <div style="display:flex;flex-direction:column;gap:6px;" id="epReasons">
+            <div class="ep-reason" onclick="pickReason('extend',this)">
+              <span class="epr-icon">&#128197;</span>
+              <div><div class="epr-title">Extend my trip</div><div class="epr-sub">Add more days or a new city after current plan</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('shorten',this)">
+              <span class="epr-icon">&#9986;</span>
+              <div><div class="epr-title">Cut short / Leave early</div><div class="epr-sub">I need to head back sooner than planned</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('conference',this)">
+              <span class="epr-icon">&#128737;</span>
+              <div><div class="epr-title">New conference / event</div><div class="epr-sub">I'm attending something new — scan my email or tell me the name</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('flight',this)">
+              <span class="epr-icon">&#9992;</span>
+              <div><div class="epr-title">Flight change</div><div class="epr-sub">New flight, rescheduled, or cancelled</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('hotel',this)">
+              <span class="epr-icon">&#127968;</span>
+              <div><div class="epr-title">Hotel change</div><div class="epr-sub">New booking, switch, or cancellation</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('team',this)">
+              <span class="epr-icon">&#128101;</span>
+              <div><div class="epr-title">Travel Team</div><div class="epr-sub">Add or change people coordinating on this trip</div></div>
+            </div>
+            <div class="ep-reason" onclick="pickReason('other',this)">
+              <span class="epr-icon">&#9997;</span>
+              <div><div class="epr-title">Something else</div><div class="epr-sub">Manual edit — dates, cities, or paste new details</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: SMART CONTEXT (shown after picking reason) -->
+      <div id="epStep2" style="display:none;">
+
+        <!-- CONTEXT BANNER -->
+        <div id="epContextBanner" style="background:var(--accent-bg);border:1px solid #c7d2fe;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:8px;">
+          <span id="epContextIcon" style="font-size:16px;"></span>
+          <span id="epContextText"></span>
+        </div>
+
+        <!-- SMART INPUT AREA (changes based on reason) -->
+        <div id="epSmartArea"></div>
+
+        <!-- DATA SOURCE -->
+        <div class="ep-section" style="margin-top:14px;">
+          <h4>How to import?</h4>
+          <div style="display:flex;gap:6px;">
+            <button class="ep-add" style="flex:1;margin:0;padding:9px;text-align:center;font-size:10px;" onclick="toggleEditScan()">&#9993; Scan Emails</button>
+            <button class="ep-add" style="flex:1;margin:0;padding:9px;text-align:center;font-size:10px;" onclick="document.getElementById('editFileInput').click()">&#128202; Upload File</button>
+            <input type="file" id="editFileInput" accept=".xlsx,.csv,.pdf,.xls" style="display:none;" onchange="handleEditUpload(this.files)">
+          </div>
+          <!-- Scan panel -->
+          <div id="editScanPanel" style="display:none;margin-top:8px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:12px;">
+            <div style="font-size:10px;color:var(--text-2);margin-bottom:6px;">Scanning O365 inbox for updates...</div>
+            <div style="display:flex;gap:6px;">
+              <input type="text" id="editScanKw" placeholder="Keywords... e.g. Emirates, RSAC, Marriott" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:11px;font-family:inherit;outline:none;">
+              <button class="ep-add" style="margin:0;" onclick="runEditScan()">Scan</button>
+            </div>
+            <div id="editScanResults" style="margin-top:8px;"></div>
+          </div>
+          <!-- Upload result -->
+          <div id="editUploadResult" style="display:none;margin-top:8px;padding:10px;background:var(--green-bg);border-radius:8px;font-size:11px;color:var(--green);font-weight:600;"></div>
+        </div>
+
+        <!-- CURRENT ROUTE (always visible for context) -->
+        <div class="ep-section">
+          <h4>Current Route</h4>
+          <div id="epRouteDisplay" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="ep-add" style="flex:0;margin:0;padding:9px 16px;" onclick="epBack()">&#8592; Back</button>
+          <button class="ep-save" style="flex:1;margin:0;" onclick="saveTrip()">Save Changes</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 3-COLUMN MAIN -->
+<div class="main">
+
+<!-- ==================== LEFT SIDEBAR ==================== -->
+<div class="left">
+
+  <!-- Tonight's Hotel -->
+  <div class="card">
+    <div class="card-label gr">&#9679; Tonight's Hotel</div>
+    <div class="hotel-name">Hotel Indigo Atlanta</div>
+    <div class="hotel-addr">683 Peachtree St NE, Midtown</div>
+    <span class="htag ci">Checked In</span>
+    <span class="htag co">Out: 12 PM (Mar 22)</span><br>
+    <span class="htag bf" style="margin-top:5px;">Breakfast included</span>
+  </div>
+
+  <!-- Events & Conferences -->
+  <div class="card">
+    <div class="card-label bl">&#9679; Events &amp; Conferences</div>
+    <div class="ev-item">
+      <a class="ev-link" href="https://blog.fabric.microsoft.com/en-us/blog/announcing-fabcon-2026/" target="_blank" title="Open FABCON 2026 website">
+        <div class="ev-icon" style="background:var(--accent-bg);color:var(--accent);">&#9733;</div>
+        <div><div class="ev-title">FABCON 2026</div><div class="ev-sub">Completed &bull; Mar 14&ndash;20 &bull; GWCC, Atlanta</div></div>
+      </a>
+    </div>
+    <div class="ev-item">
+      <a class="ev-link" href="javascript:void(0)" onclick="showTravelDayDetail()" title="View tomorrow's travel details">
+        <div class="ev-icon" style="background:var(--blue-bg);color:var(--blue);">&#9992;</div>
+        <div><div class="ev-title">Travel Day &rarr; San Jose</div><div class="ev-sub">Tomorrow &bull; Delta DL-809 &bull; 9:50 AM</div></div>
+      </a>
+    </div>
+    <div class="ev-item">
+      <a class="ev-link" href="https://www.rsaconference.com/usa" target="_blank" title="Open RSAC 2026 website">
+        <div class="ev-icon" style="background:var(--red-bg);color:var(--red);">&#128737;</div>
+        <div><div class="ev-title">RSAC 2026 Conference</div><div class="ev-sub">Mar 22&ndash;27 &bull; Moscone South, 747 Howard St, SF</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Open Actions -->
+  <div class="card">
+    <div class="card-label or">&#9679; Open Actions</div>
+    <div class="am am-clickable" onclick="sendActionReminder('[URGENT] Etihad EY14 — Date Correction Needed','Action Item: Etihad EY14 return flight currently shows Mar 21 but needs to be changed to approx Mar 26.\nThis is URGENT — wrong date on return flight from San Francisco (SFO) to Abu Dhabi (AUH).\nAlso need AUH → DXB segment confirmation.')"><div class="adot r"></div><div class="am-t"><strong>Etihad EY14</strong> fix date to ~Mar 26 &bull; SFO &rarr; AUH &rarr; DXB</div><div class="am-s ur">Urgent</div></div>
+    <div class="am am-clickable" onclick="sendActionReminder('[Pending] RSAC 2026 Badge Pickup','Action Item: RSAC 2026 badge pickup pending.\nLocations: Moscone South (747 Howard St) or Hilton Union Square (333 O\'Farrell St).\nPhoto ID required. Need to collect before conference starts Mar 22.')"><div class="adot o"></div><div class="am-t"><strong>RSAC badge</strong> Moscone South or Hilton Union Sq &bull; Photo ID req</div><div class="am-s pe">Pending</div></div>
+  </div>
+
+  <!-- Buy List - Inline Dropdown -->
+  <div class="card" style="cursor:pointer;" onclick="toggleBuyDrop(event)">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="card-label pr" style="margin-bottom:0;">&#128722; Things to Buy from US</div>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--accent);font-weight:700;" id="buyCount">2 items</span><span id="buyChev" style="font-size:9px;color:var(--text-3);transition:transform 0.2s;">&#9660;</span></span>
+    </div>
+    <div id="buyDrop" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;" onclick="event.stopPropagation()">
+      <div style="font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700;margin-bottom:5px;">&#128187; Special</div>
+      <div id="buySpecialList">
+        <div class="buy-item"><input type="checkbox"><label onclick="event.preventDefault();showBuyDetail('macmini')"><div class="bn">Mac Mini M4</div><div class="bm">$499–$599 &bull; Click for stores</div></label></div>
+      </div>
+      <!-- Mac Mini Detail (built dynamically by JS) -->
+      <div class="buy-detail" id="bd-macmini"></div>
+
+      <div style="font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--orange);font-weight:700;margin:8px 0 5px;">&#127849; Food &amp; Travel</div>
+      <div id="buyRegularList">
+        <div class="buy-item"><input type="checkbox" id="splendaCheck"><label onclick="event.preventDefault();showBuyDetail('splenda')"><div class="bn">Splenda Monk Fruit 1Kg</div><div class="bm">WHITE only &bull; For friend &bull; Click for stores</div></label></div>
+      </div>
+      <!-- Splenda Detail (built dynamically by JS) -->
+      <div class="buy-detail" id="bd-splenda"></div>
+      <div class="buy-add" style="margin-top:6px;">
+        <input type="text" id="newBuyItem" placeholder="Add item..." onclick="event.stopPropagation()">
+        <button onclick="event.stopPropagation();addBuyInline()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plan Trip Home Button -->
+  <div class="card" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);cursor:pointer;border:none;" onclick="showTripHome()">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:24px;">&#9992;</span>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">Plan Trip Home</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);">SFO &rarr; Dubai &bull; ~Mar 26</div>
+      </div>
+      <span style="margin-left:auto;font-size:16px;color:rgba(255,255,255,0.6);">&#8250;</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== CENTER ==================== -->
+<div class="center" style="display:flex;flex-direction:column;position:relative;">
+
+  <!-- 4 Category Tabs - One Horizontal Line -->
+  <div class="cat-tabs">
+    <div class="cat-tab active" onclick="switchTab('food',this)">
+      <span class="ct-icon">&#127860;</span>
+      <span class="ct-name">Food</span>
+      <span class="ct-count">3 nearby</span>
+    </div>
+    <div class="cat-tab" onclick="switchTab('bar',this)">
+      <span class="ct-icon">&#127867;</span>
+      <span class="ct-name">Bar</span>
+      <span class="ct-count">3 nearby</span>
+    </div>
+    <div class="cat-tab" onclick="switchTab('interesting',this)">
+      <span class="ct-icon">&#127775;</span>
+      <span class="ct-name">Interesting</span>
+      <span class="ct-count">3 events</span>
+    </div>
+    <div class="cat-tab" onclick="switchTab('sightseeing',this)">
+      <span class="ct-icon">&#127961;</span>
+      <span class="ct-name">Sightseeing</span>
+      <span class="ct-count">3 spots</span>
+    </div>
+  </div>
+
+  <!-- Venue Lists (one per category, toggled) -->
+  <div class="venue-list active" id="vl-food">
+    <div class="vl-head"><span class="ci">&#127860;</span><h4>Food Near You</h4></div>
+    <ul class="cl">
+      <li data-venue="south_city" onclick="showDetail('south_city')"><div><div class="cl-n">South City Kitchen <span class="tag" style="background:var(--accent-bg);color:var(--accent);">AI Pick</span><span class="oc-tag" data-v="south_city"></span></div><div class="cl-m">Southern &bull; 4.6&#9733; &bull; Fried Green Tomatoes, She-Crab Soup</div></div><div class="cl-r"><div class="cl-d">7 min</div></div></li>
+      <li data-venue="blue_india" onclick="showDetail('blue_india')"><div><div class="cl-n">Blue India <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian</span><span class="oc-tag" data-v="blue_india"></span></div><div class="cl-m">Veg options &bull; Butter Chicken, Paneer Tikka, Biryani</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
+      <li data-venue="tabla" onclick="showDetail('tabla')"><div><div class="cl-n">Tabla <span class="tag" style="background:var(--orange-bg);color:#92400e;">Indian</span><span class="oc-tag" data-v="tabla"></span></div><div class="cl-m">Modern lounge &bull; Lamb Chops, Indian Street Tacos</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+    </ul>
+  </div>
+
+  <div class="venue-list" id="vl-bar">
+    <div class="vl-head"><span class="ci">&#127867;</span><h4>Bars &amp; Drinks</h4></div>
+    <ul class="cl">
+      <li data-venue="midtown_bar" onclick="showDetail('midtown_bar')"><div><div class="cl-n">683 Midtown Bar <span class="tag" style="background:var(--green-bg);color:var(--green);">In Hotel</span><span class="oc-tag" data-v="midtown_bar"></span></div><div class="cl-m">Lobby bar &bull; Craft Cocktails, Bourbon Flights</div></div><div class="cl-r"><div class="cl-d">0 min</div></div></li>
+      <li data-venue="red_phone" onclick="showDetail('red_phone')"><div><div class="cl-n">Red Phone Booth <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Speakeasy</span><span class="oc-tag" data-v="red_phone"></span></div><div class="cl-m">Password entry &bull; Classic Cocktails, Cigars</div></div><div class="cl-r"><div class="cl-d">0.4 mi</div></div></li>
+      <li data-venue="livingston" onclick="showDetail('livingston')"><div><div class="cl-n">Livingston Bar <span class="tag" style="background:var(--blue-bg);color:var(--blue);">Rooftop</span><span class="oc-tag" data-v="livingston"></span></div><div class="cl-m">City views &bull; Signature Cocktails, Oysters</div></div><div class="cl-r"><div class="cl-d">200 ft</div></div></li>
+    </ul>
+  </div>
+
+  <div class="venue-list" id="vl-interesting">
+    <div class="vl-head"><span class="ci">&#127775;</span><h4>Interesting Around You</h4></div>
+    <ul class="cl">
+      <li data-venue="harry_potter" onclick="showDetail('harry_potter')"><div><div class="cl-n">Harry Potter: Cursed Child <span class="tag" style="background:#f3e8ff;color:#7c3aed;">Theatre</span><span class="oc-tag" data-v="harry_potter"></span></div><div class="cl-m">Fox Theatre &bull; 7:30 PM &bull; 3+ hour show</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+      <li data-venue="atl_united" onclick="showDetail('atl_united')"><div><div class="cl-n">Atlanta United vs Charlotte <span class="tag" style="background:#dcfce7;color:#166534;">Sports</span><span class="oc-tag" data-v="atl_united"></span></div><div class="cl-m">MLS &bull; 7 PM &bull; Mercedes-Benz Stadium</div></div><div class="cl-r"><div class="cl-d">1.5 mi</div></div></li>
+      <li data-venue="laughing_skull" onclick="showDetail('laughing_skull')"><div><div class="cl-n">Laughing Skull Lounge <span class="tag" style="background:#fce7f3;color:#be185d;">Comedy</span><span class="oc-tag" data-v="laughing_skull"></span></div><div class="cl-m">Shows 8 &amp; 10 PM &bull; 2-drink minimum</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
+    </ul>
+  </div>
+
+  <div class="venue-list" id="vl-sightseeing">
+    <div class="vl-head"><span class="ci">&#127961;</span><h4>Sightseeing</h4></div>
+    <ul class="cl">
+      <li data-venue="piedmont" onclick="showDetail('piedmont')"><div><div class="cl-n">Piedmont Park <span class="tag" style="background:var(--green-bg);color:var(--green);">Free</span><span class="oc-tag" data-v="piedmont"></span></div><div class="cl-m">Skyline views &bull; Sunset walk &bull; Dog-friendly</div></div><div class="cl-r"><div class="cl-d">0.6 mi</div></div></li>
+      <li data-venue="high_museum" onclick="showDetail('high_museum')"><div><div class="cl-n">High Museum of Art <span class="oc-tag" data-v="high_museum"></span></div><div class="cl-m">Sat till 9 PM &bull; $23.50 &bull; Leading SE museum</div></div><div class="cl-r"><div class="cl-d">0.3 mi</div></div></li>
+      <li data-venue="fox_theatre" onclick="showDetail('fox_theatre')"><div><div class="cl-n">Fox Theatre <span class="tag" style="background:var(--orange-bg);color:#92400e;">Landmark</span><span class="oc-tag" data-v="fox_theatre"></span></div><div class="cl-m">1929 Moorish-Egyptian architecture &bull; Tours</div></div><div class="cl-r"><div class="cl-d">0.5 mi</div></div></li>
+    </ul>
+  </div>
+
+  <!-- Detail Panel - Rest of Space (hidden until click) -->
+  <div class="detail-panel" id="detailPanel" style="flex:1;"></div>
+
+  <!-- ===== TRAVEL DAY DETAIL (inline in center) ===== -->
+  <div id="travelDayPanel" style="display:none;position:absolute;inset:0;background:var(--white);overflow-y:auto;z-index:9;padding:20px 24px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <button onclick="document.getElementById('travelDayPanel').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px;">&#10005;</button>
+      <h2 style="font-size:18px;font-weight:800;color:var(--text);margin:0;">&#9992; Tomorrow's Travel Details</h2>
+    </div>
+    <div style="background:var(--blue-bg);border-radius:10px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:800;color:var(--blue);">Delta DL-809</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);margin-top:4px;">ATL &rarr; SJC</div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Atlanta Hartsfield-Jackson &rarr; San Jose Mineta</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="background:var(--bg);border-radius:8px;padding:12px;">
+        <div style="font-size:10px;color:var(--text-3);font-weight:700;">DEPARTURE</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">9:50 AM</div>
+        <div style="font-size:12px;color:var(--text-2);">Mar 22, 2026</div>
+        <div style="font-size:12px;color:var(--text-2);">Terminal S &bull; Gate TBD</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px;">
+        <div style="font-size:10px;color:var(--text-3);font-weight:700;">ARRIVAL</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);">12:30 PM</div>
+        <div style="font-size:12px;color:var(--text-2);">Mar 22, 2026 (local)</div>
+        <div style="font-size:12px;color:var(--text-2);">~5h 40m flight</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">PNR</span><span style="font-weight:700;color:var(--text);">HLSHJX</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">Booking</span><span style="font-weight:700;color:var(--text);">MakeMyTrip MyBiz</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">Class</span><span style="font-weight:700;color:var(--text);">Corporate Fare</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 12px;background:var(--bg);border-radius:6px;">
+        <span style="color:var(--text-2);">Fare</span><span style="font-weight:700;color:var(--accent);">$2,638.60</span>
+      </div>
+    </div>
+    <div style="background:var(--orange-bg);border-radius:8px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#92400e;">&#9201; Pre-flight Checklist</div>
+      <div style="font-size:12px;color:#92400e;margin-top:4px;line-height:1.6;">
+        &bull; Hotel checkout by 7:30 AM (Hotel Indigo, 12 PM late checkout)<br>
+        &bull; Cab to ATL Airport by 8:00 AM (~30 min ride)<br>
+        &bull; Use South Checkpoint for Delta terminal<br>
+        &bull; Arrive San Jose ~12:30 PM &rarr; Holiday Inn Express Berkeley
+      </div>
+    </div>
+    <a href="https://www.delta.com/flight-search/book-a-flight" target="_blank" style="display:block;text-align:center;padding:12px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">Check Live Flight Status on Delta.com &#8599;</a>
+  </div>
+
+  <!-- ===== SEARCH RESULTS PANEL (inline in center) ===== -->
+  <div id="searchResultsPanel" style="display:none;position:absolute;inset:0;background:var(--white);overflow-y:auto;z-index:8;padding:20px 24px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <button onclick="closeSearchResults()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px;">&#10005;</button>
+      <div>
+        <h2 style="font-size:16px;font-weight:800;color:var(--text);margin:0;" id="searchTitle">&#128269; Search Results</h2>
+        <div style="font-size:12px;color:var(--text-2);" id="searchSubtitle"></div>
+      </div>
+    </div>
+    <div id="searchResultsBody"></div>
+  </div>
+
+  <!-- ===== PLAN TRIP HOME PANEL (hidden, replaces center content on click) ===== -->
+  <div id="tripHomePanel" style="display:none;position:absolute;inset:0;background:var(--white);overflow-y:auto;z-index:10;padding:20px 24px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <button onclick="closeTripHome()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px;">&#10005;</button>
+      <div>
+        <h2 style="font-size:18px;font-weight:800;color:var(--text);">&#9992; Plan Your Trip Home</h2>
+        <div style="font-size:13px;color:var(--text-2);">SFO &rarr; Dubai &bull; Departing ~Mar 26, 2026</div>
+      </div>
+    </div>
+
+    <!-- SECURITY INTELLIGENCE BANNER -->
+    <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:12px;padding:14px 16px;margin-bottom:16px;color:#fff;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:18px;">&#128680;</span>
+        <span style="font-size:14px;font-weight:800;">LIVE SECURITY INTELLIGENCE &mdash; Gulf Region</span>
+        <span style="font-size:10px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;margin-left:auto;">Updated: Mar 21, 2026</span>
+      </div>
+      <div style="font-size:12px;line-height:1.6;opacity:0.95;">
+        <strong>Active conflict zone.</strong> Iran has launched 1,800+ missiles &amp; drones at UAE since Feb 28.
+        52,000+ flights cancelled region-wide. Foreign airlines banned from DXB/DWC since Mar 17 (only Emirates/flydubai can land).
+        No ceasefire in sight. EASA advisory valid through Mar 27.
+      </div>
+    </div>
+
+    <!-- AIRPORT RISK MATRIX — with specific attack dates -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px;">&#127961; Airport Risk Assessment &amp; Attack Timeline</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #dc2626;">
+          <div style="font-size:12px;font-weight:800;">DXB &mdash; Dubai Intl</div>
+          <div style="font-size:11px;color:#dc2626;font-weight:700;">&#9888; HIGH RISK &bull; 4 incidents</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;line-height:1.4;">
+            Feb 28: Initial strike &bull; Mar 2: Terminal 3 hit (4 injured) &bull; Mar 7: Debris near airport &bull; Mar 16: Fuel tank fire (300+ flights disrupted)
+          </div>
+          <div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:3px;">Foreign airlines BANNED since Mar 17. Only Emirates/flydubai can land.</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #dc2626;">
+          <div style="font-size:12px;font-weight:800;">AUH &mdash; Abu Dhabi (Zayed)</div>
+          <div style="font-size:11px;color:#dc2626;font-weight:700;">&#9888; HIGH RISK &bull; 1 direct hit</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;line-height:1.4;">
+            Feb 28: Drone strike on airport — 1 killed (Pakistani national), 7 injured from shrapnel/blast
+          </div>
+          <div style="font-size:10px;color:#dc2626;font-weight:700;margin-top:3px;">Etihad SFO route NOT on limited schedule. Only ~70 cities operating.</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #f59e0b;">
+          <div style="font-size:12px;font-weight:800;">DMM &mdash; Dammam (King Fahd)</div>
+          <div style="font-size:11px;color:#92400e;font-weight:700;">&#9888; ELEVATED &bull; 0 direct hits</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;line-height:1.4;">
+            No attacks on airport. Saudi air defence active. EASA "elevated risk" but operational 24/7.
+          </div>
+          <div style="font-size:10px;color:#16a34a;font-weight:700;margin-top:3px;">~8h drive to Dubai via Abu Dhabi. Bypasses all UAE airports.</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #16a34a;">
+          <div style="font-size:12px;font-weight:800;">IST &mdash; Istanbul</div>
+          <div style="font-size:11px;color:#16a34a;font-weight:700;">&#9989; SAFE &bull; 0 incidents</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;line-height:1.4;">
+            Turkish airspace unrestricted. TK SFO route daily. 5/5 on-time.
+          </div>
+          <div style="font-size:10px;color:var(--orange);font-weight:700;margin-top:3px;">But: IST&rarr;DXB still needs Emirates (foreign ban). Not fully independent.</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #dc2626;">
+          <div style="font-size:12px;font-weight:800;">SHJ &mdash; Sharjah</div>
+          <div style="font-size:11px;color:#dc2626;font-weight:700;">&#10060; SUSPENDED</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;">Most flights suspended. Not viable.</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border-left:4px solid #dc2626;">
+          <div style="font-size:12px;font-weight:800;">DOH &mdash; Hamad (Qatar)</div>
+          <div style="font-size:11px;color:#dc2626;font-weight:700;">&#9888; HIGH RISK &bull; Under attack</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;">Iran strikes. QR SFO route suspended. Not viable.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLIGHT FREQUENCY COMPARISON -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;">&#128202; Flight Resumption Analysis — Who's flying more?</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:800;color:var(--accent);">Emirates (DXB)</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green);margin:6px 0;">60%</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.4;">
+            106 daily flights to 83 cities restored.
+            Only 5.3% cancellation rate (Mar 18).
+            <strong>Highest frequency = best odds of your flight operating.</strong>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:800;color:var(--blue);">Etihad (AUH)</div>
+          <div style="font-size:22px;font-weight:800;color:var(--orange);margin:6px 0;">~40%</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.4;">
+            ~70 cities on limited schedule.
+            JFK/ATL operating, <strong>SFO not on list.</strong>
+            Week-by-week schedule, not guaranteed.
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:8px 10px;background:#fff;border-radius:6px;font-size:11px;color:var(--text-2);border:1px solid var(--border);">
+        <strong>Key insight:</strong> Emirates has 50% higher operating rate than Etihad, and DXB is the only airport where US-bound flights are landing (via Emirates). Etihad is not operating SFO at all. So <strong>Emirates EK226 has the highest probability of actually departing on schedule.</strong>
+      </div>
+    </div>
+
+    <!-- SECTION 1: Return Flights — RE-WEIGHTED WITH DATA -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px;">&#128747; Return Flight Options</h3>
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:14px;">Weighted by: flight frequency, operating %, attack history, route to Dubai. Select preferred, then send to Chinmay.</div>
+
+      <!-- OPTION 1: Emirates — HIGHEST PROBABILITY (Primary Recommendation) -->
+      <div style="font-size:11px;font-weight:800;color:var(--green);background:#f0fdf4;padding:5px 10px;border-radius:6px;margin-bottom:8px;">
+        &#9989; PRIMARY &mdash; Highest operating frequency &bull; Direct to Dubai &bull; Only airline landing at DXB
+      </div>
+
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px solid var(--green);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;" id="flightOpt1" onclick="selectFlight(1)">
+        <input type="radio" name="returnFlight" value="emirates_dxb" style="margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:var(--green);">&#9989; AI RECOMMENDED &mdash; Best odds of departure</span>
+            <span style="font-size:11px;padding:2px 8px;background:var(--green-bg);color:var(--green);border-radius:4px;font-weight:700;">Direct</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">Emirates EK226 &bull; SFO &rarr; DXB</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Nonstop &bull; ~15h 50m &bull; A380 &bull; Daily service &bull; 94.7% on-time (Mar 18)</div>
+          <div style="font-size:14px;font-weight:700;color:var(--accent);margin-top:4px;">From ~$671 one-way</div>
+          <div style="font-size:11px;color:var(--green);margin-top:3px;line-height:1.4;">
+            &#9989; Emirates operating 60% network (106 daily flights, 83 cities). Only 5.3% cancellations.<br>
+            &#9989; Only airline permitted to land at DXB (foreign carriers banned since Mar 17).<br>
+            &#9989; Direct to Dubai. Straight ride home after landing. No onward connections needed.
+          </div>
+          <div style="font-size:11px;color:var(--orange);margin-top:3px;line-height:1.4;">
+            &#9888; DXB attacked 4 times (Feb 28, Mar 2, Mar 7, Mar 16). Confirm day-of status.
+          </div>
+        </div>
+      </label>
+
+      <!-- OPTION 2: Emirates via Istanbul (safety buffer) -->
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;" id="flightOpt2" onclick="selectFlight(2)">
+        <input type="radio" name="returnFlight" value="turkish_ist_ek" style="margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:var(--blue);">&#128737; SAFETY BUFFER OPTION</span>
+            <span style="font-size:11px;padding:2px 8px;background:var(--blue-bg);color:var(--blue);border-radius:4px;font-weight:700;">IST + EK to DXB</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">Turkish TK80 SFO&rarr;IST, then Emirates IST&rarr;DXB</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">SFO&rarr;IST: ~13h nonstop (5/5 on-time) &bull; IST&rarr;DXB: ~5h (Emirates daily)</div>
+          <div style="font-size:14px;font-weight:700;color:var(--accent);margin-top:4px;">~$723 combined (separate tickets)</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4;">
+            Strategy: Fly safely to Istanbul first. Then take Emirates IST&rarr;DXB (only Emirates can land at DXB).
+            If UAE escalates while in Istanbul, you have flexibility &mdash; TK offers free changes through Mar 31.
+          </div>
+          <div style="font-size:11px;color:var(--orange);margin-top:3px;">&#9888; Still depends on Emirates IST&rarr;DXB operating. Not fully independent of DXB risk.</div>
+        </div>
+      </label>
+
+      <!-- SCENARIO B: Bypass all UAE airports -->
+      <div style="font-size:11px;font-weight:800;color:#92400e;background:#fef3c7;padding:5px 10px;border-radius:6px;margin-bottom:8px;margin-top:14px;">
+        PLAN B &mdash; Bypass UAE airports entirely (if DXB/AUH situation worsens)
+      </div>
+
+      <!-- B1: Dammam via Turkish -->
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;" id="flightOpt3" onclick="selectFlight(3)">
+        <input type="radio" name="returnFlight" value="turkish_dmm" style="margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:var(--orange);">&#128663; LAND ROUTE TO DUBAI &mdash; Avoids UAE airports</span>
+            <span style="font-size:11px;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:4px;font-weight:700;">IST+DMM</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">Turkish TK80 SFO&rarr;IST&rarr;DMM (Dammam, Saudi)</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">SFO&rarr;IST: ~13h &bull; IST&rarr;DMM: ~4h &bull; Then DMM&rarr;Dubai: ~8h drive (540 mi / 869 km)</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">~$750 flights + ~$100 drive/bus</div>
+          <div style="font-size:11px;color:var(--green);margin-top:3px;line-height:1.4;">
+            &#9989; Dammam airport operational 24/7. Zero direct attacks. Saudi border crossing to UAE well-established.<br>
+            &#9989; Completely independent of DXB/AUH. No need for any UAE airport.<br>
+            &#9989; Route: DMM &rarr; drive via Salwa border &rarr; Abu Dhabi (6h) &rarr; Dubai (1.5h more)
+          </div>
+          <div style="font-size:11px;color:var(--orange);margin-top:3px;">&#9888; EASA "elevated risk" for Saudi airspace. KLM suspended DMM through Mar 28. Long drive. Need Saudi transit visa.</div>
+        </div>
+      </label>
+
+      <!-- B2: Etihad (existing booking — if it resumes) -->
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;opacity:0.75;" id="flightOpt4" onclick="selectFlight(4)">
+        <input type="radio" name="returnFlight" value="etihad_auh" style="margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;font-weight:800;color:#dc2626;">&#10060; CURRENT BOOKING &mdash; SFO ROUTE SUSPENDED</span>
+            <span style="font-size:11px;padding:2px 8px;background:var(--red-bg);color:var(--red);border-radius:4px;font-weight:700;">AUH</span>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">Etihad EY14 &bull; SFO &rarr; AUH</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Nonstop &bull; ~16h &bull; Then AUH&rarr;Dubai (1.5h drive)</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px;">From ~$471 one-way</div>
+          <div style="font-size:11px;color:#dc2626;margin-top:3px;line-height:1.4;">
+            &#10060; SFO not on Etihad's limited schedule (only ~70 cities, SFO excluded).<br>
+            &#10060; AUH attacked Feb 28 (1 killed, 7 injured). Only 40% network operating.<br>
+            &#10060; Date wrong (shows Mar 21). Needs correction to ~Mar 26 IF route resumes.
+          </div>
+          <div style="font-size:10px;color:var(--text-3);margin-top:2px;">&#128205; Keep as fallback. Free rebooking through May 15. Request refund if switching to Emirates.</div>
+        </div>
+      </label>
+
+      <!-- Search More -->
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:2px dashed var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;" id="flightOpt5" onclick="selectFlight(5)">
+        <input type="radio" name="returnFlight" value="other" style="margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);">&#128269; Search Other Airlines / Routes</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Compare one-way options on Google Flights. Consider via India (DEL, BOM) or Europe (LHR, FRA).</div>
+          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://www.google.com/travel/flights?q=one+way+SFO+to+DXB+Mar+26" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none;padding:3px 8px;background:var(--bg);border-radius:4px;">SFO&rarr;DXB &#8599;</a>
+            <a href="https://www.google.com/travel/flights?q=one+way+SFO+to+DMM+Mar+26" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none;padding:3px 8px;background:var(--bg);border-radius:4px;">SFO&rarr;DMM &#8599;</a>
+            <a href="https://www.google.com/travel/flights?q=one+way+SFO+to+DEL+Mar+26" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none;padding:3px 8px;background:var(--bg);border-radius:4px;">SFO&rarr;DEL &#8599;</a>
+            <a href="https://www.google.com/travel/flights?q=one+way+SFO+to+BOM+Mar+26" target="_blank" style="font-size:11px;color:var(--accent);font-weight:600;text-decoration:none;padding:3px 8px;background:var(--bg);border-radius:4px;">SFO&rarr;BOM &#8599;</a>
+          </div>
+        </div>
+      </label>
+
+      <!-- AI VERDICT — RE-WEIGHTED -->
+      <div style="margin-top:6px;padding:14px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #86efac;border-radius:8px;">
+        <div style="font-size:13px;font-weight:800;color:#065f46;margin-bottom:8px;">&#128161; AI Verdict &mdash; Weighted Recommendation (Mar 21, 2026)</div>
+        <div style="font-size:12px;color:#065f46;line-height:1.6;">
+          <strong style="font-size:13px;">&#9989; #1 Emirates EK226 SFO&rarr;DXB (DIRECT)</strong><br>
+          Highest probability of departure. 60% network restored, only 5.3% cancellations.
+          Only airline allowed at DXB. Direct home. <strong>Confirm day-of status before boarding.</strong><br><br>
+          <strong>&#128663; #2 Plan B: Turkish SFO&rarr;IST&rarr;DMM + Drive to Dubai</strong><br>
+          If DXB closes again or Emirates cancels: Fly to Dammam (Saudi), drive 8h to Dubai via Salwa border.
+          Completely avoids UAE airports. DMM is operational with zero attacks.<br><br>
+          <strong>&#128737; #3 Turkish SFO&rarr;IST + Emirates IST&rarr;DXB</strong><br>
+          Safe staging in Istanbul, but still needs Emirates to fly into DXB. Not fully independent.<br><br>
+          <strong style="color:#dc2626;">&#10060; Avoid: Etihad SFO&rarr;AUH</strong> (route suspended, SFO not on schedule).<br>
+          <strong style="color:#dc2626;">&#10060; Avoid: Qatar SFO&rarr;DOH</strong> (route suspended, Doha under attack).
+        </div>
+      </div>
+
+      <!-- NEWS SOURCES -->
+      <details style="margin-top:8px;">
+        <summary style="font-size:11px;color:var(--text-3);cursor:pointer;font-weight:600;">&#128240; View news sources (12 sources analyzed)</summary>
+        <div style="font-size:10px;color:var(--text-3);margin-top:6px;line-height:1.6;">
+          &bull; The National: DXB fuel tank fire after drone strike (Mar 16)<br>
+          &bull; Al Jazeera: Drone attack disrupts Dubai flights (Mar 16)<br>
+          &bull; Washington Post: Dubai airport targeted by Iran drone (Mar 16)<br>
+          &bull; CNN: Dubai airport evacuated, Iran attacks UAE/Qatar/Bahrain (Feb 28)<br>
+          &bull; Wikipedia: 2026 Iranian strikes on UAE — full attack timeline<br>
+          &bull; TravelPirates: Foreign airlines banned from DXB indefinitely (Mar 17)<br>
+          &bull; OneMilleAtATime: Dubai bans foreign airlines after fuel tank attack (Mar 16)<br>
+          &bull; Time Out Dubai: Emirates limited schedule, 106 daily flights (Mar 2026)<br>
+          &bull; LoyaltyLobby: Etihad confirmed schedule Mar 20 — SFO not listed<br>
+          &bull; Travel &amp; Tour World: 52,000+ flights cancelled region-wide<br>
+          &bull; Wego: Dammam airport open, operational 24/7 (Mar 2026)<br>
+          &bull; EASA: Middle East CZIB valid through Mar 27
+        </div>
+      </details>
+    </div>
+
+    <!-- SECTION: Ground / Alternate Transport Modes (if flights not available) -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:4px;">&#128663; Alternate Transport Modes &mdash; Last Mile to Dubai</h3>
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">If you land at a neighbouring airport (DMM, MCT, BAH), these are your options to reach Dubai.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <!-- Car / Drive -->
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:16px;margin-bottom:4px;">&#128663;</div>
+          <div style="font-size:13px;font-weight:700;">Private Car / Taxi</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4;">
+            <strong>DMM&rarr;Dubai:</strong> ~8h, $85&ndash;130 (via Salwa border, Abu Dhabi)<br>
+            <strong>MCT&rarr;Dubai:</strong> ~4.5h, $60&ndash;90 (via Hatta border)<br>
+            <strong>BAH&rarr;Dubai:</strong> ~5h, $70&ndash;100 (via King Fahd Causeway + Saudi)
+          </div>
+          <div style="font-size:10px;color:var(--green);font-weight:600;margin-top:4px;">Best option for flexibility. Book via Careem / Uber (if available) or hotel concierge.</div>
+        </div>
+
+        <!-- Bus -->
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:16px;margin-bottom:4px;">&#128653;</div>
+          <div style="font-size:13px;font-weight:700;">Intercity Bus</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4;">
+            <strong>DMM&rarr;Dubai:</strong> SAPTCO bus ~10h, $25&ndash;40<br>
+            <strong>MCT&rarr;Dubai:</strong> Mwasalat bus ~6h, $15&ndash;25<br>
+            <strong>BAH&rarr;Dubai:</strong> No direct bus (need Saudi transit)
+          </div>
+          <div style="font-size:10px;color:var(--orange);font-weight:600;margin-top:4px;">Budget option. Less frequent schedules. Check border wait times.</div>
+        </div>
+
+        <!-- Train -->
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:16px;margin-bottom:4px;">&#128646;</div>
+          <div style="font-size:13px;font-weight:700;">Train / Rail</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4;">
+            <strong>DMM&rarr;Riyadh:</strong> SAR high-speed ~2.5h, then no rail to UAE<br>
+            <strong>Etihad Rail:</strong> Abu Dhabi&ndash;Dubai metro under expansion<br>
+            <strong>No cross-border rail</strong> between Saudi&ndash;UAE currently
+          </div>
+          <div style="font-size:10px;color:#dc2626;font-weight:600;margin-top:4px;">Not viable for full DMM&rarr;Dubai. Only useful within Saudi or within UAE.</div>
+        </div>
+
+        <!-- Ferry / Boat -->
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:16px;margin-bottom:4px;">&#9973;</div>
+          <div style="font-size:13px;font-weight:700;">Ferry / Boat</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;line-height:1.4;">
+            <strong>MCT&rarr;Dubai:</strong> No regular ferry service<br>
+            <strong>BAH&rarr;Dubai:</strong> No commercial ferry (causeway only)<br>
+            <strong>Iran&rarr;UAE ferries:</strong> Suspended due to conflict
+          </div>
+          <div style="font-size:10px;color:#dc2626;font-weight:600;margin-top:4px;">Not available for this route. No commercial sea transport between Gulf airports and Dubai.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--text-2);">
+        <strong>&#128161; AI Summary:</strong> Private car/taxi is the only practical ground transport for all three alternate airports.
+        Bus works for DMM and MCT but is slower. Train and ferry are not viable for cross-border travel to Dubai.
+        <strong>Recommended:</strong> If using Plan B (DMM), book a private car via hotel concierge or Careem app.
+      </div>
+
+      <div style="margin-top:6px;padding:6px 10px;background:var(--orange-bg);border-radius:6px;font-size:11px;color:#92400e;">
+        &#9888; <strong>Visa note:</strong> Saudi transit visa required for DMM&rarr;Dubai drive. Can be obtained on arrival at DMM for Indian passport holders (96h transit). Check latest rules before travel.
+      </div>
+    </div>
+
+    <!-- SECTION 2: Gifts for Family & Friends -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:12px;">&#127873; Gifts for Family &amp; Friends</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#127851; Chocolates &amp; Candy</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">Ghirardelli, See's Candies, local artisan chocolates</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:4px;">Walgreens, Target, Ferry Building</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#128085; Branded Apparel</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">San Francisco hoodies, tech brand merch, outlet deals</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:4px;">Premium Outlets, Union Square</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#128187; Tech Accessories</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">Apple accessories, power banks, cables (cheaper in US)</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:4px;">Apple Store, Best Buy, Amazon</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#127802; Perfumes &amp; Skincare</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">Bath &amp; Body Works, Victoria's Secret, Sephora</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:4px;">Duty-free SFO or mall stores</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;">
+        <input type="text" placeholder="Add custom gift idea..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;outline:none;">
+        <button onclick="this.previousElementSibling.value='';this.previousElementSibling.focus();" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">+ Add</button>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Food Items to Carry -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:12px;">&#127859; Food &amp; Spices to Carry Home</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#127798;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Splenda / Sweeteners</div>
+          <div style="font-size:10px;color:var(--text-3);">On your buy list</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#129472;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Nuts &amp; Trail Mix</div>
+          <div style="font-size:10px;color:var(--text-3);">Trader Joe's, Costco</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#127853;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Maple Syrup / Honey</div>
+          <div style="font-size:10px;color:var(--text-3);">Check TSA limits</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#127871;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Jerky &amp; Snacks</div>
+          <div style="font-size:10px;color:var(--text-3);">Not allowed into UAE</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#9749;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Coffee / Tea</div>
+          <div style="font-size:10px;color:var(--text-3);">Blue Bottle, Peet's</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:10px;border:1px solid var(--border);text-align:center;">
+          <div style="font-size:20px;">&#127835;</div>
+          <div style="font-size:12px;font-weight:700;margin-top:4px;">Hot Sauce / Sauces</div>
+          <div style="font-size:10px;color:var(--text-3);">Check liquid limits</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:8px 10px;background:var(--orange-bg);border-radius:6px;font-size:11px;color:#92400e;">
+        &#9888; <strong>UAE customs:</strong> No pork, no alcohol, dairy/meat products need declaration. Sealed packaged foods generally OK.
+      </div>
+    </div>
+
+    <!-- SECTION 4: Last-Minute Shopping -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:12px;">&#128722; Last-Minute Shopping</h3>
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:10px;">Items from your buy list — purchase at last city to avoid extra weight across flights.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#128187; Mac Mini M4</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:2px;">From $499 at Apple Store / Amazon</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:3px;">Best: order Amazon, ship to hotel</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:12px;border:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;">&#127798; Splenda Zero</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:2px;">~$8 at Target / Walmart</div>
+          <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:3px;">Available at any grocery store</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Pre-Departure Checklist -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:800;color:var(--accent);margin-bottom:12px;">&#9745; Pre-Departure Checklist</h3>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"> Submit all expense receipts to Happay
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"> Confirm return flight with Chinmay
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"> Check baggage weight (23kg economy / 32kg business)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"> Hotel checkout &amp; retrieve any stored luggage
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;background:#fff;padding:10px 12px;border-radius:6px;border:1px solid var(--border);cursor:pointer;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);"> Download offline content for 16h flight
+        </label>
+      </div>
+    </div>
+
+    <!-- SEND TO TRAVEL DESK -->
+    <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:12px;padding:16px;text-align:center;">
+      <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;">Ready to book?</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:14px;">Select your preferred flight above, then send request to Travel Desk via Outlook.</div>
+      <button onclick="sendTripHomeToDesk()" style="background:#fff;color:var(--accent);border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        &#128231; Send to Travel Desk (Outlook)
+      </button>
+    </div>
+
+    <div style="height:20px;"></div>
+  </div>
+
+</div>
+
+<!-- ==================== RIGHT PANEL ==================== -->
+<div class="right">
+
+  <!-- Next Critical Activity — live countdown -->
+  <div class="crit-card" id="critCard">
+    <div class="crit-label">&#9679; Next Critical Activity</div>
+    <div class="crit-num" id="critCountdown">--</div>
+    <div class="crit-unit" id="critUnit">calculating...</div>
+    <div class="crit-detail" id="critDetail"></div>
+  </div>
+
+  <!-- Departure Timeline -->
+  <ul class="tl">
+    <li><span class="tt" style="color:var(--red);">5:50 AM</span>Pre-flight push notification</li>
+    <li><span class="tt">6:00 AM</span>Wake up, pack, grab-and-go</li>
+    <li><span class="tt">6:15 AM</span>Cab &rarr; ATL South Terminal</li>
+    <li><span class="tt">6:40 AM</span>TSA Security (budget 2 hrs)</li>
+    <li><span class="tt">8:40 AM</span>Clear TSA &rarr; food at gate</li>
+    <li><span class="tt">9:50 AM</span>Depart ATL</li>
+    <li><span class="tt" style="color:var(--green);">12:08 PT</span>Land SJC (3hr behind)</li>
+  </ul>
+
+  <!-- TSA Alert -->
+  <div class="ab w">
+    <h4>&#9888; TSA Alert &mdash; ATL Airport</h4>
+    350K+ weekend travelers. 2-hour wait times. Staffing shortages. Use <strong>South Checkpoint</strong> for Delta. Leave hotel by 6:15 AM.
+  </div>
+
+  <!-- Tomorrow's Flight -->
+  <div class="fc">
+    <div class="fc-l">Tomorrow's Flight</div>
+    <div class="fc-r"><span class="fc-c">ATL</span><span class="fc-a">&rarr;</span><span class="fc-c">SJC</span></div>
+    <div class="fc-t">9:50 AM ET &rarr; 12:08 PM PT</div>
+    <div class="fc-d">Delta DL-809 &bull; PNR: HLSHJX</div>
+  </div>
+
+  <!-- Live Weather Widget -->
+  <div id="weatherWidget" style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow-sm);">
+    <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--blue);font-weight:800;margin-bottom:10px;">&#127780; Weather Forecast</div>
+    <div id="weatherBody" style="font-size:12px;color:var(--text-2);">Loading weather...</div>
+    <div id="weatherClothing" style="display:none;margin-top:10px;padding:10px;background:var(--blue-bg);border-radius:8px;font-size:11px;color:var(--text);">
+    </div>
+  </div>
+
+  <!-- Other Details - separate page -->
+  <div style="margin-top:auto;padding-top:8px;">
+    <a href="Other_Details.html" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.15s;text-decoration:none;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+      <span style="font-size:11px;font-weight:700;color:var(--text);">&#128203; Other Details &amp; Expenses</span>
+      <span style="font-size:10px;color:var(--accent);font-weight:600;">Open &rarr;</span>
+    </a>
+  </div>
+
+</div>
+
+</div>
+
+<!-- BOTTOM QUERY BAR -->
+<div class="qbar">
+  <div class="qa" id="searchHistory">
+    <span class="qc" onclick="reSearch(this)">Mac Mini</span>
+    <span class="qc" onclick="reSearch(this)">ATL TSA</span>
+    <span class="qc" onclick="reSearch(this)">Breakfast</span>
+    <span class="qc" onclick="reSearch(this)">Policy</span>
+    <span class="qc" onclick="reSearch(this)">Voucher</span>
+  </div>
+  <div class="q-row">
+    <input class="qi" id="queryInput" type="text" placeholder="Ask anything &mdash; &quot;Indian veg near hotel&quot;, &quot;Uber cost to ATL&quot;...">
+    <button class="qs" onclick="submitSearch()">&#10148;</button>
+  </div>
+</div>
+
+<script>
+// ===== LIVE TIMEZONE BRACKETS — shows BASE (Dubai) time =====
+// ===== DYNAMIC TIMEZONE BRACKETS — built from tripRoute =====
+var baseLocationTz = localStorage.getItem('baseLocationTz') || 'Asia/Dubai';
+var baseLocationLabel = localStorage.getItem('baseLocationLabel') || 'Dubai';
+
+// Calculate offset hours between base timezone and a travel timezone
+function calcTzOffset(travelTz) {
+  var now = new Date();
+  var baseStr = now.toLocaleString('en-US', {timeZone:baseLocationTz});
+  var travelStr = now.toLocaleString('en-US', {timeZone:travelTz});
+  var diffMs = new Date(baseStr) - new Date(travelStr);
+  return Math.round(diffMs / 3600000);
+}
+
+// Build timezone bracket segments from tripRoute
+function buildTzSegments() {
+  var segments = [];
+  var tripStart = parseLocalDate(tripRoute[0].start);
+  var tripEnd = parseLocalDate(tripRoute[tripRoute.length - 1].end);
+  var stripStart = tripStart.getDate();
+  // Last day cell in the date strip
+  var lastDayCell = 31; // March 31
+
+  // Merge consecutive same-timezone cities into segments
+  tripRoute.forEach(function(leg) {
+    // Parse day directly from YYYY-MM-DD string to avoid UTC/local timezone mismatch
+    var sDay = parseInt(leg.start.split('-')[2], 10);
+    var eDay = parseInt(leg.end.split('-')[2], 10) - 1; // end date is exclusive (checkout day)
+    if (eDay < sDay) eDay = sDay;
+    var label = leg.tzLabel || 'Local';
+    var tz = leg.tz || 'UTC';
+
+    // Merge with previous segment if same timezone label
+    var prev = segments.length > 0 ? segments[segments.length - 1] : null;
+    if (prev && prev.label === label) {
+      prev.endDay = eDay;
+      prev.cities.push(leg.city);
+    } else {
+      segments.push({
+        label: label,
+        tz: tz,
+        startDay: sDay,
+        endDay: eDay,
+        cities: [leg.city]
+      });
+    }
+  });
+
+  // Add Transit day (fly-out day = day after last city ends)
+  var lastSeg = segments[segments.length - 1];
+  var transitDay = lastSeg.endDay + 1;
+  if (transitDay <= lastDayCell) {
+    segments.push({label:'Transit', tz:baseLocationTz, startDay:transitDay, endDay:transitDay, cities:['In-flight']});
+  }
+
+  // Add "Back to Base" for remaining days
+  var baseStart = transitDay + 1;
+  if (baseStart <= lastDayCell) {
+    segments.push({label:'Back to Base', tz:baseLocationTz, startDay:baseStart, endDay:lastDayCell, cities:[baseLocationLabel]});
+  }
+
+  // Calculate offset for each segment
+  segments.forEach(function(seg) {
+    if (seg.label === 'Transit' || seg.label === 'Back to Base') {
+      seg.offsetHr = 0;
+    } else {
+      seg.offsetHr = calcTzOffset(seg.tz);
+    }
+  });
+
+  return segments;
+}
+
+// Render bracket HTML into the container
+function renderTzBrackets() {
+  var row = document.getElementById('tzBracketRow');
+  if (!row) return;
+  var segments = buildTzSegments();
+  row.innerHTML = '';
+  // Calculate grid-column start position (1-based, relative to strip start day 8)
+  var stripStartDay = parseInt(tripRoute[0].start.split('-')[2], 10); // e.g. 8
+  segments.forEach(function(seg, i) {
+    var colStart = seg.startDay - stripStartDay + 1; // 1-based grid column
+    var colSpan = seg.endDay - seg.startDay + 1;
+    var div = document.createElement('div');
+    div.className = 'ds-tz';
+    div.id = 'tzSeg' + i;
+    div.style.gridColumn = colStart + ' / span ' + colSpan;
+    div.setAttribute('data-start', seg.startDay);
+    div.setAttribute('data-end', seg.endDay);
+    div.setAttribute('data-label', seg.label);
+    div.setAttribute('data-offset', seg.offsetHr);
+    row.appendChild(div);
+  });
+  // Store segments for live update
+  window._tzSegments = segments;
+  updateTzBrackets();
+}
+
+function updateTzBrackets() {
+  if (!window._tzSegments) return;
+  var now = new Date();
+  var todayDay = now.getDate();
+  var todayMonth = now.getMonth();
+  var baseTime = now.toLocaleTimeString('en-US', {timeZone:baseLocationTz, hour:'2-digit', minute:'2-digit', hour12:true});
+
+  window._tzSegments.forEach(function(seg, i) {
+    var el = document.getElementById('tzSeg' + i);
+    if (!el) return;
+    // Check if today falls in this segment — derive month from tripRoute start
+    var tripMonth = parseInt(tripRoute[0].start.split('-')[1], 10) - 1; // 0-indexed
+    var isCurrent = (todayMonth === tripMonth) && todayDay >= seg.startDay && todayDay <= seg.endDay;
+    if (isCurrent) {
+      if (seg.offsetHr > 0) {
+        el.textContent = seg.label + ' (' + seg.offsetHr + ' Hr) ' + baseTime;
+      } else if (seg.offsetHr < 0) {
+        el.textContent = seg.label + ' (' + Math.abs(seg.offsetHr) + ' Hr) ' + baseTime;
+      } else {
+        el.textContent = seg.label + ' ' + baseTime;
+      }
+      el.style.borderColor = '#4f46e5';
+      el.style.color = '#4f46e5';
+      el.style.fontWeight = '800';
+    } else {
+      if (seg.offsetHr !== 0) {
+        el.textContent = seg.label + ' (' + Math.abs(seg.offsetHr) + ' Hr)';
+      } else {
+        el.textContent = seg.label;
+      }
+      el.style.borderColor = '#90a4ae';
+      el.style.color = '#5b7083';
+      el.style.fontWeight = '700';
+    }
+  });
+}
+
+// renderTzBrackets() called after tripRoute is defined — see below
+
+function toggleBuyDrop(e) {
+  var drop = document.getElementById('buyDrop');
+  var chev = document.getElementById('buyChev');
+  if (drop.style.display === 'none') {
+    drop.style.display = 'block';
+    chev.style.transform = 'rotate(180deg)';
+  } else {
+    drop.style.display = 'none';
+    chev.style.transform = 'rotate(0deg)';
+  }
+}
+function updateBuyCount() {
+  var s = document.getElementById('buySpecialList').querySelectorAll('.buy-item').length;
+  var r = document.getElementById('buyRegularList').querySelectorAll('.buy-item').length;
+  document.getElementById('buyCount').textContent = (s + r) + ' items';
+}
+function addBuyInline() {
+  var inp = document.getElementById('newBuyItem');
+  var val = inp.value.trim();
+  if (!val) return;
+  var list = document.getElementById('buyRegularList');
+  var div = document.createElement('div');
+  div.className = 'buy-item';
+  div.innerHTML = '<input type="checkbox"><label><div class="bn">' + val + '</div><div class="bm">Added just now</div></label>';
+  list.appendChild(div);
+  updateBuyCount();
+  inp.value = '';
+  inp.focus();
+}
+
+// ===== Buy Detail Panels — Dynamic City Aware =====
+var buyItems = {
+  macmini: {
+    icon:'&#128187;', name:'Mac Mini M4', sub:'16GB / 256GB SSD \u2022 Retail $599 \u2022 Best deals from $399',
+    heavy:true,
+    storesByCity: {
+      'Atlanta': [
+        {icon:'&#127823;',name:'Apple Lenox Square',addr:'3393 Peachtree Rd NE \u2022 10AM–8PM',price:'$599',url:'https://www.apple.com/retail/lenoxsquare/'},
+        {icon:'&#128309;',name:'Best Buy Atlanta',addr:'Multiple locations \u2022 Price match',price:'$599',url:'https://www.bestbuy.com/site/searchpage.jsp?st=mac+mini+m4'}
+      ],
+      'San Jose': [
+        {icon:'&#127823;',name:'Apple Valley Fair',addr:'2855 Stevens Creek Blvd, Santa Clara',price:'$599',url:'https://www.apple.com/retail/valleyfair/'},
+        {icon:'&#128309;',name:'Best Buy San Jose',addr:'925 Blossom Hill Rd',price:'$599',url:'https://www.bestbuy.com/site/searchpage.jsp?st=mac+mini+m4'}
+      ],
+      'San Francisco': [
+        {icon:'&#127823;',name:'Apple Union Square SF',addr:'300 Post St \u2022 Near Moscone',price:'$599',url:'https://www.apple.com/retail/sanfrancisco/'},
+        {icon:'&#127823;',name:'Apple Stonestown',addr:'3251 20th Ave, SF',price:'$599',url:'https://www.apple.com/retail/stonestown/'},
+        {icon:'&#128309;',name:'Best Buy SF',addr:'1717 Harrison St \u2022 10 min from Moscone',price:'$599',url:'https://www.bestbuy.com/site/searchpage.jsp?st=mac+mini+m4'}
+      ]
+    },
+    online:[
+      {label:'Amazon \u2022 $499',icon:'&#128230;',url:'https://www.amazon.com/s?k=mac+mini+m4'},
+      {label:'Apple.com \u2022 $599',icon:'&#127823;',url:'https://www.apple.com/shop/buy-mac/mac-mini'},
+      {label:'BestBuy.com \u2022 $599',icon:'&#128309;',url:'https://www.bestbuy.com/site/searchpage.jsp?st=mac+mini+m4'}
+    ],
+    onlineTip:'Amazon has it for <strong>$499</strong> (lowest). Ship to your last-stop hotel.'
+  },
+  splenda: {
+    icon:'&#127849;', name:'Splenda Monk Fruit 1Kg', sub:'WHITE granulated only \u2022 For friend \u2022 ~$12–$19 per 19oz jar',
+    heavy:true,
+    storesByCity: {
+      'Atlanta': [
+        {icon:'&#128310;',name:'Walmart \u2022 Peachtree St',addr:'210 Peachtree St NW',price:'~$12',url:'https://www.walmart.com/ip/541334570'},
+        {icon:'&#128308;',name:'Kroger \u2022 Peachtree Rd',addr:'3871 Peachtree Rd NE \u2022 6AM–11PM',price:'~$14',url:'https://www.kroger.com/p/splenda-naturals-monk-fruit-sweetener-packets/0072277600355'},
+        {icon:'&#128308;',name:'Target \u2022 Atlantic Station',addr:'1380 Atlantic Dr NW',price:'~$13',url:'https://www.target.com/s/splenda+monk+fruit'}
+      ],
+      'San Jose': [
+        {icon:'&#128310;',name:'Walmart \u2022 Story Rd',addr:'777 Story Rd, San Jose',price:'~$12',url:'https://www.walmart.com/ip/541334570'},
+        {icon:'&#128308;',name:'Target \u2022 San Jose',addr:'Multiple locations',price:'~$13',url:'https://www.target.com/s/splenda+monk+fruit'}
+      ],
+      'San Francisco': [
+        {icon:'&#128310;',name:'Walmart \u2022 SF area',addr:'Multiple locations',price:'~$12',url:'https://www.walmart.com/ip/541334570'},
+        {icon:'&#128308;',name:'Target \u2022 SF Metreon',addr:'789 Mission St \u2022 5 min from Moscone',price:'~$13',url:'https://www.target.com/s/splenda+monk+fruit'},
+        {icon:'&#128308;',name:'Safeway \u2022 Market St',addr:'145 Jackson St, SF',price:'~$14',url:'https://www.safeway.com/shop/product-details.970110881.html'}
+      ]
+    },
+    online:[
+      {label:'DoorDash \u2022 1hr',icon:'&#128690;',url:'https://www.doordash.com/products/splenda-zero-calorie-monk-fruit-sweetener-98-oz/urpc_8c869fb4-275c-4c95-ab2a-61d8619fb5ee'},
+      {label:'Walmart+ Delivery',icon:'&#128310;',url:'https://www.walmart.com/ip/541334570'},
+      {label:'Target Same-Day',icon:'&#128308;',url:'https://www.target.com/s/splenda+monk+fruit'},
+      {label:'Amazon \u2022 $12',icon:'&#128230;',url:'https://www.amazon.com/s?k=splenda+monk+fruit+sweetener+granulated'}
+    ],
+    onlineTip:'DoorDash can deliver to your hotel in ~1 hour. Or order on Amazon to your last-stop hotel.'
+  }
+};
+
+function getLastCity(){ return tripRoute[tripRoute.length - 1].city; }
+
+function buildBuyPanel(id) {
+  var item = buyItems[id];
+  if(!item) return;
+  var curCity = getCurrentCity() ? getCurrentCity().city : tripRoute[0].city;
+  var lastCity = getLastCity();
+  var panel = document.getElementById('bd-' + id);
+
+  var html = '<span class="bd-close" onclick="closeBuyDetail(\''+id+'\')">&times;</span>';
+  html += '<h4>'+item.icon+' '+item.name+'</h4>';
+  html += '<div class="bd-sub">'+item.sub+'</div>';
+
+  // Section 1: Buy Now (current city)
+  var nowStores = item.storesByCity[curCity] || [];
+  if(nowStores.length) {
+    html += '<div class="bd-section"><h5>&#128205; Buy Now &mdash; '+curCity+'</h5>';
+    nowStores.forEach(function(s){
+      html += '<div class="bd-store"><a href="'+s.url+'" target="_blank"><span class="bs-icon">'+s.icon+'</span><div class="bs-info"><div class="bs-name">'+s.name+'</div><div class="bs-addr">'+s.addr+'</div></div><span class="bs-price">'+s.price+'</span></a></div>';
+    });
+    html += '</div>';
+  }
+
+  // Section 2: Buy at last destination (if different from current)
+  if(lastCity !== curCity) {
+    var lastStores = item.storesByCity[lastCity] || [];
+    html += '<div class="bd-section"><h5 style="color:var(--green);">&#9989; Buy in '+lastCity+' (last stop) &mdash; Recommended</h5>';
+    if(item.heavy) html += '<div style="font-size:9px;color:var(--green);margin-bottom:5px;font-weight:600;">&#128161; Buy at last city = less weight across '+(tripRoute.length-1)+' cities before home!</div>';
+    if(lastStores.length) {
+      lastStores.forEach(function(s){
+        html += '<div class="bd-store"><a href="'+s.url+'" target="_blank"><span class="bs-icon">'+s.icon+'</span><div class="bs-info"><div class="bs-name">'+s.name+'</div><div class="bs-addr">'+s.addr+'</div></div><span class="bs-price">'+s.price+'</span></a></div>';
+      });
+    } else {
+      html += '<div style="font-size:9px;color:var(--text-3);padding:6px;">No pre-loaded stores for '+lastCity+'. Use "Search" below or check Google Maps.</div>';
+    }
+    html += '</div>';
+  }
+
+  // Section 3: Online / Delivery
+  html += '<div class="bd-section"><h5 style="color:var(--orange);">&#128230; Online / Delivery to Hotel</h5><div class="bd-delivery">';
+  item.online.forEach(function(o){
+    html += '<a class="bd-dlv" href="'+o.url+'" target="_blank">'+o.icon+' '+o.label+'</a>';
+  });
+  html += '</div>';
+  html += '<div style="font-size:8px;color:var(--text-3);margin-top:4px;">&#128161; '+item.onlineTip+'</div></div>';
+
+  // Suggest input
+  html += '<div class="bd-suggest"><input type="text" id="suggest_'+id+'" placeholder="Know a better store? Tell me..." onclick="event.stopPropagation()"><button onclick="event.stopPropagation();handleSuggest(\''+id+'\')">Search</button></div>';
+
+  panel.innerHTML = html;
+}
+
+function showBuyDetail(id) {
+  document.querySelectorAll('.buy-detail').forEach(function(d){d.classList.remove('open');});
+  buildBuyPanel(id);
+  var panel = document.getElementById('bd-' + id);
+  if(panel) panel.classList.add('open');
+}
+function closeBuyDetail(id) {
+  var panel = document.getElementById('bd-' + id);
+  if(panel) panel.classList.remove('open');
+}
+function handleSuggest(itemId) {
+  var inp = document.getElementById('suggest_'+itemId);
+  if(!inp) return;
+  var val = inp.value.trim();
+  if(!val) return;
+  var itemName = buyItems[itemId] ? buyItems[itemId].name : itemId;
+  var query = val + ' near me ' + itemName;
+  window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
+  inp.value = '';
+}
+
+// Tab switching
+function switchTab(cat, el) {
+  // Deactivate all tabs
+  document.querySelectorAll('.cat-tab').forEach(function(t){t.classList.remove('active');});
+  // Hide all venue lists
+  document.querySelectorAll('.venue-list').forEach(function(v){v.classList.remove('active');});
+  // Activate clicked tab
+  el.classList.add('active');
+  // Show matching venue list
+  var vl = document.getElementById('vl-' + cat);
+  if (vl) vl.classList.add('active');
+  // Close detail panel when switching tabs
+  closeDetail();
+}
+
+// Venue detail data
+var venues = {
+  south_city: {name:'South City Kitchen Midtown',type:'Southern American',rating:'4.6',price:'$$$',dist:'0.4 mi (7 min walk)',addr:'1144 Crescent Ave NE, Atlanta, GA 30309',hours:'Mon-Thu 11AM-9PM, Fri 11AM-10PM, Sat 10AM-10PM, Sun 10AM-9PM',
+    menu:['Fried Green Tomatoes','Buttermilk Fried Chicken','She-Crab Soup','Shrimp & Grits','Pimento Cheese','Pecan Pie','Bourbon Old Fashioned'],note:'Reservations recommended for Saturday evening. Walk south on Peachtree, turn right on 12th.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/South+City+Kitchen+Midtown/@33.7866,-84.3838,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/south-city-kitchen-midtown-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Search Google',url:'https://www.google.com/search?q=South+City+Kitchen+Midtown+Atlanta+menu+reservations',cls:'secondary',icon:'&#128269;'}]},
+  blue_india: {name:'Blue India',type:'Indian Restaurant',rating:'4.3',price:'$$',dist:'0.3 mi (5 min walk)',addr:'933 Peachtree St NE, Atlanta, GA 30309',hours:'Mon-Sun 11:30AM-10PM',
+    menu:['Butter Chicken','Paneer Tikka','Biryani','Dal Makhani','Naan Basket','Mango Lassi','Gulab Jamun'],note:'Good vegetarian options. North on Peachtree St, 5 min walk.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Blue+India/@33.7831,-84.3830,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/blue-india-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Order on DoorDash',url:'https://www.doordash.com/store/blue-india-atlanta-171410/',cls:'secondary',icon:'&#127860;'}]},
+  tabla: {name:'Tabla',type:'Modern Indian Lounge',rating:'4.4',price:'$$',dist:'0.5 mi (9 min walk)',addr:'77 12th St NE, Atlanta, GA 30309',hours:'Tue-Sun 5PM-11PM, Closed Mon',
+    menu:['Lamb Chops','Chicken Tikka Masala','Samosa Chaat','Tandoori Salmon','Craft Cocktails','Indian Street Tacos','Mango Cheesecake'],note:'Modern Indian with lounge vibe. Good for drinks + dinner combo.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Tabla/@33.7870,-84.3810,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/tabla-atlanta',cls:'secondary',icon:'&#11088;'},{label:'Search Google',url:'https://www.google.com/search?q=Tabla+Atlanta+Indian+restaurant+menu',cls:'secondary',icon:'&#128269;'}]},
+  midtown_bar: {name:'683 Midtown Bar',type:'Hotel Bar',rating:'4.1',price:'$$',dist:'In hotel (lobby level)',addr:'683 Peachtree St NE (Hotel Indigo lobby)',hours:'Daily 4PM-12AM',
+    menu:['Craft Cocktails','Local Draft Beers','Wine Selection','Bourbon Flights','Bar Bites','Charcuterie Board'],note:'No walking needed. Downstairs in your hotel lobby. Relaxed atmosphere.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Hotel+Indigo+Atlanta+Midtown/@33.7726,-84.3853,17z/',cls:'primary',icon:'&#128205;'}]},
+  red_phone: {name:'Red Phone Booth',type:'Speakeasy Bar',rating:'4.5',price:'$$$',dist:'0.4 mi (7 min walk)',addr:'17 Andrew Young International Blvd, Atlanta, GA 30303',hours:'Mon-Sat 5PM-2AM, Sun 5PM-12AM',
+    menu:['Classic Cocktails','Prohibition-era Drinks','Cigars','Premium Whiskey','Champagne'],note:'Secret code required for entry. Ask hotel concierge for tonight\'s code, or visit their website.',
+    links:[{label:'Get Access Code',url:'https://www.redphonebooth.com/',cls:'primary',icon:'&#128222;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Red+Phone+Booth/@33.7580,-84.3910,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/red-phone-booth-atlanta',cls:'secondary',icon:'&#11088;'}]},
+  livingston: {name:'Livingston Restaurant & Bar',type:'Rooftop Bar',rating:'4.2',price:'$$',dist:'200 ft from hotel',addr:'659 Peachtree St NE, Atlanta, GA 30308',hours:'Daily 5PM-1AM',
+    menu:['Signature Cocktails','Southern Tapas','Oysters','Flatbreads','Craft Beer'],note:'Rooftop terrace with city views. Steps from your hotel. Great sunset spot.',
+    links:[{label:'View on Google Maps',url:'https://www.google.com/maps/place/Livingston+Restaurant+%26+Bar/@33.7718,-84.3855,17z/',cls:'primary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/livingston-restaurant-and-bar-atlanta',cls:'secondary',icon:'&#11088;'}]},
+  harry_potter: {name:'Harry Potter and the Cursed Child',type:'Theatre / Broadway Show',rating:'4.8',price:'$$$$',ticketRange:'$49 \u2013 $299',dist:'0.5 mi (8 min walk)',addr:'Fox Theatre, 660 Peachtree St NE',hours:'Tonight: 7:30 PM (Sat matinee 2 PM also available)',
+    menu:['Concessions available','Pre-show dining at nearby restaurants recommended'],note:'3+ hour show in 2 parts. Arrive 30 min early. No photography during performance. Tickets from $49 (rear balcony) to $299 (premium orchestra).',
+    links:[{label:'Buy Tickets \u2014 Fox Theatre',url:'https://www.foxtheatre.org/events',cls:'primary',icon:'&#127915;'},{label:'Search Tickets on Google',url:'https://www.google.com/search?q=Harry+Potter+Cursed+Child+Fox+Theatre+Atlanta+tickets',cls:'green',icon:'&#127903;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Fox+Theatre/@33.7726,-84.3857,17z/',cls:'secondary',icon:'&#128205;'}]},
+  atl_united: {name:'Atlanta United vs Charlotte FC',type:'MLS Soccer Match',rating:'4.7',price:'$$-$$$',ticketRange:'$25 \u2013 $180',dist:'1.5 mi (Uber 6 min)',addr:'Mercedes-Benz Stadium, 1 AMB Dr NW',hours:'Tonight: 7 PM kickoff, Gates open 5:30 PM',
+    menu:['Stadium concessions','Molly B pub inside','King of Pops','Craft beer stations','Fox Bros BBQ stand'],note:'MLS regular season. Take Uber or MARTA to Dome/GWCC station. Tickets from $25 (upper deck) to $180 (lower sideline).',
+    links:[{label:'Buy Tickets \u2014 atlutd.com',url:'https://www.atlutd.com/tickets/',cls:'primary',icon:'&#9917;'},{label:'Search Tickets on Google',url:'https://www.google.com/search?q=Atlanta+United+vs+Charlotte+FC+tickets+tonight',cls:'green',icon:'&#127903;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Mercedes-Benz+Stadium/@33.7553,-84.4006,17z/',cls:'secondary',icon:'&#128205;'}]},
+  laughing_skull: {name:'Laughing Skull Lounge',type:'Comedy Club',rating:'4.4',price:'$$',ticketRange:'$15 \u2013 $25',dist:'0.3 mi (5 min walk)',addr:'878 Peachtree St NE, Atlanta, GA 30309',hours:'Shows at 8 PM & 10 PM tonight',
+    menu:['2-drink minimum','Craft Beer','Wine','Cocktails','Light Snacks'],note:'Intimate venue, arrive 20 min early for good seats. 2-drink minimum. Tickets $15\u2013$25 depending on show.',
+    links:[{label:'Buy Tickets',url:'https://www.google.com/search?q=Laughing+Skull+Lounge+Atlanta+tickets+tonight',cls:'primary',icon:'&#127911;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Laughing+Skull+Lounge/@33.7806,-84.3832,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/laughing-skull-lounge-atlanta',cls:'secondary',icon:'&#11088;'}]},
+  piedmont: {name:'Piedmont Park',type:'Public Park',rating:'4.8',price:'Free',dist:'0.6 mi (11 min walk)',addr:'400 Park Dr NE, Atlanta, GA 30309',hours:'Daily 6AM-11PM',
+    menu:['Park Tavern restaurant on-site','Food trucks on weekends','Bring your own picnic'],note:'Best skyline views from the meadow. Great sunset walk tonight. Dog-friendly. Free entry.',
+    links:[{label:'Park Website',url:'https://piedmontpark.org/',cls:'primary',icon:'&#127795;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Piedmont+Park/@33.7879,-84.3748,16z/',cls:'secondary',icon:'&#128205;'}]},
+  high_museum: {name:'High Museum of Art',type:'Art Museum',rating:'4.6',price:'$$ ($23.50)',ticketRange:'$23.50 general',dist:'0.3 mi (5 min walk)',addr:'1280 Peachtree St NE, Atlanta, GA 30309',hours:'Sat 10AM-9PM (late night!), Sun 12-5PM',
+    menu:['Table 1280 restaurant inside','Museum cafe for coffee & light bites'],note:'Leading Southeast art museum. Open late on Saturdays until 9 PM. Free parking garage.',
+    links:[{label:'Buy Tickets \u2014 high.org',url:'https://high.org/',cls:'primary',icon:'&#127912;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/High+Museum+of+Art/@33.7901,-84.3856,17z/',cls:'secondary',icon:'&#128205;'}]},
+  fox_theatre: {name:'Fox Theatre',type:'Historic Theatre',rating:'4.9',price:'$$-$$$$',ticketRange:'$20 tour / $40\u2013$200 shows',dist:'0.5 mi (8 min walk)',addr:'660 Peachtree St NE, Atlanta, GA 30308',hours:'Box office: 10AM-6PM, Evening shows vary',
+    menu:['Marquee Club lounge','Concessions','Egyptian Ballroom bar'],note:'Iconic 1929 Moorish-Egyptian architecture. Take a guided tour ($20) or catch a show tonight.',
+    links:[{label:'Events & Tickets',url:'https://www.foxtheatre.org/events',cls:'primary',icon:'&#127915;'},{label:'View on Google Maps',url:'https://www.google.com/maps/place/Fox+Theatre/@33.7726,-84.3857,17z/',cls:'secondary',icon:'&#128205;'},{label:'Reviews on Yelp',url:'https://www.yelp.com/biz/fox-theatre-atlanta',cls:'secondary',icon:'&#11088;'}]}
+};
+
+function showDetail(id) {
+  var v = venues[id];
+  if (!v) return;
+  // Remove active from all li
+  document.querySelectorAll('.cl li').forEach(function(li){li.classList.remove('active');});
+  // Add active to clicked
+  event.currentTarget.classList.add('active');
+  var p = document.getElementById('detailPanel');
+  var menuHtml = v.menu.map(function(m){return '<span>'+m+'</span>';}).join('');
+  var linksHtml = '';
+  if (v.links && v.links.length) {
+    linksHtml = '<div class="dp-links">';
+    v.links.forEach(function(lk){
+      linksHtml += '<a class="dp-link '+lk.cls+'" href="'+lk.url+'" target="_blank" rel="noopener">'+lk.icon+' '+lk.label+'</a>';
+    });
+    linksHtml += '</div>';
+  }
+  var ticketHtml = v.ticketRange ? '<div class="dp-stat"><div class="dp-sv">'+v.ticketRange+'</div><div class="dp-sl">Ticket Range</div></div>' : '';
+  p.innerHTML = '<div class="dp-head"><div><div class="dp-name">'+v.name+'</div><div class="dp-type">'+v.type+'</div></div><div class="dp-close" onclick="closeDetail()">&times;</div></div>'
+    +'<div class="dp-stats"><div class="dp-stat"><div class="dp-sv">'+v.rating+'</div><div class="dp-sl">Rating</div></div><div class="dp-stat"><div class="dp-sv">'+v.price+'</div><div class="dp-sl">Price</div></div><div class="dp-stat"><div class="dp-sv">'+v.dist+'</div><div class="dp-sl">From Hotel</div></div>'+ticketHtml+'</div>'
+    +linksHtml
+    +'<div class="dp-section"><h5>Open Hours</h5><p>'+v.hours+'</p></div>'
+    +'<div class="dp-section"><h5>Menu Highlights</h5><div class="dp-menu">'+menuHtml+'</div></div>'
+    +'<div class="dp-section"><h5>Note</h5><p>'+v.note+'</p></div>'
+    +'<div class="dp-addr">&#128205; '+v.addr+'</div>';
+  p.style.display = 'block';
+}
+function closeDetail() {
+  document.getElementById('detailPanel').style.display = 'none';
+  document.querySelectorAll('.cl li').forEach(function(li){li.classList.remove('active');});
+}
+
+function reSearch(el) {
+  document.getElementById('queryInput').value = el.textContent.trim();
+  submitSearch();
+}
+
+// ===== SMART LOCAL-FIRST SEARCH ENGINE =====
+// ===== SMART SEARCH ENGINE v2 — Intent-based with category filtering =====
+
+// Stop words — ignore these in scoring
+var _stopWords = ['which','what','where','when','how','is','are','the','a','an','in','on','at','to','for','of','do','does','can','i','my','me','this','that','any','some','there','near','here','please','show','find','get','tell','about'];
+
+// Intent classifiers — detect query category from signal words
+var _intents = {
+  food:     {signals:['food','restaurant','eat','hungry','dinner','lunch','breakfast','meal','dining','veg','vegetarian','chicken','biryani','indian','paneer','naan','pizza','sushi','thai','chinese','cafe','dine','brunch','takeout','delivery'], group:'food'},
+  bar:      {signals:['bar','drink','cocktail','beer','wine','bourbon','nightlife','pub','lounge','whiskey','happy hour','brewery'], group:'bar'},
+  hotel:    {signals:['hotel','room','checkout','check-in','stay','accommodation','wifi','pool','gym','laundry','housekeeping','minibar'], group:'hotel'},
+  flight:   {signals:['flight','fly','delta','airport','atl','sjc','sfo','departure','pnr','boarding','gate','terminal','tsa'], group:'flight'},
+  return:   {signals:['return','go home','trip home','emirates','etihad','turkish','dubai flight','dxb','home flight'], group:'return'},
+  expense:  {signals:['expense','cost','money','spend','budget','receipt','happay','reimbursement','bill'], group:'expense'},
+  policy:   {signals:['policy','per diem','allowance','limit','rules','travel policy','advance'], group:'policy'},
+  support:  {signals:['help','contact','spoc','chinmay','travel desk','support','issue','problem','escalate','piyush'], group:'support'},
+  shopping: {signals:['buy','shop','shopping','mac mini','gift','chocolate','perfume','apple store','purchase','splenda','ghirardelli'], group:'shopping'},
+  conference:{signals:['fabcon','rsac','conference','microsoft','fabric','cybersecurity','moscone','session','booth','expo'], group:'conference'},
+  sightseeing:{signals:['sightseeing','visit','tourist','attraction','explore','museum','park','aquarium','monument'], group:'sightseeing'},
+  weather:  {signals:['weather','rain','temperature','cold','hot','forecast','umbrella','sunny'], group:'weather'},
+  transport:{signals:['cab','taxi','uber','lyft','ride','transport','car','drive','bus','bart','muni','metro','train'], group:'transport'},
+  currency: {signals:['currency','exchange','dollar','rupee','convert','usd','inr','aed','forex'], group:'currency'},
+  document: {signals:['voucher','booking','confirmation','itinerary','document','ticket','pdf'], group:'document'}
+};
+
+// Time modifiers detected in query
+function _detectTimeMod(q) {
+  if (/\bnow\b|\bopen\b|\bcurrently\b|\bright now\b|\btonight\b/.test(q)) return 'now';
+  if (/\blate\b|\bmidnight\b|\b2am\b|\bafter hours\b/.test(q)) return 'late';
+  if (/\bearly\b|\bmorning\b|\bbreakfast\b|\b6am\b|\b7am\b/.test(q)) return 'morning';
+  if (/\btomorrow\b/.test(q)) return 'tomorrow';
+  return null;
+}
+
+// Detect primary intent from query
+function _detectIntent(q) {
+  var qLow = q.toLowerCase();
+  var best = null, bestScore = 0;
+  for (var key in _intents) {
+    var score = 0;
+    _intents[key].signals.forEach(function(sig) {
+      if (qLow.indexOf(sig) !== -1) {
+        score += sig.split(' ').length * 3; // multi-word signals score higher
+      }
+    });
+    if (score > bestScore) { bestScore = score; best = key; }
+  }
+  return bestScore >= 3 ? best : null;
+}
+
+// Search index with group tags for filtering
+var searchIndex = [
+  // Food & Restaurants
+  {keywords:['food','hungry','eat','restaurant','dinner','lunch','breakfast','meal','dining','veg','vegetarian','chicken','biryani','indian','paneer','naan','open','late','brunch'],
+   group:'food', category:'Food & Restaurants', tab:'food', icon:'&#127860;',
+   title:'Food Near You', desc:'Restaurants near your hotel in current city',
+   hours:'Most open 11 AM – 10 PM',
+   action:function(){ switchTab('food',document.querySelector('.cat-tab')); closeSearchResults(); }},
+  {keywords:['south city','southern','fried green','she-crab','american food','american restaurant'],
+   group:'food', category:'Food', venue:'south_city', icon:'&#127860;',
+   title:'South City Kitchen Midtown', desc:'Southern American • 4.6★ • 7 min walk • Fried Green Tomatoes, She-Crab Soup',
+   hours:'Mon–Sun 11 AM – 10 PM'},
+  {keywords:['blue india','indian food','butter chicken','dal','paneer tikka','indian restaurant','curry','tandoori'],
+   group:'food', category:'Food', venue:'blue_india', icon:'&#127860;',
+   title:'Blue India', desc:'Indian Restaurant • 4.3★ • 0.3 mi • Butter Chicken, Paneer Tikka, Biryani',
+   hours:'Mon–Sun 11:30 AM – 10:30 PM'},
+  {keywords:['tabla','modern indian','lamb chops','indian lounge','street tacos','fusion'],
+   group:'food', category:'Food', venue:'tabla', icon:'&#127860;',
+   title:'Tabla', desc:'Modern Indian Lounge • 4.4★ • 0.5 mi • Lamb Chops, Indian Street Tacos',
+   hours:'Tue–Sun 5 PM – 11 PM'},
+
+  // Bars
+  {keywords:['bar','drink','cocktail','beer','wine','bourbon','nightlife','pub','lounge','happy hour'],
+   group:'bar', category:'Bars & Nightlife', tab:'bar', icon:'&#127867;',
+   title:'Bars Near You', desc:'Bars and lounges near your hotel',
+   hours:'Most open 4 PM – 2 AM',
+   action:function(){ switchTab('bar',document.querySelectorAll('.cat-tab')[1]); closeSearchResults(); }},
+  {keywords:['midtown bar','hotel bar','lobby bar','683','in-hotel'],
+   group:'bar', category:'Bar', venue:'midtown_bar', icon:'&#127867;',
+   title:'683 Midtown Bar', desc:'Hotel Bar • In Hotel Indigo lobby • Craft Cocktails, Bourbon Flights',
+   hours:'Daily 4 PM – 12 AM'},
+  {keywords:['red phone','speakeasy','prohibition','cigar','secret bar'],
+   group:'bar', category:'Bar', venue:'red_phone', icon:'&#127867;',
+   title:'Red Phone Booth', desc:'Speakeasy Bar • 4.5★ • Secret code required',
+   hours:'Mon–Sat 5 PM – 2 AM'},
+
+  // Sightseeing & Interesting
+  {keywords:['sightseeing','visit','tourist','attraction','see','explore','walk','park','museum','aquarium','monument'],
+   group:'sightseeing', category:'Sightseeing', tab:'sightseeing', icon:'&#127963;',
+   title:'Sightseeing Near You', desc:'Attractions and places to explore',
+   action:function(){ switchTab('sightseeing',document.querySelectorAll('.cat-tab')[3]); closeSearchResults(); }},
+  {keywords:['interesting','unique','cool','things to do','activity','fun','experience'],
+   group:'sightseeing', category:'Interesting', tab:'interesting', icon:'&#128161;',
+   title:'Interesting Things to Do', desc:'Unique experiences and activities near you',
+   action:function(){ switchTab('interesting',document.querySelectorAll('.cat-tab')[2]); closeSearchResults(); }},
+
+  // Hotel
+  {keywords:['hotel','room','checkout','check-in','check in','stay','accommodation','hotel indigo','holiday inn','doubletree','wifi','pool','gym'],
+   group:'hotel', category:'Hotel', icon:'&#127976;',
+   title:'Tonight\'s Hotel — Hotel Indigo Atlanta Midtown', desc:'683 Peachtree St NE • Checked In • Checkout 12 PM (Mar 22) • Breakfast included'},
+
+  // Flight & Travel
+  {keywords:['flight','fly','delta','dl-809','travel day','tomorrow flight','airport','atl','sjc','departure','pnr','boarding pass'],
+   group:'flight', category:'Travel', icon:'&#9992;',
+   title:'Tomorrow\'s Flight — Delta DL-809', desc:'ATL→SJC • Mar 22 • Departs 9:50 AM • PNR: HLSHJX',
+   action:function(){ showTravelDayDetail(); closeSearchResults(); }},
+  {keywords:['return flight','go home','trip home','emirates','etihad','turkish','plan trip','home flight','dxb','dubai flight','sfo dubai'],
+   group:'return', category:'Return Flight', icon:'&#128747;',
+   title:'Plan Your Trip Home', desc:'SFO→Dubai • ~Mar 26 • View flight options with security intel',
+   action:function(){ showTripHome(); closeSearchResults(); }},
+  {keywords:['tsa','security checkpoint','gate','terminal','boarding','airport security'],
+   group:'flight', category:'Airport', icon:'&#128680;',
+   title:'ATL Airport — TSA & Security', desc:'Use South Checkpoint for Delta. 350K+ weekend travelers. Leave hotel by 6:15 AM.'},
+
+  // Expenses & Policy
+  {keywords:['expense','cost','money','spend','budget','receipt','happay','reimbursement','bill','track spending'],
+   group:'expense', category:'Expenses', icon:'&#128176;',
+   title:'Trip Expenses', desc:'View expense table, add receipts, download Excel — in Other Details page',
+   action:function(){ window.open('Other_Details.html#page-expenses','_blank'); closeSearchResults(); }},
+  {keywords:['policy','per diem','allowance','limit','rules','travel policy','advance','company rules'],
+   group:'policy', category:'Policy', icon:'&#128220;',
+   title:'Travel Policy', desc:'Per diem $80 meals / $25 incidental / $220 A-City hotels — in Other Details page',
+   action:function(){ window.open('Other_Details.html#page-policy','_blank'); closeSearchResults(); }},
+
+  // SPOC & Help
+  {keywords:['help','contact','spoc','chinmay','travel desk','support','issue','problem','escalate','piyush','call someone'],
+   group:'support', category:'Support', icon:'&#128222;',
+   title:'Travel Desk SPOC', desc:'Chinmay Malhotra — Travel Desk • Piyush Garg — Travel Head',
+   action:function(){ window.open('Other_Details.html#page-spoc','_blank'); closeSearchResults(); }},
+
+  // Shopping & Buy
+  {keywords:['buy','shop','shopping','mac mini','gift','chocolate','perfume','apple store','purchase','splenda','ghirardelli','tech','accessories'],
+   group:'shopping', category:'Shopping', icon:'&#128722;',
+   title:'Things to Buy from US', desc:'Mac Mini M4, Splenda, Ghirardelli, tech accessories — see left panel'},
+  {keywords:['voucher','booking confirmation','itinerary','documents','ticket copy','pdf'],
+   group:'document', category:'Documents', icon:'&#128196;',
+   title:'Booking Vouchers & Documents', desc:'Hotel Indigo, Holiday Inn Berkeley, DoubleTree, Delta DL-809 — in Other Details'},
+
+  // FABCON & RSAC
+  {keywords:['fabcon','microsoft fabric','data analytics','fabric conference'],
+   group:'conference', category:'Conference', icon:'&#11088;',
+   title:'FABCON 2026', desc:'Completed • Mar 14–20 • GWCC, Atlanta'},
+  {keywords:['rsac','cybersecurity','security conference','moscone','rsa conference'],
+   group:'conference', category:'Conference', icon:'&#128737;',
+   title:'RSAC 2026 Conference', desc:'Mar 22–27 • Moscone South, 747 Howard St, SF'},
+
+  // Weather
+  {keywords:['weather','rain','temperature','cold','hot','forecast','umbrella','sunny','humid'],
+   group:'weather', category:'Weather', icon:'&#127780;',
+   title:'Weather in Atlanta', desc:'Check current conditions for your city'},
+
+  // Transport
+  {keywords:['cab','taxi','uber','lyft','ride','transport','car','drive','bus','bart','muni','metro','train','rental'],
+   group:'transport', category:'Transport', icon:'&#128663;',
+   title:'Local Transport', desc:'Corporate cab account available. BART for Berkeley/SF area.'},
+
+  // Currency
+  {keywords:['currency','exchange','dollar','rupee','convert','usd','inr','aed','forex','money exchange'],
+   group:'currency', category:'Finance', icon:'&#128178;',
+   title:'Currency Info', desc:'Primary: USD (US travel). INR (home). AED (UAE transit). See expenses for details.'}
+];
+
+function smartSearch(query) {
+  var q = query.toLowerCase().trim();
+  // Filter out stop words for scoring, but keep original for intent detection
+  var words = q.split(/\s+/).filter(function(w) { return w.length > 1 && _stopWords.indexOf(w) === -1; });
+  var intent = _detectIntent(q);
+  var timeMod = _detectTimeMod(q);
+  var results = [];
+
+  searchIndex.forEach(function(item) {
+    var score = 0;
+
+    // 1. Keyword matching (only meaningful words)
+    words.forEach(function(w) {
+      item.keywords.forEach(function(kw) {
+        if (kw === q) score += 15; // exact full query match
+        else if (kw === w) score += 8; // exact word match
+        else if (kw.indexOf(w) !== -1 && w.length >= 3) score += 3; // substring match (min 3 chars)
+      });
+    });
+
+    // 2. Intent boost — if detected intent matches this item's group, big bonus
+    if (intent && item.group === intent) score += 12;
+    // If intent detected but item is different group, penalize
+    if (intent && item.group !== intent) score = Math.floor(score * 0.3);
+
+    // 3. Title/desc matching (lower weight, only for 3+ char words)
+    words.forEach(function(w) {
+      if (w.length >= 3) {
+        if (item.title.toLowerCase().indexOf(w) !== -1) score += 2;
+        if (item.desc.toLowerCase().indexOf(w) !== -1) score += 1;
+      }
+    });
+
+    // Minimum threshold — only include if meaningful match
+    if (score >= 5) results.push({item:item, score:score, timeMod:timeMod});
+  });
+
+  results.sort(function(a,b){ return b.score - a.score; });
+  return results.slice(0, 5); // max 5 results
+}
+
+function closeSearchResults() {
+  document.getElementById('searchResultsPanel').style.display = 'none';
+}
+
+function _getCurrentCityName() {
+  var cur = getCurrentCity();
+  return cur ? cur.city : 'Atlanta';
+}
+
+function submitSearch() {
+  var inp = document.getElementById('queryInput');
+  var val = inp.value.trim();
+  if (!val) return;
+
+  // Add to history chips
+  var hist = document.getElementById('searchHistory');
+  var chip = document.createElement('span');
+  chip.className = 'qc';
+  chip.setAttribute('onclick', 'reSearch(this)');
+  chip.textContent = val.length > 18 ? val.substring(0,16)+'..' : val;
+  hist.insertBefore(chip, hist.firstChild);
+  if (hist.children.length > 7) hist.removeChild(hist.lastChild);
+
+  var results = smartSearch(val);
+  var panel = document.getElementById('searchResultsPanel');
+  var body = document.getElementById('searchResultsBody');
+  var timeMod = _detectTimeMod(val.toLowerCase());
+  var intent = _detectIntent(val.toLowerCase());
+  var cityName = _getCurrentCityName();
+
+  if (results.length > 0) {
+    document.getElementById('searchTitle').innerHTML = '&#128269; Results for "' + val + '"';
+    document.getElementById('searchSubtitle').textContent = results.length + ' result' + (results.length>1?'s':'');
+
+    var html = '';
+
+    // Smart answer banner for time-based queries
+    if (timeMod === 'now' && (intent === 'food' || intent === 'bar')) {
+      var hour = new Date().getHours();
+      var timeContext = '';
+      if (hour < 6) timeContext = 'It\'s very early — most restaurants are closed. Hotel lobby or 24/7 options:';
+      else if (hour < 11) timeContext = 'Morning hours — look for breakfast spots:';
+      else if (hour < 15) timeContext = 'Lunch time — most restaurants are open now:';
+      else if (hour < 17) timeContext = 'Afternoon — some restaurants between lunch & dinner service:';
+      else if (hour < 22) timeContext = 'Dinner time — most restaurants are open now:';
+      else timeContext = 'Late night — limited options. Try hotel bar or late-night spots:';
+
+      html += '<div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:10px;padding:14px;margin-bottom:12px;">'
+        + '<div style="font-size:11px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">&#9201; Smart Answer</div>'
+        + '<div style="font-size:13px;color:#1e1b4b;font-weight:600;">' + timeContext + '</div>'
+        + '</div>';
+    }
+
+    results.forEach(function(r) {
+      var item = r.item;
+      var clickAction = '';
+      if (item.action) {
+        clickAction = 'onclick="searchIndex[' + searchIndex.indexOf(item) + '].action()"';
+      } else if (item.venue) {
+        clickAction = 'onclick="showDetail(\'' + item.venue + '\');closeSearchResults()"';
+      } else if (item.tab) {
+        clickAction = 'onclick="switchTab(\'' + item.tab + '\',document.querySelectorAll(\'.cat-tab\')[' +
+          ['food','bar','interesting','sightseeing'].indexOf(item.tab) + ']);closeSearchResults()"';
+      }
+
+      // Build description — append hours if time-based query
+      var descText = item.desc;
+      if (timeMod && item.hours) descText += ' • ' + item.hours;
+
+      html += '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:' + (clickAction?'pointer':'default') + ';transition:border-color 0.15s;" ' + clickAction + ' onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
+        + '<div style="display:flex;align-items:center;gap:10px;">'
+        + '<span style="font-size:22px;flex-shrink:0;">' + item.icon + '</span>'
+        + '<div style="flex:1;">'
+        + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--accent);margin-bottom:2px;">' + item.category + '</div>'
+        + '<div style="font-size:14px;font-weight:700;color:var(--text);">' + item.title + '</div>'
+        + '<div style="font-size:12px;color:var(--text-2);margin-top:2px;">' + descText + '</div>'
+        + '</div>'
+        + (clickAction ? '<span style="font-size:14px;color:var(--text-3);">&#8250;</span>' : '')
+        + '</div></div>';
+    });
+
+    // Contextual web search fallback
+    var mapsQuery = val + ' near ' + cityName;
+    html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;display:flex;gap:8px;justify-content:center;">'
+      + '<a href="https://www.google.com/maps/search/' + encodeURIComponent(mapsQuery) + '" target="_blank" style="font-size:12px;color:var(--accent);font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid var(--accent);border-radius:6px;">&#128205; Google Maps</a>'
+      + '<a href="https://www.google.com/search?q=' + encodeURIComponent(val + ' ' + cityName) + '" target="_blank" style="font-size:12px;color:var(--text-2);font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid var(--border);border-radius:6px;">&#128269; Google Search</a>'
+      + '</div>';
+
+    body.innerHTML = html;
+    panel.style.display = 'block';
+  } else {
+    // No local results — show smart fallback with Maps + Google
+    document.getElementById('searchTitle').innerHTML = '&#128269; "' + val + '"';
+    document.getElementById('searchSubtitle').textContent = 'No matching info in TRAVELAG';
+
+    var mapsQuery = val + ' near ' + cityName;
+    body.innerHTML = '<div style="text-align:center;padding:30px 20px;">'
+      + '<div style="font-size:40px;margin-bottom:12px;">&#128270;</div>'
+      + '<div style="font-size:14px;color:var(--text-2);margin-bottom:16px;">Nothing found locally. Try searching externally:</div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;max-width:300px;margin:0 auto;">'
+      + '<a href="https://www.google.com/maps/search/' + encodeURIComponent(mapsQuery) + '" target="_blank" style="display:block;padding:12px;background:#16a34a;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">&#128205; Search Google Maps near ' + cityName + '</a>'
+      + '<a href="https://www.google.com/search?q=' + encodeURIComponent(val + ' ' + cityName) + '" target="_blank" style="display:block;padding:12px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">&#128269; Search Google</a>'
+      + '</div></div>';
+
+    panel.style.display = 'block';
+  }
+
+  inp.value = '';
+}
+document.getElementById('queryInput').addEventListener('keypress', function(e){ if(e.key==='Enter') submitSearch(); });
+
+// Edit Trip
+// ===== EDIT TRIP — Conversational Flow =====
+var tripRoute = [
+  {city:'Las Vegas', start:'2026-03-08', end:'2026-03-10', status:'past', tz:'America/Los_Angeles', tzLabel:'PT'},
+  {city:'Redmond', start:'2026-03-10', end:'2026-03-14', status:'past', tz:'America/Los_Angeles', tzLabel:'PT'},
+  {city:'Atlanta', start:'2026-03-14', end:'2026-03-22', status:'current', tz:'America/New_York', tzLabel:'EST'},
+  {city:'Berkeley', start:'2026-03-22', end:'2026-03-25', status:'future', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'Holiday Inn Express Berkeley', hotelAddr:'1175 University Ave, Berkeley, CA 94702'},
+  {city:'San Francisco', start:'2026-03-25', end:'2026-03-26', status:'future', tz:'America/Los_Angeles', tzLabel:'PT', hotel:'TBD — near Moscone Center'}
+];
+
+// Parse 'YYYY-MM-DD' as LOCAL midnight (avoids UTC offset bugs)
+function parseLocalDate(str) {
+  var p = str.split('-');
+  return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+}
+
+function getCurrentCity(){
+  var today = new Date();
+  for(var i=0;i<tripRoute.length;i++){
+    var s = parseLocalDate(tripRoute[i].start);
+    var e = parseLocalDate(tripRoute[i].end);
+    if(today>=s && today<e) return tripRoute[i];
+  }
+  return tripRoute[0];
+}
+
+// Now that tripRoute is defined, build the timezone brackets
+renderTzBrackets();
+setInterval(updateTzBrackets, 30000);
+
+// ===== LIVE CRITICAL ACTIVITY COUNTDOWN =====
+// Upcoming critical events — add/remove as trip progresses
+// Times are in LOCAL time of the event's city (parsed explicitly)
+var criticalEvents = [
+  {label:'Cab to ATL Airport', year:2026, month:3, day:22, hour:6, min:15, tz:'America/New_York'},
+  {label:'Delta DL-809 Departure ATL→SJC', year:2026, month:3, day:22, hour:9, min:50, tz:'America/New_York'},
+  {label:'Check-in Holiday Inn Berkeley', year:2026, month:3, day:22, hour:15, min:0, tz:'America/Los_Angeles'},
+  {label:'RSAC 2026 — Day 1', year:2026, month:3, day:23, hour:9, min:0, tz:'America/Los_Angeles'},
+  {label:'Fly Home SFO→Dubai', year:2026, month:3, day:26, hour:0, min:0, tz:'America/Los_Angeles'}
+];
+
+function critEventToDate(ev) {
+  // Create date in the event's local timezone
+  return new Date(ev.year, ev.month - 1, ev.day, ev.hour, ev.min, 0);
+}
+
+function updateCritCountdown() {
+  var now = new Date();
+  var next = null, diffMs = Infinity;
+
+  criticalEvents.forEach(function(ev) {
+    var evDate = critEventToDate(ev);
+    var ms = evDate - now;
+    if (ms > 0 && ms < diffMs) { diffMs = ms; next = ev; }
+  });
+
+  var numEl = document.getElementById('critCountdown');
+  var unitEl = document.getElementById('critUnit');
+  var detailEl = document.getElementById('critDetail');
+  var cardEl = document.getElementById('critCard');
+  if (!numEl || !next) return;
+
+  var totalMin = Math.floor(diffMs / 60000);
+  var hours = Math.floor(totalMin / 60);
+  var mins = totalMin % 60;
+
+  if (hours >= 24) {
+    var days = Math.floor(hours / 24);
+    var remHrs = hours % 24;
+    numEl.textContent = days + 'd ' + remHrs + 'h';
+    unitEl.textContent = 'until next event';
+  } else if (hours > 0) {
+    numEl.textContent = hours + 'h ' + mins + 'm';
+    unitEl.textContent = hours <= 2 ? 'GET READY' : 'hours to go';
+  } else {
+    numEl.textContent = mins + 'm';
+    unitEl.textContent = 'IMMINENT';
+  }
+
+  // Extract display time from event
+  var evTime = critEventToDate(next);
+  var timeStr = evTime.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+  detailEl.textContent = next.label + ' \u2022 ' + timeStr;
+
+  // Pulse effect when under 2 hours
+  if (hours < 2) {
+    cardEl.style.animation = 'critPulse 2s ease-in-out infinite';
+  } else {
+    cardEl.style.animation = 'none';
+  }
+}
+updateCritCountdown();
+setInterval(updateCritCountdown, 30000); // update every 30s
+
+// ===== LIVE WEATHER WIDGET — Open-Meteo (free, no key) =====
+var weatherCities = [
+  {name:'Atlanta',        lat:33.749, lon:-84.388, tz:'America/New_York'},
+  {name:'Berkeley',       lat:37.872, lon:-122.272, tz:'America/Los_Angeles'},
+  {name:'San Francisco',  lat:37.775, lon:-122.418, tz:'America/Los_Angeles'}
+];
+
+// WMO weather code → icon + label
+function wmoToWeather(code) {
+  if (code === 0) return {icon:'&#9728;&#65039;', label:'Clear'};
+  if (code <= 3) return {icon:'&#9925;', label:'Partly Cloudy'};
+  if (code <= 48) return {icon:'&#127787;&#65039;', label:'Foggy'};
+  if (code <= 57) return {icon:'&#127782;&#65039;', label:'Drizzle'};
+  if (code <= 67) return {icon:'&#127783;&#65039;', label:'Rain'};
+  if (code <= 77) return {icon:'&#127784;&#65039;', label:'Snow'};
+  if (code <= 82) return {icon:'&#127783;&#65039;', label:'Showers'};
+  if (code <= 86) return {icon:'&#127784;&#65039;', label:'Snow Showers'};
+  if (code >= 95) return {icon:'&#9889;', label:'Thunderstorm'};
+  return {icon:'&#127780;', label:'Mixed'};
+}
+
+function fToC(f) { return ((f - 32) * 5 / 9).toFixed(0); }
+
+function fetchWeather() {
+  var curCity = getCurrentCity();
+  var curName = curCity ? curCity.city : 'Atlanta';
+
+  // Find current city and next destination
+  var currentIdx = -1;
+  for (var i = 0; i < tripRoute.length; i++) {
+    if (tripRoute[i].city === curName) { currentIdx = i; break; }
+  }
+  // Find next different city
+  var nextCity = null;
+  for (var j = currentIdx + 1; j < tripRoute.length; j++) {
+    if (tripRoute[j].city !== curName) { nextCity = tripRoute[j]; break; }
+  }
+
+  // Build list of cities to fetch: current + next destination
+  var fetchList = [];
+  weatherCities.forEach(function(wc) {
+    if (wc.name === curName || (nextCity && wc.name === nextCity.city)) fetchList.push(wc);
+  });
+  if (fetchList.length === 0) fetchList.push(weatherCities[0]); // fallback
+
+  var allData = [];
+  var done = 0;
+
+  fetchList.forEach(function(city) {
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + city.lat + '&longitude=' + city.lon
+      + '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'
+      + '&temperature_unit=fahrenheit&timezone=' + encodeURIComponent(city.tz) + '&forecast_days=7';
+
+    fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+      allData.push({city: city.name, data: data});
+      done++;
+      if (done === fetchList.length) renderWeather(allData, curName, nextCity ? nextCity.city : null);
+    }).catch(function() {
+      done++;
+      if (done === fetchList.length) renderWeather(allData, curName, nextCity ? nextCity.city : null);
+    });
+  });
+}
+
+function renderWeather(allData, currentCityName, nextCityName) {
+  var body = document.getElementById('weatherBody');
+  var clothDiv = document.getElementById('weatherClothing');
+  if (!body) return;
+
+  var html = '';
+  var allMinF = 999, allMaxF = -999;
+
+  allData.forEach(function(entry) {
+    var d = entry.data.daily;
+    if (!d) return;
+    var isCurrent = (entry.city === currentCityName);
+    var cityLabel = isCurrent ? entry.city + ' (Now)' : entry.city + ' (Next)';
+    var daysToShow = isCurrent ? 2 : 2; // today + tomorrow for current, first 2 days for next
+
+    html += '<div style="margin-bottom:10px;">'
+      + '<div style="font-size:11px;font-weight:800;color:' + (isCurrent ? 'var(--accent)' : 'var(--text-2)') + ';margin-bottom:6px;">' + cityLabel + '</div>'
+      + '<div style="display:flex;gap:6px;">';
+
+    for (var i = 0; i < daysToShow && i < d.time.length; i++) {
+      var maxF = Math.round(d.temperature_2m_max[i]);
+      var minF = Math.round(d.temperature_2m_min[i]);
+      var maxC = fToC(maxF);
+      var minC = fToC(minF);
+      var rain = d.precipitation_probability_max[i];
+      var wmo = wmoToWeather(d.weathercode[i]);
+      var dayLabel = (i === 0 && isCurrent) ? 'Today' : (i === 1 && isCurrent) ? 'Tomorrow' : new Date(d.time[i]).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+      // Track trip-wide extremes
+      if (maxF > allMaxF) allMaxF = maxF;
+      if (minF < allMinF) allMinF = minF;
+
+      html += '<div style="flex:1;background:var(--bg);border-radius:8px;padding:8px 6px;text-align:center;">'
+        + '<div style="font-size:9px;font-weight:700;color:var(--text-3);margin-bottom:4px;">' + dayLabel + '</div>'
+        + '<div style="font-size:18px;margin-bottom:2px;">' + wmo.icon + '</div>'
+        + '<div style="font-size:9px;color:var(--text-3);margin-bottom:4px;">' + wmo.label + '</div>'
+        + '<div style="font-size:13px;font-weight:800;color:var(--text);">' + maxF + '°F</div>'
+        + '<div style="font-size:10px;color:var(--text-3);">' + maxC + '°C</div>'
+        + '<div style="font-size:10px;color:var(--blue);margin-top:2px;">Lo ' + minF + '°F/' + minC + '°C</div>'
+        + (rain > 20 ? '<div style="font-size:9px;color:var(--blue);font-weight:700;margin-top:2px;">&#127783;&#65039; ' + rain + '%</div>' : '')
+        + '</div>';
+    }
+
+    html += '</div></div>';
+
+    // Also pull all 7 days for trip-wide range
+    for (var k = 0; k < d.temperature_2m_max.length; k++) {
+      if (d.temperature_2m_max[k] > allMaxF) allMaxF = Math.round(d.temperature_2m_max[k]);
+      if (d.temperature_2m_min[k] < allMinF) allMinF = Math.round(d.temperature_2m_min[k]);
+    }
+  });
+
+  body.innerHTML = html;
+
+  // Trip-wide clothing suggestion
+  if (allMaxF > -999 && clothDiv) {
+    var range = allMaxF - allMinF;
+    var suggestion = '';
+    if (allMinF < 45) suggestion = '&#129507; Pack a warm jacket + layers. Lows dip below 45°F.';
+    else if (allMinF < 60) suggestion = '&#129507; Light jacket for evenings. Layering recommended.';
+    else suggestion = '&#128085; Light clothing fine. Warm throughout.';
+
+    if (range > 30) suggestion += ' Wide ' + range + '°F swing across your trip — pack versatile layers.';
+
+    clothDiv.innerHTML = '<strong>&#127890; Trip Clothing</strong><br>'
+      + '<span style="font-size:10px;">Full range: ' + allMinF + '°F/' + fToC(allMinF) + '°C to ' + allMaxF + '°F/' + fToC(allMaxF) + '°C</span><br>'
+      + '<span style="font-size:10px;">' + suggestion + '</span>';
+    clothDiv.style.display = 'block';
+  }
+}
+
+// Fetch on load
+fetchWeather();
+// Refresh every 30 minutes
+setInterval(fetchWeather, 1800000);
+
+// ===== VENUE OPEN/CLOSED STATUS — structured hours =====
+// Schedule: {days:[0=Sun..6=Sat], open:hour(24h), close:hour(24h)}
+// For venues that close after midnight, close > 24 (e.g. 26 = 2AM)
+var venueSchedule = {
+  // Restaurants
+  south_city:   [{days:[0,1,2,3,4,5,6], open:11, close:22}],
+  blue_india:   [{days:[0,1,2,3,4,5,6], open:11.5, close:22.5}],
+  tabla:        [{days:[2,3,4,5,6], open:17, close:23}, {days:[0], open:17, close:22}], // closed Mon
+  // Bars
+  midtown_bar:  [{days:[0,1,2,3,4,5,6], open:16, close:24}],
+  red_phone:    [{days:[1,2,3,4,5], open:17, close:26}, {days:[6], open:17, close:26}, {days:[0], open:17, close:24}],
+  livingston:   [{days:[0,1,2,3,4,5,6], open:17, close:25}],
+  // Events (time-specific, not recurring)
+  harry_potter: [{days:[6], open:19.5, close:23}], // Sat 7:30 PM show
+  atl_united:   [{days:[6], open:17.5, close:22}], // Sat gates 5:30 PM
+  laughing_skull:[{days:[4,5,6], open:20, close:23.5}],
+  // Sightseeing
+  piedmont:     [{days:[0,1,2,3,4,5,6], open:6, close:23}],
+  high_museum:  [{days:[6], open:10, close:21}, {days:[0], open:12, close:17}, {days:[2,3,4,5], open:10, close:17}], // closed Mon
+  fox_theatre:  [{days:[1,2,3,4,5], open:10, close:18}] // box office hours
+};
+
+function getVenueStatus(venueId) {
+  var sched = venueSchedule[venueId];
+  if (!sched) return null;
+
+  var now = new Date();
+  var day = now.getDay(); // 0=Sun
+  var hour = now.getHours() + now.getMinutes() / 60;
+
+  // Check if open right now
+  for (var i = 0; i < sched.length; i++) {
+    var s = sched[i];
+    if (s.days.indexOf(day) === -1) continue;
+    // Handle past-midnight closing (close > 24)
+    var closeHr = s.close > 24 ? s.close - 24 : s.close;
+    var crossesMidnight = s.close > 24;
+
+    if (crossesMidnight) {
+      // Open if: after open time OR before close time (next day early AM)
+      if (hour >= s.open || hour < closeHr) {
+        // Check closing soon (within 1 hour)
+        if (hour >= s.open && (s.close - hour) <= 1) return {status:'closing', closes:s.close};
+        if (hour < closeHr && (closeHr - hour) <= 1) return {status:'closing', closes:closeHr};
+        return {status:'open', closes: crossesMidnight ? closeHr : s.close};
+      }
+    } else {
+      if (hour >= s.open && hour < s.close) {
+        if ((s.close - hour) <= 1) return {status:'closing', closes:s.close};
+        return {status:'open', closes:s.close};
+      }
+    }
+  }
+
+  // Not open — find next opening
+  for (var j = 0; j < sched.length; j++) {
+    if (sched[j].days.indexOf(day) !== -1 && hour < sched[j].open) {
+      return {status:'closed', opens:sched[j].open};
+    }
+  }
+  return {status:'closed', opens:null};
+}
+
+function formatHour(h) {
+  if (h >= 24) h -= 24;
+  var hr = Math.floor(h);
+  var mn = Math.round((h - hr) * 60);
+  var ampm = hr >= 12 ? 'PM' : 'AM';
+  if (hr === 0) hr = 12;
+  else if (hr > 12) hr -= 12;
+  return hr + (mn > 0 ? ':' + (mn < 10 ? '0' : '') + mn : '') + ' ' + ampm;
+}
+
+function refreshVenueStatus() {
+  document.querySelectorAll('.oc-tag[data-v]').forEach(function(tag) {
+    var vid = tag.getAttribute('data-v');
+    var info = getVenueStatus(vid);
+    if (!info) { tag.innerHTML = ''; return; }
+
+    if (info.status === 'open') {
+      tag.className = 'oc-tag oc-open';
+      tag.textContent = 'Open';
+    } else if (info.status === 'closing') {
+      tag.className = 'oc-tag oc-closing';
+      tag.textContent = 'Closing Soon';
+    } else {
+      tag.className = 'oc-tag oc-closed';
+      tag.textContent = info.opens ? 'Closed \u2022 Opens ' + formatHour(info.opens) : 'Closed Today';
+    }
+  });
+}
+
+// Run immediately + every 5 minutes
+refreshVenueStatus();
+setInterval(refreshVenueStatus, 300000);
+
+// ===== MASTER 5-MIN REFRESH for all time-dependent elements =====
+setInterval(function() {
+  updateCritCountdown();
+  updateTzBrackets();
+  refreshVenueStatus();
+}, 300000);
+
+function openEditTrip(){
+  document.getElementById('editOverlay').classList.add('open');
+  // Reset to step 1
+  document.getElementById('epStep1').style.display='block';
+  document.getElementById('epStep2').style.display='none';
+  document.querySelectorAll('.ep-reason').forEach(function(r){r.classList.remove('selected');});
+  // Update current city banner
+  var cur = getCurrentCity();
+  if(cur){
+    document.getElementById('epCurrentCity').textContent = cur.city;
+    var dayNum = Math.ceil((new Date()-parseLocalDate(tripRoute[0].start))/(1000*60*60*24))+1;
+    var totalDays = Math.ceil((parseLocalDate(tripRoute[tripRoute.length-1].end)-parseLocalDate(tripRoute[0].start))/(1000*60*60*24));
+    var nextCity = '';
+    for(var i=0;i<tripRoute.length;i++){if(tripRoute[i].status==='future'){nextCity=tripRoute[i].city;break;}}
+    var info = 'Day '+dayNum+' of '+totalDays;
+    if(nextCity) info += ' \u2022 Next: '+nextCity;
+    document.getElementById('epCurrentInfo').textContent = info;
+  }
+}
+function closeEditTrip(){
+  document.getElementById('editOverlay').classList.remove('open');
+}
+
+function pickReason(reason, el){
+  document.querySelectorAll('.ep-reason').forEach(function(r){r.classList.remove('selected');});
+  el.classList.add('selected');
+  // Show step 2 after brief delay
+  setTimeout(function(){
+    document.getElementById('epStep1').style.display='none';
+    document.getElementById('epStep2').style.display='block';
+    buildSmartArea(reason);
+    buildRouteDisplay();
+  }, 200);
+}
+
+function buildSmartArea(reason){
+  var icon = document.getElementById('epContextIcon');
+  var text = document.getElementById('epContextText');
+  var area = document.getElementById('epSmartArea');
+  var html = '';
+  if(reason==='extend'){
+    icon.textContent='📅'; text.textContent='Extending your trip — add new dates & city below, or scan your email for new bookings.';
+    html = '<div class="ep-smart-field"><label>New End Date</label><input type="date" value="2026-03-30" id="epNewEnd"></div>'
+      +'<div class="ep-smart-field"><label>Add City (after San Francisco)</label><input type="text" placeholder="e.g. Los Angeles, Seattle, Las Vegas" id="epNewCity"></div>'
+      +'<div class="ep-smart-field"><label>Reason / Notes (optional)</label><input type="text" placeholder="e.g. attending another conference, client meetings" id="epExtNote"></div>';
+  } else if(reason==='shorten'){
+    icon.textContent='✂️'; text.textContent='Cutting short — when do you need to leave? We\'ll adjust flights and cancel downstream hotels.';
+    html = '<div class="ep-smart-field"><label>New End Date</label><input type="date" value="2026-03-24" id="epNewEnd"></div>'
+      +'<div class="ep-smart-field"><label>Last City</label><input type="text" placeholder="e.g. San Jose (skip San Francisco)" id="epLastCity"></div>';
+  } else if(reason==='conference'){
+    icon.textContent='🛡️'; text.textContent='New conference — tell us the name or scan your emails. We\'ll pull badge info, venue, and schedule.';
+    html = '<div class="ep-smart-field"><label>Conference Name</label><input type="text" placeholder="e.g. Google I/O, AWS re:Invent, DevConnect" id="epConfName"></div>'
+      +'<div class="ep-smart-field"><label>City &amp; Dates (if known)</label><input type="text" placeholder="e.g. San Francisco, Mar 24-26" id="epConfDates"></div>'
+      +'<div style="font-size:10px;color:var(--accent);margin-top:4px;font-weight:600;">💡 Tip: Click "Scan Emails" below — we\'ll find registration confirmations automatically.</div>';
+  } else if(reason==='flight'){
+    icon.textContent='✈️'; text.textContent='Flight change — new booking, reschedule, or cancellation. Scan email or enter details.';
+    html = '<div class="ep-smart-field"><label>What changed?</label><textarea placeholder="e.g. Rebooked Etihad EY14 to Mar 27 instead of Mar 21\ne.g. New flight: Delta DL-123, SJC → SFO, Mar 23" rows="3" id="epFlightNote"></textarea></div>';
+  } else if(reason==='hotel'){
+    icon.textContent='🏨'; text.textContent='Hotel change — new booking, switch, or cancellation. Upload voucher or scan email.';
+    html = '<div class="ep-smart-field"><label>What changed?</label><textarea placeholder="e.g. Booked Hilton Union Square, SF, Mar 23-26\ne.g. Cancelled Hotel Indigo, switching to Marriott" rows="3" id="epHotelNote"></textarea></div>';
+  } else if(reason==='team'){
+    icon.textContent='👥'; text.textContent='Manage your travel team — add or remove coordinators and assign them to trip events.';
+    var evts = ['FABCON ATL','San Jose','RSAC SF','Flights','Hotels'];
+    var members = [
+      {name:'Chinmay Malhotra',role:'Travel Desk',color:'#4f46e5',checks:[0,0,0,1,1]},
+      {name:'Sabarinathan',role:'Sales',color:'#7c3aed',checks:[1,0,1,0,0]},
+      {name:'Udayan',role:'US Travel',color:'#0891b2',checks:[1,1,1,1,1]},
+      {name:'Abhishek Das',role:'Trainee',color:'#059669',checks:[0,1,1,0,0]}
+    ];
+    html = '<div style="overflow-x:auto;margin-bottom:10px;"><table style="width:100%;border-collapse:separate;border-spacing:0;font-size:11px;">';
+    html += '<tr><th style="padding:6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);text-align:left;border-bottom:2px solid var(--border);">Person</th>';
+    evts.forEach(function(e){html += '<th style="padding:6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);text-align:center;border-bottom:2px solid var(--border);white-space:nowrap;">'+e+'</th>';});
+    html += '</tr>';
+    members.forEach(function(m){
+      var ini = m.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+      html += '<tr style="border-bottom:1px solid var(--bg);">';
+      html += '<td style="padding:6px;"><div style="display:flex;align-items:center;gap:6px;"><div style="width:22px;height:22px;border-radius:50%;background:'+m.color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;">'+ini+'</div><div><div style="font-weight:700;font-size:11px;">'+m.name+'</div><div style="font-size:8px;color:var(--text-3);">'+m.role+'</div></div></div></td>';
+      m.checks.forEach(function(c){
+        html += '<td style="padding:6px;text-align:center;"><input type="checkbox" '+(c?'checked':'')+' style="accent-color:var(--accent);cursor:pointer;width:16px;height:16px;"></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</table></div>';
+    html += '<div style="display:flex;gap:6px;"><input type="text" placeholder="Add person name..." style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:11px;font-family:inherit;outline:none;">'
+      +'<select style="padding:7px;border:1px solid var(--border);border-radius:5px;font-size:10px;font-family:inherit;background:var(--white);"><option>Travel Desk</option><option>Sales</option><option>US Travel</option><option>Trainee</option><option>Conference</option><option>Agent</option><option>Visa</option></select>'
+      +'<button class="ep-add" style="margin:0;padding:7px 12px;">+ Add</button></div>';
+    html += '<div style="font-size:9px;color:var(--text-3);margin-top:6px;">💡 Auto-detected from email patterns: booking threads, conference registrations, travel planning discussions.</div>';
+  } else {
+    icon.textContent='✏️'; text.textContent='Manual edit — update anything about your trip.';
+    html = '<div class="ep-smart-field"><label>Trip Name</label><input type="text" value="US Trip 2026" id="epTripName"></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      +'<div class="ep-smart-field"><label>Start Date</label><input type="date" value="2026-03-08" id="epStart"></div>'
+      +'<div class="ep-smart-field"><label>End Date</label><input type="date" value="2026-03-26" id="epEnd"></div></div>'
+      +'<div class="ep-smart-field"><label>Paste or type new details</label><textarea placeholder="Any changes — flights, hotels, events, notes..." rows="3"></textarea></div>';
+  }
+  area.innerHTML = html;
+}
+
+function buildRouteDisplay(){
+  var rd = document.getElementById('epRouteDisplay');
+  var html = '';
+  tripRoute.forEach(function(r, i){
+    var cls = r.status==='current'?'current':r.status==='future'?'future':'past';
+    html += '<span class="ep-city-pill '+cls+'">'+r.city+'</span>';
+    if(i < tripRoute.length-1) html += '<span class="ep-city-arrow">→</span>';
+  });
+  rd.innerHTML = html;
+}
+
+function epBack(){
+  document.getElementById('epStep2').style.display='none';
+  document.getElementById('epStep1').style.display='block';
+  document.querySelectorAll('.ep-reason').forEach(function(r){r.classList.remove('selected');});
+}
+
+function toggleEditScan(){
+  var p=document.getElementById('editScanPanel');
+  p.style.display = p.style.display==='none'?'block':'none';
+}
+
+function runEditScan(){
+  var res=document.getElementById('editScanResults');
+  res.innerHTML='<div style="padding:6px;color:var(--accent);font-weight:700;font-size:10px;">Scanning inbox...</div>';
+  setTimeout(function(){
+    res.innerHTML=
+      '<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--white);border-radius:4px;margin-bottom:3px;border:1px solid var(--border);font-size:10px;">'
+      +'<span>✈️</span><span style="flex:1;color:var(--text-2);">Delta DL-809 ATL→SJC Mar 22</span><span style="color:var(--green);font-weight:700;">✓</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--white);border-radius:4px;margin-bottom:3px;border:1px solid var(--border);font-size:10px;">'
+      +'<span>🏨</span><span style="flex:1;color:var(--text-2);">Hotel Indigo Atlanta Mar 21-22</span><span style="color:var(--green);font-weight:700;">✓</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--white);border-radius:4px;margin-bottom:3px;border:1px solid var(--border);font-size:10px;">'
+      +'<span>🏨</span><span style="flex:1;color:var(--text-2);">Holiday Inn Express Berkeley Mar 22-26 (AG)</span><span style="color:var(--green);font-weight:700;">✓</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--white);border-radius:4px;margin-bottom:3px;border:1px solid var(--border);font-size:10px;">'
+      +'<span>🏨</span><span style="flex:1;color:var(--text-2);">DoubleTree Berkeley Marina Mar 22-28 (Murtaza)</span><span style="color:var(--green);font-weight:700;">✓</span></div>'
+      +'<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--white);border-radius:4px;margin-bottom:3px;border:1px solid var(--border);font-size:10px;">'
+      +'<span>🛡️</span><span style="flex:1;color:var(--text-2);">RSAC 2026 badge pickup details</span><span style="color:var(--green);font-weight:700;">✓</span></div>'
+      +'<div style="padding:6px;color:var(--green);font-weight:700;font-size:10px;">✓ Found 5 new items</div>';
+  },1200);
+}
+
+function handleEditUpload(files){
+  if(!files.length) return;
+  var r=document.getElementById('editUploadResult');
+  r.style.display='block';
+  r.textContent='✓ Uploaded: '+files[0].name+' ('+Math.round(files[0].size/1024)+' KB)';
+}
+
+function saveTrip(){
+  closeEditTrip();
+}
+
+// ===== OPEN ACTION — Send Reminder via Microsoft Outlook =====
+function sendActionReminder(subject, body){
+  var to = 'chinmay.malhotra@celebaltech.com';
+  var user = 'Abhishek Goyal';
+  var tripDates = 'Mar 8–28, 2026';
+  var route = 'Atlanta → Berkeley → San Francisco';
+  var fullBody = 'Hi Chinmay,\n\nReminder from '+user+'\'s TRAVELAG:\n\n'
+    +body+'\n\nTrip: US Trip 2026\nDates: '+tripDates+'\nRoute: '+route+'\n\nPlease action at the earliest.\n\nBest,\n'+user;
+  // Open in Microsoft Outlook (mailto triggers default mail client — ensure Outlook is set as default)
+  window.location.href = 'mailto:'+to+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(fullBody);
+}
+
+// ===== TRAVEL DAY DETAIL =====
+function showTravelDayDetail(){
+  document.getElementById('travelDayPanel').style.display='block';
+}
+
+// ===== PLAN TRIP HOME =====
+function showTripHome(){
+  document.getElementById('tripHomePanel').style.display='block';
+}
+function closeTripHome(){
+  document.getElementById('tripHomePanel').style.display='none';
+}
+function selectFlight(n){
+  for(var i=1;i<=5;i++){
+    var el = document.getElementById('flightOpt'+i);
+    if(el) el.style.borderColor = i===n ? 'var(--accent)' : 'var(--border)';
+  }
+}
+function sendTripHomeToDesk(){
+  var sel = document.querySelector('input[name="returnFlight"]:checked');
+  if(!sel){ alert('Please select a flight option first.'); return; }
+  var flightMap = {
+    'emirates_dxb':'Emirates EK226 (SFO→DXB, Direct, ~$671) — AI RECOMMENDED: Highest frequency, 60% network, only airline at DXB. Confirm day-of status.',
+    'turkish_ist_ek':'Turkish TK80 SFO→IST + Emirates IST→DXB (~$723) — Safety buffer via Istanbul. Still depends on Emirates landing at DXB.',
+    'turkish_dmm':'Turkish TK80 SFO→IST→DMM + Drive to Dubai (~$850 total) — PLAN B: Bypasses all UAE airports. 8h drive Dammam→Dubai via Saudi border.',
+    'etihad_auh':'Etihad EY14 (SFO→AUH, ~$471) — NOTE: SFO route SUSPENDED. Only 40% network. Date needs fix to Mar 26. Keep as fallback.',
+    'other':'Other airline — see Google Flights comparison for alternate routes (DEL, BOM, LHR options)'
+  };
+  var flightName = flightMap[sel.value] || sel.value;
+  var subject = '[Travel Request] Return Flight Booking — AG, SFO → Home, ~Mar 26';
+  var body = 'Hi Chinmay,\n\nPlease proceed with booking my return flight:\n\n'
+    +'Selected Option: '+flightName+'\n'
+    +'Route: SFO → Dubai/UAE\n'
+    +'Preferred Date: ~Mar 26, 2026\n'
+    +'Passenger: Abhishek Goyal (G7)\n\n'
+    +'SECURITY NOTE: Gulf region is under active conflict (Iran drone/missile strikes on UAE since Feb 28). '
+    +'Please check airline operating status before confirming. AI recommends Turkish Airlines via Istanbul as safest route.\n\n'
+    +'Trip: US Trip 2026\nDates: Mar 8–28, 2026\nRoute: Atlanta → Berkeley → San Francisco\n\n'
+    +'Please confirm once booked.\n\nBest,\nAbhishek Goyal';
+  window.location.href = 'mailto:chinmay.malhotra@celebaltech.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+</script>
+<script>
+// Register Service Worker for PWA
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./service-worker.js').then(function(r){
+    console.log('SW registered:', r.scope);
+  }).catch(function(e){ console.log('SW failed:', e); });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAVELAG — Setup</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#4f46e5">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --white:#fff;--bg:#f5f6f8;--accent:#4f46e5;--accent-hover:#4338ca;--accent-bg:#eef2ff;
+    --text:#1a1a2e;--text-2:#4a4a68;--text-3:#8b8ba7;
+    --green:#10b981;--green-bg:#ecfdf5;--blue:#3b82f6;--blue-bg:#eff6ff;
+    --orange:#f59e0b;--orange-bg:#fffbeb;--red:#ef4444;--red-bg:#fef2f2;
+    --border:#e5e7eb;--shadow:0 2px 8px rgba(0,0,0,0.06);--radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:40px 0 60px;text-align:center;position:relative;overflow:hidden;}
+  .header::after{content:'';position:absolute;bottom:-30px;left:0;right:0;height:60px;background:var(--bg);border-radius:50% 50% 0 0;}
+  .header h1{font-size:28px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px;}
+  .header p{font-size:14px;opacity:0.7;max-width:500px;margin:0 auto;}
+  .header .badge{display:inline-block;background:rgba(79,70,229,0.4);border:1px solid rgba(79,70,229,0.6);padding:4px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+
+  /* PROGRESS — 3 steps */
+  .progress-bar{max-width:680px;margin:-20px auto 30px;padding:0 24px;position:relative;z-index:2;}
+  .pb-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .pb-fill{height:100%;background:linear-gradient(90deg,var(--accent),#7c3aed);border-radius:3px;transition:width 0.5s ease;width:0%;}
+  .pb-steps{display:flex;justify-content:space-between;margin-top:8px;}
+  .pb-step{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.8px;transition:color 0.3s;}
+  .pb-step.active{color:var(--accent);}
+  .pb-step.done{color:var(--green);}
+
+  /* CONTAINER */
+  .container{max-width:680px;margin:0 auto;padding:0 24px 60px;}
+
+  /* STEP CARDS */
+  .step{display:none;animation:fadeIn 0.3s ease;}
+  .step.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;margin-bottom:16px;}
+  .card-num{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+  .card h2{font-size:20px;font-weight:800;margin-bottom:4px;}
+  .card .sub{font-size:12px;color:var(--text-3);margin-bottom:20px;line-height:1.5;}
+
+  /* FORM */
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-2);margin-bottom:5px;}
+  .field input[type=text],.field input[type=email],.field input[type=date],.field textarea{
+    width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;transition:all 0.15s;background:var(--white);
+  }
+  .field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,0.1);}
+  .field textarea{resize:vertical;min-height:50px;}
+  .field .hint{font-size:10px;color:var(--text-3);margin-top:3px;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  /* CHIPS */
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:8px 16px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s;background:var(--white);user-select:none;}
+  .chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+  .chip.selected{border-color:var(--accent);color:#fff;background:var(--accent);}
+
+  /* BUDGET */
+  .budget-row{display:flex;gap:8px;}
+  .budget-opt{flex:1;padding:10px 8px;border:1px solid var(--border);border-radius:8px;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--white);}
+  .budget-opt:hover{border-color:var(--accent);}
+  .budget-opt.selected{border-color:var(--accent);background:var(--accent-bg);}
+  .budget-opt .bo-icon{font-size:18px;display:block;margin-bottom:2px;}
+  .budget-opt .bo-label{font-size:10px;font-weight:700;color:var(--text-2);}
+  .budget-opt .bo-range{font-size:9px;color:var(--text-3);}
+  .budget-opt.selected .bo-label{color:var(--accent);}
+
+  /* DATA IMPORT OPTIONS */
+  .import-row{display:flex;gap:10px;margin-top:10px;}
+  .import-btn{flex:1;display:flex;align-items:center;gap:10px;padding:14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;background:var(--white);font-family:inherit;font-size:12px;font-weight:600;color:var(--text-2);text-align:left;}
+  .import-btn:hover{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
+  .import-btn.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);}
+  .import-btn .ib-icon{font-size:22px;flex-shrink:0;}
+  .import-btn .ib-rec{font-size:8px;font-weight:700;background:var(--green-bg);color:var(--green);padding:2px 6px;border-radius:8px;margin-left:auto;text-transform:uppercase;letter-spacing:0.5px;}
+
+  /* SCAN PANEL */
+  .scan-panel{display:none;background:var(--accent-bg);border:1px solid #c7d2fe;border-radius:10px;padding:16px;margin-top:12px;}
+  .scan-panel.visible{display:block;}
+  .scan-panel h5{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;}
+  .scan-panel p{font-size:11px;color:var(--text-2);line-height:1.5;}
+  .scan-field{display:flex;gap:8px;margin-top:10px;}
+  .scan-field input{flex:1;padding:9px 12px;border:1px solid #c7d2fe;border-radius:6px;font-size:12px;font-family:inherit;outline:none;}
+  .scan-field input:focus{border-color:var(--accent);}
+  .scan-btn{padding:9px 16px;border-radius:6px;background:var(--accent);color:#fff;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .scan-btn:hover{background:var(--accent-hover);}
+  .scan-results{margin-top:10px;font-size:11px;}
+  .scan-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--white);border-radius:6px;margin-bottom:4px;border:1px solid var(--border);}
+  .scan-item .si-icon{font-size:14px;}
+  .scan-item .si-text{flex:1;color:var(--text-2);}
+  .scan-item .si-check{color:var(--green);font-weight:700;}
+
+  /* UPLOAD ZONE */
+  .upload-zone{display:none;border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-top:12px;}
+  .upload-zone.visible{display:block;}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-bg);}
+  .upload-zone .uz-icon{font-size:24px;margin-bottom:2px;}
+  .upload-zone .uz-title{font-size:12px;font-weight:700;}
+  .upload-zone .uz-sub{font-size:10px;color:var(--text-3);margin-top:2px;}
+  .upload-zone input{display:none;}
+
+  /* PRIORITY GRID */
+  .priority-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .priority-card{padding:12px 8px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;text-align:center;background:var(--white);}
+  .priority-card:hover{border-color:var(--accent);}
+  .priority-card.selected{border-color:var(--accent);background:var(--accent-bg);}
+  .priority-card .pc-icon{font-size:20px;margin-bottom:2px;}
+  .priority-card .pc-name{font-size:10px;font-weight:700;color:var(--text);}
+  .priority-card.selected .pc-name{color:var(--accent);}
+
+  /* SECTION DIVIDER */
+  .section-divider{height:1px;background:var(--border);margin:20px 0;}
+  .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:10px;}
+
+  /* BUTTONS */
+  .btn-row{display:flex;gap:10px;margin-top:24px;}
+  .btn{padding:12px 28px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all 0.15s;}
+  .btn-primary{background:var(--accent);color:#fff;margin-left:auto;}
+  .btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 4px 12px rgba(79,70,229,0.3);}
+  .btn-secondary{background:var(--white);color:var(--text-2);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-generate{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;width:100%;padding:16px;font-size:15px;border-radius:12px;margin-top:20px;}
+  .btn-generate:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,70,229,0.35);}
+
+  /* REVIEW */
+  .review-section{margin-bottom:16px;}
+  .review-section h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:6px;}
+  .review-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg);font-size:12px;}
+  .review-row:last-child{border-bottom:none;}
+  .rr-label{color:var(--text-2);}
+  .rr-value{font-weight:700;color:var(--text);}
+  .review-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+  .review-chip{padding:3px 10px;background:var(--accent-bg);color:var(--accent);border-radius:12px;font-size:10px;font-weight:600;}
+
+  /* SUCCESS */
+  .success-card{text-align:center;padding:40px 28px;}
+  .success-card .sc-icon{font-size:48px;margin-bottom:12px;}
+  .success-card h2{font-size:22px;font-weight:900;margin-bottom:6px;}
+  .success-card p{font-size:13px;color:var(--text-2);max-width:400px;margin:0 auto;line-height:1.6;}
+
+  /* LANDING */
+  .landing{text-align:center;max-width:560px;margin:0 auto;}
+  .landing-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;}
+  .lc{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:32px 20px;cursor:pointer;transition:all 0.2s;text-align:center;}
+  .lc:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,70,229,0.12);}
+  .lc .lc-icon{font-size:40px;margin-bottom:10px;}
+  .lc h3{font-size:16px;font-weight:800;margin-bottom:4px;}
+  .lc p{font-size:12px;color:var(--text-3);line-height:1.5;}
+  .lc .lc-tag{display:inline-block;margin-top:10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:10px;}
+  .lc .lc-tag.new{background:var(--accent-bg);color:var(--accent);}
+  .lc .lc-tag.ret{background:var(--green-bg);color:var(--green);}
+
+  /* RETURNING USER FLOW */
+  .ret-flow{text-align:center;}
+  .ret-email-box{display:flex;gap:10px;max-width:420px;margin:16px auto 0;}
+  .ret-email-box input{flex:1;padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;outline:none;}
+  .ret-email-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,0.1);}
+  .ret-email-box button{padding:12px 24px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .ret-email-box button:hover{background:var(--accent-hover);}
+  .ret-scanning{display:none;text-align:center;margin-top:20px;}
+  .ret-scanning.visible{display:block;}
+  .ret-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ret-status{font-size:12px;color:var(--text-2);margin-bottom:6px;}
+  .ret-status strong{color:var(--text);}
+  .ret-found{display:none;margin-top:20px;}
+  .ret-found.visible{display:block;}
+  .ret-trip-card{background:var(--white);border:2px solid var(--green);border-radius:14px;padding:20px;max-width:420px;margin:0 auto;text-align:left;}
+  .ret-trip-card h3{font-size:16px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .ret-trip-card h3 .rtc-flag{font-size:20px;}
+  .rtc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg);font-size:12px;}
+  .rtc-row:last-child{border-bottom:none;}
+  .rtc-label{color:var(--text-3);}
+  .rtc-value{font-weight:700;}
+  .rtc-items{margin-top:10px;}
+  .rtc-item{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px;color:var(--text-2);}
+  .rtc-item .ri-icon{font-size:13px;}
+  .rtc-item .ri-check{color:var(--green);margin-left:auto;font-weight:700;}
+  .rtc-item .ri-warn{color:var(--orange);margin-left:auto;font-weight:700;}
+
+  /* TRAVEL TEAM MATRIX */
+  .team-matrix{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;margin-top:10px;}
+  .team-matrix th{padding:8px 6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-3);text-align:center;border-bottom:2px solid var(--border);white-space:nowrap;}
+  .team-matrix th:first-child{text-align:left;min-width:150px;}
+  .team-matrix td{padding:8px 6px;border-bottom:1px solid var(--bg);text-align:center;vertical-align:middle;}
+  .team-matrix td:first-child{text-align:left;}
+  .team-matrix tr:hover{background:var(--accent-bg);}
+  .tm-person{display:flex;align-items:center;gap:8px;}
+  .tm-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .tm-name{font-weight:700;color:var(--text);font-size:12px;line-height:1.2;}
+  .tm-role{font-size:9px;color:var(--text-3);font-weight:500;}
+  .tm-check{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;}
+  .tm-add-row{display:flex;gap:8px;margin-top:10px;}
+  .tm-add-row input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;outline:none;}
+  .tm-add-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,0.1);}
+  .tm-add-row select{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:var(--white);color:var(--text-2);}
+  .tm-add-btn{padding:8px 14px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .tm-add-btn:hover{background:var(--accent-hover);}
+  .tm-hint{font-size:10px;color:var(--text-3);margin-top:6px;line-height:1.5;}
+  .tm-remove{font-size:10px;color:var(--red);cursor:pointer;margin-left:auto;opacity:0.5;transition:opacity 0.15s;}
+  .tm-remove:hover{opacity:1;}
+
+  /* AUTO-DETECT STATUS BANNER */
+  .detect-banner{display:none;background:var(--green-bg);border:1px solid #a7f3d0;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#065f46;}
+  .detect-banner.visible{display:flex;align-items:center;gap:10px;}
+  .detect-banner .db-icon{font-size:18px;}
+  .detect-banner strong{font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="badge">Powered by AI</div>
+  <h1>TRAVELAG</h1>
+  <p>Your personal trip dashboard, built in under 60 seconds.</p>
+</div>
+
+<!-- PROGRESS — 3 steps only -->
+<div class="progress-bar" id="progressBar">
+  <div class="pb-track"><div class="pb-fill" id="pbFill"></div></div>
+  <div class="pb-steps">
+    <span class="pb-step active" id="ps1">Connect</span>
+    <span class="pb-step" id="ps2">Personalize</span>
+    <span class="pb-step" id="ps3">Go</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ============ STEP 0: LANDING ============ -->
+<div class="step active" id="step0">
+  <div class="card landing">
+    <div class="card-num">Welcome</div>
+    <h2>How would you like to start?</h2>
+    <div class="sub">First time? We'll set you up in 3 quick steps. Been here before? Just reconnect your work email.</div>
+    <div class="landing-cards">
+      <div class="lc" onclick="startNewUser()">
+        <div class="lc-icon">&#9889;</div>
+        <h3>New Trip Setup</h3>
+        <p>First time here. Walk me through the setup with my preferences.</p>
+        <span class="lc-tag new">3 quick steps</span>
+      </div>
+      <div class="lc" onclick="startReturning()">
+        <div class="lc-icon">&#128075;</div>
+        <h3>Welcome Back</h3>
+        <p>I've used this before. Just find my next trip from my emails.</p>
+        <span class="lc-tag ret">30 seconds</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 0b: RETURNING USER ============ -->
+<div class="step" id="step0b">
+  <div class="card ret-flow">
+    <div class="card-num">Welcome Back</div>
+    <h2>Connect your work email</h2>
+    <div class="sub">We'll scan your inbox for new trip bookings, conferences, and flights. Your preferences from last time are saved.</div>
+    <div class="ret-email-box">
+      <input type="email" id="retEmail" placeholder="your.name@celebaltech.com">
+      <button onclick="scanReturning()">Connect &amp; Scan</button>
+    </div>
+    <div class="ret-scanning" id="retScanning">
+      <div class="ret-spinner"></div>
+      <div class="ret-status" id="retStatus">Connecting to O365...</div>
+    </div>
+    <div class="ret-found" id="retFound">
+      <div class="ret-trip-card">
+        <h3><span class="rtc-flag">&#127758;</span> New Trip Detected</h3>
+        <div class="rtc-row"><span class="rtc-label">Trip</span><span class="rtc-value" id="retTripName">Loading...</span></div>
+        <div class="rtc-row"><span class="rtc-label">Dates</span><span class="rtc-value" id="retTripDates">Loading...</span></div>
+        <div class="rtc-row"><span class="rtc-label">Route</span><span class="rtc-value" id="retTripRoute">Loading...</span></div>
+        <div class="rtc-items" id="retItems"></div>
+      </div>
+      <div style="margin-top:14px;font-size:11px;color:var(--text-3);">Your food preferences, budget, and dashboard focus from your last trip will be reused. You can change them anytime from Settings.</div>
+      <button class="btn btn-generate" onclick="generateApp()" style="margin-top:16px;">&#9889; Build My Dashboard</button>
+    </div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn btn-secondary" onclick="goStep(0)">&larr; Back</button>
+      <button class="btn btn-secondary" onclick="startNewUser()">Full setup instead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 1: CONNECT (Name + Email + Import) ============ -->
+<div class="step" id="step1">
+  <div class="card">
+    <div class="card-num">Step 1 of 3 &mdash; Connect</div>
+    <h2>Who are you &amp; where's your trip data?</h2>
+    <div class="sub">Your name, work email, and trip dates. Then pick how to import your bookings &mdash; we'll auto-extract flights, hotels, conferences, and badges.</div>
+
+    <div class="row">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="inName" placeholder="e.g. Abhishek Goyal">
+      </div>
+      <div class="field">
+        <label>Work Email</label>
+        <input type="email" id="inEmail" placeholder="e.g. name@celebaltech.com">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Trip Start</label>
+        <input type="date" id="inStart">
+      </div>
+      <div class="field">
+        <label>Trip End</label>
+        <input type="date" id="inEnd">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cities in Order</label>
+      <input type="text" id="inCities" placeholder="e.g. Atlanta &rarr; San Jose &rarr; San Francisco">
+      <div class="hint">Separate with arrows or commas. Include layover cities.</div>
+    </div>
+
+    <div class="field">
+      <label>Base Location (Home Timezone)</label>
+      <select id="inBaseLocation" style="width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white);cursor:pointer;">
+        <option value="Asia/Dubai|Dubai" selected>Dubai (GST, UTC+4)</option>
+        <option value="Asia/Kolkata|Jaipur">Jaipur / India (IST, UTC+5:30)</option>
+        <option value="America/Los_Angeles|Redmond">Redmond / US Pacific (PT, UTC-7)</option>
+        <option value="America/New_York|New York">New York / US Eastern (ET, UTC-5)</option>
+        <option value="America/Chicago|Chicago">Chicago / US Central (CT, UTC-6)</option>
+        <option value="Europe/London|London">London (GMT/BST)</option>
+        <option value="Asia/Singapore|Singapore">Singapore (SGT, UTC+8)</option>
+        <option value="Australia/Sydney|Sydney">Sydney (AEST, UTC+10)</option>
+      </select>
+      <div class="hint">Your home timezone &mdash; the app shows this time in the date strip so you know what time it is back home.</div>
+    </div>
+
+    <div class="field">
+      <label>Your Grade Band</label>
+      <div class="hint" style="margin-bottom:8px;">Per diem, accommodation limits &amp; deputation allowances differ by grade. Updated with <strong>Celebal Travel Policy — March 2026</strong>.</div>
+      <div style="display:flex;gap:10px;">
+        <div class="budget-opt" id="gradeG4" onclick="selectGrade('G1-G4',this)" style="flex:1;padding:14px 8px;">
+          <span class="bo-icon">&#128188;</span>
+          <span class="bo-label">G1 &ndash; G4</span>
+          <span class="bo-range">Standard tier</span>
+        </div>
+        <div class="budget-opt selected" id="gradeG7" onclick="selectGrade('G5-G7',this)" style="flex:1;padding:14px 8px;">
+          <span class="bo-icon">&#127775;</span>
+          <span class="bo-label">G5 &ndash; G7</span>
+          <span class="bo-range">Senior / Leadership</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-label">Import Trip Data</div>
+
+    <div class="import-row">
+      <button class="import-btn" onclick="pickImport('o365',this)">
+        <span class="ib-icon">&#9993;</span>
+        <span>Scan O365 Emails</span>
+        <span class="ib-rec">Smart</span>
+      </button>
+      <button class="import-btn" onclick="pickImport('excel',this)">
+        <span class="ib-icon">&#128202;</span>
+        <span>Upload File</span>
+      </button>
+      <button class="import-btn" onclick="pickImport('skip',this)">
+        <span class="ib-icon">&#9997;</span>
+        <span>I'll add later</span>
+      </button>
+    </div>
+
+    <!-- O365 SCAN INLINE -->
+    <div class="scan-panel" id="o365Panel">
+      <h5>&#128268; O365 Email Scan</h5>
+      <p>We'll scan your inbox for booking confirmations, conference registrations, flight e-tickets, and hotel vouchers from the last 30 days.</p>
+      <div class="scan-field">
+        <input type="text" id="scanKeywords" placeholder="Extra keywords (optional)... e.g. FABCON, RSAC">
+        <button class="scan-btn" onclick="simulateScan()">Scan Inbox</button>
+      </div>
+      <div class="scan-results" id="scanResults"></div>
+    </div>
+
+    <!-- FILE UPLOAD INLINE -->
+    <div class="upload-zone" id="excelUpload" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');handleUpload(event.dataTransfer.files)" onclick="document.getElementById('excelInput').click()">
+      <div class="uz-icon">&#128196;</div>
+      <div class="uz-title">Drop your itinerary file here or click to browse</div>
+      <div class="uz-sub">.xlsx, .csv, .pdf &mdash; flight bookings, hotel list, expense sheet</div>
+      <input type="file" id="excelInput" accept=".xlsx,.csv,.pdf,.xls" onchange="handleUpload(this.files)">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(0)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 2: PERSONALIZE (Taste + Focus — one screen) ============ -->
+<div class="step" id="step2">
+  <div class="card">
+    <div class="card-num">Step 2 of 3 &mdash; Personalize</div>
+    <h2>Make it yours</h2>
+    <div class="sub">Quick preferences so we recommend the right food, track the right things, and show what matters most. Tap to select.</div>
+
+    <div class="field">
+      <label>Cuisines you love (pick any)</label>
+      <div class="chip-group" id="cuisineChips">
+        <div class="chip" onclick="toggleChip(this)">Indian</div>
+        <div class="chip" onclick="toggleChip(this)">Italian</div>
+        <div class="chip" onclick="toggleChip(this)">Japanese</div>
+        <div class="chip" onclick="toggleChip(this)">Mexican</div>
+        <div class="chip" onclick="toggleChip(this)">Chinese</div>
+        <div class="chip" onclick="toggleChip(this)">Thai</div>
+        <div class="chip" onclick="toggleChip(this)">American</div>
+        <div class="chip" onclick="toggleChip(this)">Mediterranean</div>
+        <div class="chip" onclick="toggleChip(this)">Korean</div>
+        <div class="chip" onclick="toggleChip(this)">Local / Regional</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Dietary</label>
+        <div class="chip-group" id="dietChips">
+          <div class="chip selected" onclick="toggleChip(this)">None</div>
+          <div class="chip" onclick="toggleChip(this)">Vegetarian</div>
+          <div class="chip" onclick="toggleChip(this)">Halal</div>
+          <div class="chip" onclick="toggleChip(this)">Vegan</div>
+          <div class="chip" onclick="toggleChip(this)">Gluten-free</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Dining Budget</label>
+        <div class="budget-row" id="budgetRow">
+          <div class="budget-opt" onclick="selectBudget(this)">
+            <span class="bo-icon">&#127828;</span>
+            <span class="bo-label">$</span>
+            <span class="bo-range">&lt;$15</span>
+          </div>
+          <div class="budget-opt" onclick="selectBudget(this)">
+            <span class="bo-icon">&#127860;</span>
+            <span class="bo-label">$$</span>
+            <span class="bo-range">$15–40</span>
+          </div>
+          <div class="budget-opt" onclick="selectBudget(this)">
+            <span class="bo-icon">&#127942;</span>
+            <span class="bo-label">$$$</span>
+            <span class="bo-range">$40–80</span>
+          </div>
+          <div class="budget-opt" onclick="selectBudget(this)">
+            <span class="bo-icon">&#127775;</span>
+            <span class="bo-label">$$$$</span>
+            <span class="bo-range">$80+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Shopping list (optional)</label>
+      <input type="text" id="inBuyList" placeholder="e.g. Mac Mini M4, Splenda Monk Fruit 1Kg">
+      <div class="hint">Items to buy during this trip. Leave blank if none.</div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-label">Travel Team &mdash; who's involved?</div>
+    <div class="sub" style="margin-bottom:12px;margin-top:-4px;">People you coordinate with during travel. Tick which events each person is relevant for. Auto-detected from your emails &amp; chats.</div>
+
+    <div style="overflow-x:auto;">
+      <table class="team-matrix" id="teamMatrix">
+        <thead id="tmHead">
+          <tr>
+            <th>Person</th>
+            <th>FABCON ATL</th>
+            <th>San Jose</th>
+            <th>RSAC SF</th>
+            <th>Flights</th>
+            <th>Hotels</th>
+          </tr>
+        </thead>
+        <tbody id="tmBody"></tbody>
+      </table>
+    </div>
+
+    <div class="tm-add-row">
+      <input type="text" id="tmNewName" placeholder="Name (e.g. John Doe)">
+      <select id="tmNewRole">
+        <option value="Travel Desk">Travel Desk</option>
+        <option value="Sales">Sales</option>
+        <option value="US Travel">US Travel</option>
+        <option value="Trainee">Trainee</option>
+        <option value="Conference">Conference</option>
+        <option value="Agent">Agent</option>
+        <option value="Visa">Visa</option>
+        <option value="Other">Other</option>
+      </select>
+      <button class="tm-add-btn" onclick="addTeamMember()">+ Add</button>
+    </div>
+    <div class="tm-hint">&#128161; Detected from email patterns: booking confirmations, conference threads, travel planning discussions. You can add or remove people and adjust event assignments.</div>
+
+    <div class="section-divider"></div>
+    <div class="section-label">Dashboard Focus &mdash; pick up to 3</div>
+
+    <div class="priority-grid" id="priorityGrid">
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#127860;</div>
+        <div class="pc-name">Food Discovery</div>
+      </div>
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#128202;</div>
+        <div class="pc-name">Expense Tracking</div>
+      </div>
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#9992;</div>
+        <div class="pc-name">Flight Alerts</div>
+      </div>
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#127775;</div>
+        <div class="pc-name">Local Events</div>
+      </div>
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#128737;</div>
+        <div class="pc-name">Conference Intel</div>
+      </div>
+      <div class="priority-card" onclick="togglePriority(this)">
+        <div class="pc-icon">&#128722;</div>
+        <div class="pc-name">Shopping List</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="buildReview();goStep(3)">Review &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 3: REVIEW & GO ============ -->
+<div class="step" id="step3">
+  <div class="card">
+    <div class="card-num">Step 3 of 3 &mdash; Go</div>
+    <h2>Review &amp; Generate</h2>
+    <div class="sub">Confirm your details. We'll build your personalized travel dashboard in seconds.</div>
+    <div id="reviewContent"></div>
+    <button class="btn btn-generate" onclick="generateApp()">&#9889; Generate TRAVELAG</button>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-secondary" onclick="goStep(2)">&larr; Back to edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SUCCESS ============ -->
+<div class="step" id="step4">
+  <div class="card success-card">
+    <div class="sc-icon">&#9889;</div>
+    <h2>TRAVELAG is Ready!</h2>
+    <p>We've scanned your data, pulled trip details, and built a personalized dashboard with your preferences baked in.</p>
+    <button class="btn btn-generate" onclick="window.location.href='Travel_App_Design.html'" style="margin-top:20px;">Open My Dashboard &rarr;</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+var currentStep = 0;
+var totalSteps = 3;
+
+function goStep(n) {
+  var cur = (currentStep === '0b') ? 'step0b' : 'step'+currentStep;
+  var nxt = (n === '0b') ? 'step0b' : 'step'+n;
+  document.getElementById(cur).classList.remove('active');
+  document.getElementById(nxt).classList.add('active');
+  currentStep = n;
+  var pb = document.getElementById('progressBar');
+  if(typeof n === 'number' && n >= 1 && n <= 3) {
+    pb.style.display = 'block';
+    var pct = ((n-1)/(totalSteps-1))*100;
+    document.getElementById('pbFill').style.width = pct+'%';
+    for(var i=1;i<=totalSteps;i++){
+      var ps = document.getElementById('ps'+i);
+      ps.classList.remove('active','done');
+      if(i<n) ps.classList.add('done');
+      else if(i===n) ps.classList.add('active');
+    }
+  } else {
+    pb.style.display = 'none';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function startNewUser() { goStep(1); }
+function startReturning() { goStep('0b'); }
+
+/* ---- RETURNING USER SCAN ---- */
+function scanReturning() {
+  var email = document.getElementById('retEmail').value.trim();
+  if(!email) { document.getElementById('retEmail').focus(); return; }
+  var scan = document.getElementById('retScanning');
+  var status = document.getElementById('retStatus');
+  scan.classList.add('visible');
+  document.getElementById('retFound').classList.remove('visible');
+  var steps = [
+    {text:'Connecting to O365...', delay:800},
+    {text:'Scanning inbox (last 30 days)...', delay:1200},
+    {text:'Found flight confirmations...', delay:800},
+    {text:'Found hotel bookings...', delay:600},
+    {text:'Found conference registration...', delay:600},
+    {text:'Building trip profile...', delay:500}
+  ];
+  var i = 0;
+  function next(){
+    if(i < steps.length){ status.innerHTML = '<strong>'+steps[i].text+'</strong>'; var d = steps[i].delay; i++; setTimeout(next, d); }
+    else { scan.classList.remove('visible'); showReturnResult(email); }
+  }
+  next();
+}
+
+function showReturnResult(email) {
+  document.getElementById('retTripName').textContent = 'Business Trip — May 2026';
+  document.getElementById('retTripDates').textContent = 'May 12 – May 23, 2026';
+  document.getElementById('retTripRoute').textContent = 'Dubai → London → Amsterdam → Dubai';
+  var items = [
+    {icon:'&#9992;', text:'Emirates EK-007 DXB→LHR May 12', check:true},
+    {icon:'&#9992;', text:'KLM KL-1010 LHR→AMS May 18', check:true},
+    {icon:'&#127968;', text:'Premier Inn London, May 12–18', check:true},
+    {icon:'&#127968;', text:'NH Hotel Amsterdam, May 18–22', check:true},
+    {icon:'&#9733;', text:'Microsoft Build 2026 — London', check:true},
+    {icon:'&#9992;', text:'Return flight AMS→DXB', warn:true},
+    {icon:'&#128220;', text:'Travel Policy March 2026 — Applied', check:true}
+  ];
+  var html = '';
+  items.forEach(function(it){
+    var badge = it.check ? '<span class="ri-check">&#10003;</span>' : '<span class="ri-warn">&#9888; Pending</span>';
+    html += '<div class="rtc-item"><span class="ri-icon">'+it.icon+'</span>'+it.text+badge+'</div>';
+  });
+  document.getElementById('retItems').innerHTML = html;
+  document.getElementById('retFound').classList.add('visible');
+}
+
+/* ---- IMPORT PICKER ---- */
+function pickImport(type, el) {
+  document.querySelectorAll('.import-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('o365Panel').classList.remove('visible');
+  document.getElementById('excelUpload').classList.remove('visible');
+  if(type==='o365') document.getElementById('o365Panel').classList.add('visible');
+  else if(type==='excel') document.getElementById('excelUpload').classList.add('visible');
+}
+
+function simulateScan() {
+  var res = document.getElementById('scanResults');
+  res.innerHTML = '<div style="padding:8px;color:var(--accent);font-weight:700;font-size:11px;">Scanning inbox...</div>';
+  setTimeout(function(){
+    res.innerHTML =
+      '<div class="scan-item"><span class="si-icon">&#9992;</span><span class="si-text">Delta DL-809 ATL&rarr;SJC &bull; Mar 22</span><span class="si-check">&#10003;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#127968;</span><span class="si-text">Hotel Indigo Atlanta &bull; Mar 9-14</span><span class="si-check">&#10003;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#127968;</span><span class="si-text">First Hotel Atlanta &bull; Mar 19-21</span><span class="si-check">&#10003;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#9733;</span><span class="si-text">FABCON 2026 Badge &bull; QR code found</span><span class="si-check">&#10003;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#128737;</span><span class="si-text">RSAC 2026 Conference &bull; Badge pickup info</span><span class="si-check">&#10003;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#9992;</span><span class="si-text">Etihad EY14 &bull; Return flight (needs date fix)</span><span class="si-check" style="color:var(--orange);">&#9888;</span></div>'
+     +'<div class="scan-item"><span class="si-icon">&#128220;</span><span class="si-text">Celebal Travel Policy March 2026 &bull; Applied</span><span class="si-check">&#10003;</span></div>'
+     +'<div style="padding:8px;color:var(--green);font-weight:700;font-size:11px;">&#10003; Found 7 items from 23 emails scanned</div>';
+  }, 1500);
+}
+
+function handleUpload(files) {
+  if(!files.length) return;
+  var f = files[0];
+  var zone = document.getElementById('excelUpload');
+  zone.innerHTML = '<div class="uz-icon">&#9989;</div><div class="uz-title">'+f.name+'</div><div class="uz-sub">Uploaded &bull; '+(f.size/1024).toFixed(0)+' KB</div>';
+}
+
+/* ---- GRADE SELECTOR ---- */
+var selectedGrade = 'G5-G7';
+function selectGrade(grade, el){
+  document.querySelectorAll('#gradeG4, #gradeG7').forEach(function(b){b.classList.remove('selected');});
+  el.classList.add('selected');
+  selectedGrade = grade;
+}
+
+/* ---- TRAVEL TEAM MATRIX ---- */
+var teamEvents = ['FABCON ATL','San Jose','RSAC SF','Flights','Hotels'];
+var teamMembers = [
+  {name:'Chinmay Malhotra', role:'Travel Desk', color:'#4f46e5', checks:[0,0,0,1,1]},
+  {name:'Sabarinathan', role:'Sales', color:'#7c3aed', checks:[1,0,1,0,0]},
+  {name:'Udayan', role:'US Travel', color:'#0891b2', checks:[1,1,1,1,1]},
+  {name:'Abhishek Das', role:'Trainee', color:'#059669', checks:[0,1,1,0,0]}
+];
+
+function renderTeamMatrix(){
+  var head = document.getElementById('tmHead');
+  var hrow = '<tr><th>Person</th>';
+  teamEvents.forEach(function(ev){hrow += '<th>'+ev+'</th>';});
+  hrow += '</tr>';
+  head.innerHTML = hrow;
+
+  var body = document.getElementById('tmBody');
+  var html = '';
+  teamMembers.forEach(function(m,mi){
+    var initials = m.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    html += '<tr>';
+    html += '<td><div class="tm-person"><div class="tm-avatar" style="background:'+m.color+'">'+initials+'</div><div><div class="tm-name">'+m.name+'</div><div class="tm-role">'+m.role+'</div></div><span class="tm-remove" onclick="removeTeamMember('+mi+')" title="Remove">&times;</span></div></td>';
+    teamEvents.forEach(function(ev,ei){
+      var chk = m.checks[ei] ? 'checked' : '';
+      html += '<td><input type="checkbox" class="tm-check" '+chk+' onchange="updateTeamCheck('+mi+','+ei+',this.checked)"></td>';
+    });
+    html += '</tr>';
+  });
+  body.innerHTML = html;
+}
+
+function updateTeamCheck(mi,ei,val){ teamMembers[mi].checks[ei] = val ? 1 : 0; }
+
+function addTeamMember(){
+  var nameInput = document.getElementById('tmNewName');
+  var roleSelect = document.getElementById('tmNewRole');
+  var name = nameInput.value.trim();
+  if(!name) { nameInput.focus(); return; }
+  var colors = ['#e11d48','#d97706','#0284c7','#7c3aed','#059669','#4f46e5','#be185d','#0891b2'];
+  var c = colors[teamMembers.length % colors.length];
+  var checks = [];
+  teamEvents.forEach(function(){checks.push(0);});
+  teamMembers.push({name:name, role:roleSelect.value, color:c, checks:checks});
+  nameInput.value = '';
+  renderTeamMatrix();
+}
+
+function removeTeamMember(mi){
+  teamMembers.splice(mi,1);
+  renderTeamMatrix();
+}
+
+// Init matrix on load
+document.addEventListener('DOMContentLoaded', function(){ renderTeamMatrix(); });
+
+/* ---- CHIPS / BUDGET / PRIORITY ---- */
+function toggleChip(el) { el.classList.toggle('selected'); }
+function selectBudget(el) {
+  document.querySelectorAll('.budget-opt').forEach(function(b){b.classList.remove('selected');});
+  el.classList.add('selected');
+}
+function togglePriority(el) {
+  if(el.classList.contains('selected')) { el.classList.remove('selected'); }
+  else if(document.querySelectorAll('.priority-card.selected').length < 3) { el.classList.add('selected'); }
+}
+
+/* ---- REVIEW ---- */
+function getSelectedChips(groupId) {
+  var chips = [];
+  document.querySelectorAll('#'+groupId+' .chip.selected').forEach(function(c){chips.push(c.textContent.trim());});
+  return chips;
+}
+
+function buildReview() {
+  var name = document.getElementById('inName').value || 'Not set';
+  var email = document.getElementById('inEmail').value || 'Not set';
+  var start = document.getElementById('inStart').value || 'Not set';
+  var end = document.getElementById('inEnd').value || 'Not set';
+  var cities = document.getElementById('inCities').value || 'Not set';
+  var cuisines = getSelectedChips('cuisineChips');
+  var diet = getSelectedChips('dietChips');
+  var budget = '';
+  var b = document.querySelector('.budget-opt.selected');
+  if(b) budget = b.querySelector('.bo-label').textContent + ' (' + b.querySelector('.bo-range').textContent + ')';
+  var buyList = document.getElementById('inBuyList').value || 'None';
+  var priorities = [];
+  document.querySelectorAll('.priority-card.selected .pc-name').forEach(function(p){priorities.push(p.textContent);});
+
+  var source = 'Not selected';
+  var activeImport = document.querySelector('.import-btn.active');
+  if(activeImport){
+    var txt = activeImport.textContent.trim();
+    if(txt.indexOf('O365')>-1) source = 'O365 Email Scan';
+    else if(txt.indexOf('Upload')>-1) source = 'File Upload';
+    else source = 'Manual / Later';
+  }
+
+  var html = '<div class="review-section"><h4>Traveler</h4>'
+    +'<div class="review-row"><span class="rr-label">Name</span><span class="rr-value">'+name+'</span></div>'
+    +'<div class="review-row"><span class="rr-label">Email</span><span class="rr-value">'+email+'</span></div></div>';
+
+  html += '<div class="review-section"><h4>Trip</h4>'
+    +'<div class="review-row"><span class="rr-label">Dates</span><span class="rr-value">'+start+' &rarr; '+end+'</span></div>'
+    +'<div class="review-row"><span class="rr-label">Route</span><span class="rr-value">'+cities+'</span></div>'
+    +'<div class="review-row"><span class="rr-label">Data Source</span><span class="rr-value">'+source+'</span></div>'
+    +(selectedGrade ? '<div class="review-row"><span class="rr-label">Grade Band</span><span class="rr-value">'+selectedGrade+'</span></div>' : '')
+    +'</div>';
+
+  html += '<div class="review-section"><h4>Preferences</h4>';
+  if(cuisines.length) html += '<div class="review-row"><span class="rr-label">Cuisines</span><div class="review-chips">'+cuisines.map(function(c){return '<span class="review-chip">'+c+'</span>';}).join('')+'</div></div>';
+  if(diet.length) html += '<div class="review-row"><span class="rr-label">Dietary</span><div class="review-chips">'+diet.map(function(d){return '<span class="review-chip">'+d+'</span>';}).join('')+'</div></div>';
+  if(budget) html += '<div class="review-row"><span class="rr-label">Budget</span><span class="rr-value">'+budget+'</span></div>';
+  if(buyList!=='None') html += '<div class="review-row"><span class="rr-label">Buy List</span><span class="rr-value">'+buyList+'</span></div>';
+  html += '</div>';
+
+  if(priorities.length) {
+    html += '<div class="review-section"><h4>Dashboard Focus</h4><div class="review-chips">'+priorities.map(function(p){return '<span class="review-chip">'+p+'</span>';}).join('')+'</div></div>';
+  }
+
+  // Travel Team summary
+  var activeMembers = teamMembers.filter(function(m){ return m.checks.some(function(c){return c;}); });
+  if(activeMembers.length) {
+    html += '<div class="review-section"><h4>Travel Team</h4>';
+    activeMembers.forEach(function(m){
+      var evts = [];
+      m.checks.forEach(function(c,i){ if(c) evts.push(teamEvents[i]); });
+      html += '<div class="review-row"><span class="rr-label">'+m.name+' <span style="font-size:9px;color:var(--text-3);">('+m.role+')</span></span><div class="review-chips">'+evts.map(function(e){return '<span class="review-chip">'+e+'</span>';}).join('')+'</div></div>';
+    });
+    html += '</div>';
+  }
+  document.getElementById('reviewContent').innerHTML = html;
+}
+
+function generateApp() {
+  // Save base location to localStorage for Travel_App_Design.html to read
+  var baseSel = document.getElementById('inBaseLocation');
+  if (baseSel && baseSel.value) {
+    var parts = baseSel.value.split('|');
+    localStorage.setItem('baseLocationTz', parts[0]);
+    localStorage.setItem('baseLocationLabel', parts[1] || '');
+  }
+  goStep(4);
+}
+
+// Hide progress bar on landing
+document.getElementById('progressBar').style.display = 'none';
+</script>
+</body>
+</html>
