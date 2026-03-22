@@ -2437,6 +2437,39 @@ if('serviceWorker' in navigator){
     console.log('SW registered:', r.scope);
   }).catch(function(e){ console.log('SW failed:', e); });
 }
+
+// ===== MOBILE: Wake Lock — keeps screen on while app is open =====
+var _wakeLock = null;
+async function requestWakeLock(){
+  try {
+    if('wakeLock' in navigator){
+      _wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake Lock active — screen will stay on');
+      _wakeLock.addEventListener('release', function(){ console.log('Wake Lock released'); });
+    }
+  } catch(e){ console.log('Wake Lock not available:', e.message); }
+}
+requestWakeLock();
+// Re-acquire wake lock when page becomes visible again (iOS/Android release it on tab switch)
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') requestWakeLock();
+});
+
+// ===== MOBILE: Instant refresh when app comes back to foreground =====
+var _lastActive = Date.now();
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible'){
+    var away = Date.now() - _lastActive;
+    if(away > 60000){ // was away more than 1 minute
+      console.log('App resumed after '+Math.round(away/1000)+'s — refreshing all data');
+      try { updateCritCountdown(); } catch(e){}
+      try { updateTzBrackets(); } catch(e){}
+      try { refreshVenueStatus(); } catch(e){}
+      try { fetchWeather(); } catch(e){}
+    }
+  }
+  _lastActive = Date.now();
+});
 </script>
 </body>
 </html>
