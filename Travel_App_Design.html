@@ -529,6 +529,24 @@
     </div>
   </div>
 
+  <!-- My Documents -->
+  <div class="card" style="cursor:pointer;" onclick="toggleDocsDrop(event)">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="card-label bl" style="margin-bottom:0;">&#128196; My Documents</div>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="font-size:10px;color:var(--blue);font-weight:700;" id="docCount">0 files</span><span id="docChev" style="font-size:9px;color:var(--text-3);transition:transform 0.2s;">&#9660;</span></span>
+    </div>
+    <div id="docDrop" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;" onclick="event.stopPropagation()">
+      <div id="docList" style="max-height:200px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:var(--accent-bg);border:1px dashed var(--accent);border-radius:6px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;">
+          &#128206; Upload File
+          <input type="file" id="docUploadInput" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.csv,.txt,.doc,.docx" multiple style="display:none;" onchange="handleDocUpload(this.files)">
+        </label>
+      </div>
+      <div style="font-size:9px;color:var(--text-3);margin-top:4px;">PDF, images, Excel, text. Stored in your browser.</div>
+    </div>
+  </div>
+
   <!-- Plan Trip Home Button -->
   <div class="card" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);cursor:pointer;border:none;" onclick="showTripHome()">
     <div style="display:flex;align-items:center;gap:10px;">
@@ -677,6 +695,15 @@
       </div>
     </div>
     <div id="searchResultsBody"></div>
+  </div>
+
+  <!-- ===== DOCUMENT VIEWER PANEL ===== -->
+  <div id="docViewerPanel" style="display:none;position:absolute;inset:0;background:var(--white);overflow-y:auto;z-index:9;padding:20px 24px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <button onclick="closeDocViewer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px;">&#10005;</button>
+      <h2 style="font-size:18px;font-weight:800;color:var(--text);margin:0;" id="docViewerTitle">&#128196; Document</h2>
+    </div>
+    <div id="docViewerBody" style="width:100%;"></div>
   </div>
 
   <!-- ===== PLAN TRIP HOME PANEL — CONFIRMED FLIGHT VIEW ===== -->
@@ -1363,8 +1390,86 @@ function reSearch(el) {
   submitSearch();
 }
 
-// ===== SMART LOCAL-FIRST SEARCH ENGINE =====
-// ===== SMART SEARCH ENGINE v2 — Intent-based with category filtering =====
+// ===== SMART SEARCH ENGINE v3 — Knowledge Base + Intent + Instant Answers =====
+
+// Travel Knowledge Base — direct answers to common queries
+var _knowledgeBase = [
+  // TRANSPORT
+  {q:['bart','bart to sf','bart to moscone','bart to san francisco','how to get to sf','train to sf','public transport'],
+   answer:'<strong>BART: Downtown Berkeley \u2192 Powell St</strong><br>~30 min, $4.50 one-way. Exit Powell St, walk 10 min south on 4th St to Moscone South (747 Howard St).<br><a href="https://www.bart.gov/planner" target="_blank" style="color:var(--accent);">BART Trip Planner \u2197</a>', icon:'&#128646;', cat:'Transport'},
+  {q:['uber','lyft','cab','taxi','ride','how to get around','rideshare'],
+   answer:'<strong>Uber/Lyft available</strong> throughout Berkeley & SF. Typical fares:<br>\u2022 Hotel \u2192 Moscone SF: ~$25\u201335 (30 min)<br>\u2022 Hotel \u2192 SFO Airport: ~$35\u201345 (40 min)<br>\u2022 Around Berkeley: ~$8\u201315<br>Tip: BART is faster for Berkeley\u2192SF during rush hour.', icon:'&#128663;', cat:'Transport'},
+  {q:['sfo','airport','how to get to airport','airport transfer','sfo airport'],
+   answer:'<strong>Getting to SFO from Berkeley:</strong><br>\u2022 BART: Downtown Berkeley \u2192 SFO station, ~55 min, ~$11<br>\u2022 Uber/Lyft: ~40 min, $35\u201345<br>\u2022 For Mar 26 flight (4:45 PM): Leave by 12:30 PM latest<br><a href="https://www.bart.gov/planner" target="_blank" style="color:var(--accent);">BART Planner \u2197</a> | <a href="https://www.flysfo.com/" target="_blank" style="color:var(--accent);">SFO Website \u2197</a>', icon:'&#9992;', cat:'Transport'},
+  {q:['parking','where to park','car park'],
+   answer:'<strong>Parking in Berkeley:</strong> Street meters free after 6 PM and Sundays. Center St Garage ($2/hr). Your hotel has limited parking \u2014 ask at check-in.<br><strong>SF/Moscone:</strong> 5th & Mission Garage ($6/hr, max $36/day). Better to take BART.', icon:'&#127359;', cat:'Transport'},
+
+  // CURRENCY & MONEY
+  {q:['currency','exchange rate','dollar','rupee','aed','how much','convert','forex','money exchange'],
+   answer:'<strong>Currency Rates (approx):</strong><br>\u2022 1 USD = ~83\u201384 INR<br>\u2022 1 USD = ~3.67 AED (fixed)<br>\u2022 1 AED = ~22.7 INR<br>No need to carry cash \u2014 cards accepted everywhere in US. ATMs at any bank. Tip 15\u201320% at restaurants.', icon:'&#128178;', cat:'Finance'},
+  {q:['tip','tipping','how much to tip','gratuity'],
+   answer:'<strong>US Tipping Guide:</strong><br>\u2022 Restaurants: 15\u201320% of pre-tax bill<br>\u2022 Uber/Lyft: $2\u20135 or 15%<br>\u2022 Hotel housekeeping: $2\u20135/night<br>\u2022 Coffee/counter: $1\u20132 or skip<br>\u2022 Bars: $1\u20132 per drink<br>Tip is expected, not optional in US.', icon:'&#128176;', cat:'Finance'},
+
+  // TIME & TIMEZONE
+  {q:['time','what time','timezone','time difference','dubai time','india time','ist','gst'],
+   answer:function(){
+     var now = new Date();
+     var pt = now.toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit',hour12:true});
+     var ist = now.toLocaleTimeString('en-US',{timeZone:'Asia/Kolkata',hour:'numeric',minute:'2-digit',hour12:true});
+     var gst = now.toLocaleTimeString('en-US',{timeZone:'Asia/Dubai',hour:'numeric',minute:'2-digit',hour12:true});
+     return '<strong>Current Time:</strong><br>\u2022 Berkeley/SF (PT): <strong>'+pt+'</strong><br>\u2022 Dubai (GST): <strong>'+gst+'</strong> (+12h)<br>\u2022 India (IST): <strong>'+ist+'</strong> (+13.5h)';
+   }, icon:'&#128336;', cat:'Time'},
+  {q:['check-in','online check-in','web check-in','emirates check-in'],
+   answer:'<strong>Emirates EK226 Online Check-in:</strong><br>Opens <strong>48 hours</strong> before departure = <strong>Mar 24, 4:45 PM PT</strong><br><a href="https://www.emirates.com/english/manage-booking/" target="_blank" style="color:var(--accent);">Emirates Manage Booking \u2197</a><br>Have passport + PNR F8WLVF ready.', icon:'&#9992;', cat:'Flight'},
+
+  // FOOD SPECIFIC
+  {q:['veg','vegetarian','veg food','veg restaurant','pure veg','jain'],
+   answer:'<strong>Vegetarian-Friendly in Berkeley:</strong><br>\u2022 <strong>Vik\'s Chaat</strong> \u2014 Indian, mostly veg (dosa, chole bhature) \u2022 1.2 mi<br>\u2022 <strong>Gather</strong> \u2014 Farm-to-table, strong veg menu \u2022 0.8 mi<br>\u2022 <strong>Curry Up Now</strong> \u2014 Indian fusion, veg options \u2022 0.5 mi<br>All have multiple vegetarian choices.', icon:'&#127860;', cat:'Food',
+   action:function(){ switchTab('food',document.querySelector('.cat-tab')); closeSearchResults(); }},
+  {q:['coffee','cafe','starbucks','peet','blue bottle','caffeine'],
+   answer:'<strong>Coffee Near You:</strong><br>\u2022 <strong>Peet\'s Coffee</strong> \u2014 2124 Vine St (0.6 mi) \u2014 Berkeley original!<br>\u2022 <strong>Blue Bottle</strong> \u2014 4th St, Berkeley (1 mi)<br>\u2022 <strong>Caffe Strada</strong> \u2014 UC Berkeley campus, outdoor seating<br>\u2022 Hotel lobby has complimentary coffee too.', icon:'&#9749;', cat:'Food'},
+  {q:['breakfast','morning food','brunch','where to eat morning'],
+   answer:'<strong>Breakfast Options:</strong><br>\u2022 <strong>Hotel</strong> \u2014 Free breakfast included at Holiday Inn Express<br>\u2022 <strong>Gather</strong> \u2014 Sunday brunch 10 AM\u20139 PM<br>\u2022 <strong>Vik\'s Chaat</strong> \u2014 Opens 11 AM (more brunch than breakfast)<br>\u2022 <strong>Peet\'s Coffee</strong> \u2014 Pastries + coffee from 5:30 AM', icon:'&#127858;', cat:'Food'},
+
+  // HOTEL
+  {q:['wifi','internet','wifi password','hotel wifi'],
+   answer:'<strong>Hotel WiFi:</strong> Holiday Inn Express Berkeley \u2014 Free WiFi for all guests. Connect to "IHG Connect" network, enter room number + last name. Speed is generally good for video calls.', icon:'&#128246;', cat:'Hotel'},
+  {q:['checkout','check out','late checkout','checkout time'],
+   answer:'<strong>Checkout: 11:00 AM on Mar 25</strong><br>Holiday Inn Express Berkeley. Late checkout may be available \u2014 ask front desk morning of. Luggage storage available after checkout if needed.', icon:'&#127968;', cat:'Hotel'},
+  {q:['laundry','dry clean','wash clothes','iron'],
+   answer:'<strong>Laundry:</strong><br>\u2022 Hotel: Self-service laundry room (coin-operated) at Holiday Inn<br>\u2022 Nearby: University Wash (1201 University Ave) \u2014 2 min walk<br>\u2022 Iron/ironing board available in room \u2014 call front desk if not there', icon:'&#128084;', cat:'Hotel'},
+
+  // CONFERENCE
+  {q:['rsac','rsa','rsa conference','moscone','cybersecurity conference','badge','registration'],
+   answer:'<strong>RSAC 2026:</strong><br>\u2022 <strong>Where:</strong> Moscone South, 747 Howard St, San Francisco<br>\u2022 <strong>When:</strong> Mar 23\u201327, 9 AM\u20136 PM daily<br>\u2022 <strong>Badge:</strong> Pick up at registration desk. Photo ID required.<br>\u2022 <strong>How to get there:</strong> BART Downtown Berkeley \u2192 Powell St (~30 min)<br><a href="https://www.rsaconference.com/usa" target="_blank" style="color:var(--accent);">RSAC Website \u2197</a>', icon:'&#128737;', cat:'Conference'},
+
+  // SHOPPING
+  {q:['apple store','where to buy iphone','macbook','electronics','tech store'],
+   answer:'<strong>Tech Shopping:</strong><br>\u2022 <strong>Apple 4th Street</strong> \u2014 1823 4th St, Berkeley (1 mi from hotel)<br>\u2022 <strong>Apple Union Square SF</strong> \u2014 300 Post St (near Moscone)<br>\u2022 <strong>Best Buy Emeryville</strong> \u2014 3700 Mandela Pkwy (10 min drive)<br>\u2022 <strong>Amazon</strong> \u2014 Ship to hotel, arrives next day', icon:'&#128187;', cat:'Shopping'},
+  {q:['outlet','shopping mall','clothes','fashion','where to shop'],
+   answer:'<strong>Shopping Near Berkeley/SF:</strong><br>\u2022 <strong>4th Street Berkeley</strong> \u2014 Boutique shops, 1 mi from hotel<br>\u2022 <strong>Westfield SF Centre</strong> \u2014 865 Market St (near Moscone)<br>\u2022 <strong>Union Square SF</strong> \u2014 All major brands<br>\u2022 <strong>Premium Outlets Livermore</strong> \u2014 40 min drive, big savings', icon:'&#128717;', cat:'Shopping'},
+
+  // EMERGENCY & PRACTICAL
+  {q:['emergency','911','police','hospital','urgent','medical','doctor','pharmacy'],
+   answer:'<strong>Emergency: Call 911</strong><br>\u2022 <strong>Nearest ER:</strong> Alta Bates Summit Medical Center \u2014 2450 Ashby Ave (1.5 mi)<br>\u2022 <strong>Pharmacy:</strong> Walgreens 2050 University Ave (0.3 mi, open till 10 PM)<br>\u2022 <strong>CVS:</strong> 2160 Shattuck Ave (0.5 mi)<br>\u2022 Travel insurance doc in Other Details page.', icon:'&#128680;', cat:'Emergency'},
+  {q:['sim','sim card','phone','data','mobile data','esim','internet on phone'],
+   answer:'<strong>US Mobile Data Options:</strong><br>\u2022 <strong>eSIM (fastest):</strong> Airalo or Holafly app \u2014 buy instantly, ~$5\u201315/week<br>\u2022 <strong>Physical SIM:</strong> T-Mobile prepaid at Target/Walmart \u2014 $25 for 10GB<br>\u2022 <strong>WiFi:</strong> Free at hotel, Moscone, most cafes/restaurants<br>\u2022 Your Indian SIM roaming: check Jio/Airtel international pack (~\u20b9500/day)', icon:'&#128241;', cat:'Practical'},
+  {q:['weather','rain','cold','jacket','umbrella','what to wear'],
+   answer:function(){
+     var w = document.getElementById('weatherBody');
+     return '<strong>Weather:</strong> Check the right sidebar for live forecast.<br>Berkeley/SF in late March: 55\u201370\u00b0F (13\u201321\u00b0C). Evenings cool. <strong>Bring a light jacket.</strong> Rain possible \u2014 check forecast daily. SF can be foggy/windy even when Berkeley is sunny.';
+   }, icon:'&#127780;', cat:'Weather'},
+  {q:['pnr','booking reference','ticket number','flight details','seat','baggage'],
+   answer:'<strong>Emirates EK226 Booking:</strong><br>\u2022 PNR: <strong>F8WLVF</strong><br>\u2022 Ticket: <strong>176 9494656594</strong><br>\u2022 Seat: <strong>60K</strong> (Window)<br>\u2022 Class: Economy Saver<br>\u2022 Baggage: 2 pieces checked<br>\u2022 Skywards: Silver \u2014 385 186 244<br>\u2022 Fare: AED 2,620', icon:'&#9992;', cat:'Flight'},
+  {q:['passport','visa','immigration','customs','do i need visa'],
+   answer:'<strong>Travel Documents:</strong><br>\u2022 Indian passport + valid US visa (B1/B2) \u2014 carry both<br>\u2022 UAE: No visa needed for Indian passport holders with valid US visa (96h transit/30-day visit)<br>\u2022 Keep digital copies in My Documents section<br>\u2022 SFO International Terminal for Emirates', icon:'&#128210;', cat:'Travel'},
+  {q:['per diem','expense','allowance','how much can i spend','reimbursement','happay'],
+   answer:'<strong>Travel Policy (Celebal):</strong><br>\u2022 Meals: $80/day<br>\u2022 Incidentals: $25/day<br>\u2022 Hotels: $220/night (A-city)<br>\u2022 Submit receipts on Happay app<br>\u2022 Full policy in Other Details page<br><a href="Other_Details.html" style="color:var(--accent);">Open Other Details \u2197</a>', icon:'&#128176;', cat:'Policy'},
+  {q:['chinmay','travel desk','help','contact','spoc','piyush','who to call'],
+   answer:'<strong>Travel Desk Contacts:</strong><br>\u2022 <strong>Chinmay Malhotra</strong> \u2014 Travel Desk SPOC<br>\u2022 <strong>Piyush Garg</strong> \u2014 Travel Head<br>\u2022 Email: chinmay.malhotra@celebaltech.com<br>\u2022 For urgent flight issues, use the Flight Alert button in Plan Trip Home.', icon:'&#128222;', cat:'Support'},
+  {q:['power','plug','charger','adapter','outlet','voltage'],
+   answer:'<strong>US Power:</strong> Type A/B plugs, 120V/60Hz.<br>If coming from India/UAE (Type G/D), you need an adapter. Available at:<br>\u2022 Hotel front desk (ask \u2014 many have loaners)<br>\u2022 Walgreens 2050 University Ave<br>\u2022 Any Target/Walmart<br>Your laptop charger likely supports 100\u2013240V (check the fine print).', icon:'&#128268;', cat:'Practical'}
+];
 
 // Stop words — ignore these in scoring
 var _stopWords = ['which','what','where','when','how','is','are','the','a','an','in','on','at','to','for','of','do','does','can','i','my','me','this','that','any','some','there','near','here','please','show','find','get','tell','about'];
@@ -1575,6 +1680,30 @@ function _getCurrentCityName() {
   return cur ? cur.city : tripRoute[tripRoute.length-1].city;
 }
 
+// Knowledge Base search — matches query against KB entries
+function searchKnowledgeBase(query) {
+  var q = query.toLowerCase().trim();
+  var words = q.split(/\s+/).filter(function(w){ return w.length > 1 && _stopWords.indexOf(w) === -1; });
+  var best = null, bestScore = 0;
+
+  _knowledgeBase.forEach(function(entry) {
+    var score = 0;
+    entry.q.forEach(function(keyword) {
+      // Exact phrase match in query
+      if (q.indexOf(keyword) !== -1) score += keyword.split(' ').length * 10;
+      // Word-level matches
+      words.forEach(function(w) {
+        if (keyword === w) score += 6;
+        else if (keyword.indexOf(w) !== -1 && w.length >= 3) score += 3;
+        else if (w.indexOf(keyword) !== -1 && keyword.length >= 3) score += 2;
+      });
+    });
+    if (score > bestScore) { bestScore = score; best = entry; }
+  });
+
+  return bestScore >= 6 ? best : null;
+}
+
 function submitSearch() {
   var inp = document.getElementById('queryInput');
   var val = inp.value.trim();
@@ -1589,36 +1718,51 @@ function submitSearch() {
   hist.insertBefore(chip, hist.firstChild);
   if (hist.children.length > 7) hist.removeChild(hist.lastChild);
 
-  var results = smartSearch(val);
   var panel = document.getElementById('searchResultsPanel');
   var body = document.getElementById('searchResultsBody');
-  var timeMod = _detectTimeMod(val.toLowerCase());
-  var intent = _detectIntent(val.toLowerCase());
   var cityName = _getCurrentCityName();
 
+  // STEP 1: Check Knowledge Base for instant answer
+  var kbResult = searchKnowledgeBase(val);
+
+  // STEP 2: Also run legacy index search
+  var results = smartSearch(val);
+  var timeMod = _detectTimeMod(val.toLowerCase());
+  var intent = _detectIntent(val.toLowerCase());
+
+  var html = '';
+
+  // If KB has an answer, show it prominently
+  if (kbResult) {
+    var answerText = typeof kbResult.answer === 'function' ? kbResult.answer() : kbResult.answer;
+    html += '<div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:12px;padding:16px;margin-bottom:14px;">'
+      + '<div style="display:flex;align-items:flex-start;gap:12px;">'
+      + '<span style="font-size:28px;flex-shrink:0;">' + kbResult.icon + '</span>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:6px;">' + kbResult.cat + ' \u2014 Instant Answer</div>'
+      + '<div style="font-size:13px;color:var(--text);line-height:1.6;">' + answerText + '</div>'
+      + (kbResult.action ? '<div style="margin-top:8px;"><button onclick="_knowledgeBase['+_knowledgeBase.indexOf(kbResult)+'].action()" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">View in App \u2192</button></div>' : '')
+      + '</div></div></div>';
+  }
+
+  // Smart time-based banner
+  if (!kbResult && timeMod === 'now' && (intent === 'food' || intent === 'bar')) {
+    var hour = new Date().getHours();
+    var timeContext = '';
+    if (hour < 6) timeContext = 'Very early \u2014 most places closed. Hotel lobby or 24/7 options:';
+    else if (hour < 11) timeContext = 'Morning \u2014 breakfast spots:';
+    else if (hour < 15) timeContext = 'Lunch time \u2014 most restaurants open:';
+    else if (hour < 17) timeContext = 'Afternoon \u2014 limited service hours:';
+    else if (hour < 22) timeContext = 'Dinner time \u2014 most restaurants open:';
+    else timeContext = 'Late night \u2014 limited options:';
+
+    html += '<div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:10px;padding:14px;margin-bottom:12px;">'
+      + '<div style="font-size:11px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">&#9201; Smart Answer</div>'
+      + '<div style="font-size:13px;color:#1e1b4b;font-weight:600;">' + timeContext + '</div></div>';
+  }
+
+  // Show index results (venues, categories, etc.)
   if (results.length > 0) {
-    document.getElementById('searchTitle').innerHTML = '&#128269; Results for "' + val + '"';
-    document.getElementById('searchSubtitle').textContent = results.length + ' result' + (results.length>1?'s':'');
-
-    var html = '';
-
-    // Smart answer banner for time-based queries
-    if (timeMod === 'now' && (intent === 'food' || intent === 'bar')) {
-      var hour = new Date().getHours();
-      var timeContext = '';
-      if (hour < 6) timeContext = 'It\'s very early — most restaurants are closed. Hotel lobby or 24/7 options:';
-      else if (hour < 11) timeContext = 'Morning hours — look for breakfast spots:';
-      else if (hour < 15) timeContext = 'Lunch time — most restaurants are open now:';
-      else if (hour < 17) timeContext = 'Afternoon — some restaurants between lunch & dinner service:';
-      else if (hour < 22) timeContext = 'Dinner time — most restaurants are open now:';
-      else timeContext = 'Late night — limited options. Try hotel bar or late-night spots:';
-
-      html += '<div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:10px;padding:14px;margin-bottom:12px;">'
-        + '<div style="font-size:11px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">&#9201; Smart Answer</div>'
-        + '<div style="font-size:13px;color:#1e1b4b;font-weight:600;">' + timeContext + '</div>'
-        + '</div>';
-    }
-
     results.forEach(function(r) {
       var item = r.item;
       var clickAction = '';
@@ -1630,10 +1774,8 @@ function submitSearch() {
         clickAction = 'onclick="switchTab(\'' + item.tab + '\',document.querySelectorAll(\'.cat-tab\')[' +
           ['food','bar','interesting','sightseeing'].indexOf(item.tab) + ']);closeSearchResults()"';
       }
-
-      // Build description — append hours if time-based query
       var descText = item.desc;
-      if (timeMod && item.hours) descText += ' • ' + item.hours;
+      if (timeMod && item.hours) descText += ' \u2022 ' + item.hours;
 
       html += '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;cursor:' + (clickAction?'pointer':'default') + ';transition:border-color 0.15s;" ' + clickAction + ' onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
         + '<div style="display:flex;align-items:center;gap:10px;">'
@@ -1646,33 +1788,30 @@ function submitSearch() {
         + (clickAction ? '<span style="font-size:14px;color:var(--text-3);">&#8250;</span>' : '')
         + '</div></div>';
     });
-
-    // Contextual web search fallback
-    var mapsQuery = val + ' near ' + cityName;
-    html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;display:flex;gap:8px;justify-content:center;">'
-      + '<a href="https://www.google.com/maps/search/' + encodeURIComponent(mapsQuery) + '" target="_blank" style="font-size:12px;color:var(--accent);font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid var(--accent);border-radius:6px;">&#128205; Google Maps</a>'
-      + '<a href="https://www.google.com/search?q=' + encodeURIComponent(val + ' ' + cityName) + '" target="_blank" style="font-size:12px;color:var(--text-2);font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid var(--border);border-radius:6px;">&#128269; Google Search</a>'
-      + '</div>';
-
-    body.innerHTML = html;
-    panel.style.display = 'block';
-  } else {
-    // No local results — show smart fallback with Maps + Google
-    document.getElementById('searchTitle').innerHTML = '&#128269; "' + val + '"';
-    document.getElementById('searchSubtitle').textContent = 'No matching info in TRAVELAG';
-
-    var mapsQuery = val + ' near ' + cityName;
-    body.innerHTML = '<div style="text-align:center;padding:30px 20px;">'
-      + '<div style="font-size:40px;margin-bottom:12px;">&#128270;</div>'
-      + '<div style="font-size:14px;color:var(--text-2);margin-bottom:16px;">Nothing found locally. Try searching externally:</div>'
-      + '<div style="display:flex;flex-direction:column;gap:8px;max-width:300px;margin:0 auto;">'
-      + '<a href="https://www.google.com/maps/search/' + encodeURIComponent(mapsQuery) + '" target="_blank" style="display:block;padding:12px;background:#16a34a;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">&#128205; Search Google Maps near ' + cityName + '</a>'
-      + '<a href="https://www.google.com/search?q=' + encodeURIComponent(val + ' ' + cityName) + '" target="_blank" style="display:block;padding:12px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">&#128269; Search Google</a>'
-      + '</div></div>';
-
-    panel.style.display = 'block';
   }
 
+  // Always show Google/Maps search buttons
+  var mapsQuery = val + ' near ' + cityName;
+  html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;">'
+    + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);margin-bottom:8px;">Search Externally</div>'
+    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+    + '<a href="https://www.google.com/maps/search/' + encodeURIComponent(mapsQuery) + '" target="_blank" style="font-size:12px;color:#16a34a;font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid #16a34a;border-radius:6px;">&#128205; Google Maps</a>'
+    + '<a href="https://www.google.com/search?q=' + encodeURIComponent(val + ' ' + cityName) + '" target="_blank" style="font-size:12px;color:var(--accent);font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid var(--accent);border-radius:6px;">&#128269; Google</a>'
+    + '<a href="https://www.yelp.com/search?find_desc=' + encodeURIComponent(val) + '&find_loc=' + encodeURIComponent(cityName) + '" target="_blank" style="font-size:12px;color:#d32323;font-weight:700;text-decoration:none;padding:8px 14px;border:1px solid #d32323;border-radius:6px;">&#11088; Yelp</a>'
+    + '</div></div>';
+
+  // Set panel titles
+  if (kbResult || results.length > 0) {
+    document.getElementById('searchTitle').innerHTML = '&#128269; "' + val + '"';
+    var count = (kbResult ? 1 : 0) + results.length;
+    document.getElementById('searchSubtitle').textContent = count + ' result' + (count>1?'s':'') + ' found';
+  } else {
+    document.getElementById('searchTitle').innerHTML = '&#128269; "' + val + '"';
+    document.getElementById('searchSubtitle').textContent = 'No local match \u2014 try external search below';
+  }
+
+  body.innerHTML = html;
+  panel.style.display = 'block';
   inp.value = '';
 }
 document.getElementById('queryInput').addEventListener('keypress', function(e){ if(e.key==='Enter') submitSearch(); });
@@ -2416,6 +2555,188 @@ function sendFlightAlert(type) {
 setInterval(checkFlightStatus, 6 * 3600000);
 // Initial check on page load
 setTimeout(checkFlightStatus, 3000);
+
+// ===== MY DOCUMENTS — localStorage persistence =====
+function getStoredDocs() {
+  try { return JSON.parse(localStorage.getItem('travelag_docs') || '[]'); } catch(e) { return []; }
+}
+function saveStoredDocs(docs) {
+  try { localStorage.setItem('travelag_docs', JSON.stringify(docs)); } catch(e) {
+    alert('Storage full. Try removing old documents first.');
+  }
+}
+
+function toggleDocsDrop(e) {
+  var drop = document.getElementById('docDrop');
+  var chev = document.getElementById('docChev');
+  if (drop.style.display === 'none') {
+    drop.style.display = 'block';
+    chev.style.transform = 'rotate(180deg)';
+    renderDocList();
+  } else {
+    drop.style.display = 'none';
+    chev.style.transform = 'rotate(0deg)';
+  }
+}
+
+function handleDocUpload(files) {
+  if (!files.length) return;
+  var docs = getStoredDocs();
+  var processed = 0;
+
+  Array.from(files).forEach(function(file) {
+    // Max 5MB per file for localStorage
+    if (file.size > 5 * 1024 * 1024) {
+      alert(file.name + ' is too large (max 5MB). Use git push for large files.');
+      processed++;
+      if (processed === files.length) { renderDocList(); }
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var docEntry = {
+        id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        name: file.name,
+        size: file.size,
+        type: file.type || guessType(file.name),
+        data: e.target.result,
+        uploaded: new Date().toISOString(),
+        tag: guessTag(file.name)
+      };
+      docs.push(docEntry);
+      processed++;
+      if (processed === files.length) {
+        saveStoredDocs(docs);
+        renderDocList();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Reset file input so same file can be re-uploaded
+  document.getElementById('docUploadInput').value = '';
+}
+
+function guessType(name) {
+  var ext = name.split('.').pop().toLowerCase();
+  var map = {pdf:'application/pdf', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', csv:'text/csv', txt:'text/plain', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'};
+  return map[ext] || 'application/octet-stream';
+}
+
+function guessTag(name) {
+  var n = name.toLowerCase();
+  if (n.indexOf('ticket') !== -1 || n.indexOf('flight') !== -1 || n.indexOf('boarding') !== -1 || n.indexOf('emirates') !== -1 || n.indexOf('etihad') !== -1) return 'Flight';
+  if (n.indexOf('hotel') !== -1 || n.indexOf('reservation') !== -1 || n.indexOf('booking') !== -1 || n.indexOf('holiday') !== -1 || n.indexOf('marriott') !== -1 || n.indexOf('hilton') !== -1) return 'Hotel';
+  if (n.indexOf('expense') !== -1 || n.indexOf('receipt') !== -1 || n.indexOf('invoice') !== -1 || n.indexOf('bill') !== -1) return 'Expense';
+  if (n.indexOf('visa') !== -1 || n.indexOf('passport') !== -1 || n.indexOf('id') !== -1) return 'ID/Visa';
+  if (n.indexOf('conf') !== -1 || n.indexOf('badge') !== -1 || n.indexOf('rsac') !== -1 || n.indexOf('fabcon') !== -1) return 'Conference';
+  return 'Document';
+}
+
+function getDocIcon(type) {
+  if (type.indexOf('pdf') !== -1) return '&#128196;';
+  if (type.indexOf('image') !== -1) return '&#128247;';
+  if (type.indexOf('sheet') !== -1 || type.indexOf('csv') !== -1) return '&#128202;';
+  if (type.indexOf('word') !== -1 || type.indexOf('document') !== -1) return '&#128195;';
+  return '&#128193;';
+}
+
+function getTagColor(tag) {
+  var map = {Flight:'var(--blue)', Hotel:'var(--green)', Expense:'var(--orange)', 'ID/Visa':'var(--red)', Conference:'var(--accent)', Document:'var(--text-3)'};
+  return map[tag] || 'var(--text-3)';
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function renderDocList() {
+  var docs = getStoredDocs();
+  var list = document.getElementById('docList');
+  var countEl = document.getElementById('docCount');
+  if (countEl) countEl.textContent = docs.length + ' file' + (docs.length !== 1 ? 's' : '');
+
+  if (!list) return;
+  if (docs.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-3);font-size:11px;">No documents yet. Upload your tickets, hotel vouchers, or receipts.</div>';
+    return;
+  }
+
+  var html = '';
+  docs.forEach(function(doc) {
+    var date = new Date(doc.uploaded);
+    var dateStr = date.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    var tagColor = getTagColor(doc.tag);
+
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--bg);font-size:11px;">'
+      + '<span style="font-size:16px;flex-shrink:0;">' + getDocIcon(doc.type) + '</span>'
+      + '<div style="flex:1;min-width:0;cursor:pointer;" onclick="viewDoc(\'' + doc.id + '\')">'
+      + '<div style="font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + doc.name + '</div>'
+      + '<div style="font-size:9px;color:var(--text-3);">' + formatFileSize(doc.size) + ' \u2022 ' + dateStr
+      + ' <span style="color:' + tagColor + ';font-weight:700;">' + doc.tag + '</span></div>'
+      + '</div>'
+      + '<button onclick="event.stopPropagation();deleteDoc(\'' + doc.id + '\')" style="background:none;border:none;font-size:12px;color:var(--text-3);cursor:pointer;padding:4px;" title="Delete">&times;</button>'
+      + '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function viewDoc(id) {
+  var docs = getStoredDocs();
+  var doc = docs.find(function(d) { return d.id === id; });
+  if (!doc) return;
+
+  var panel = document.getElementById('docViewerPanel');
+  var title = document.getElementById('docViewerTitle');
+  var body = document.getElementById('docViewerBody');
+
+  title.innerHTML = getDocIcon(doc.type) + ' ' + doc.name;
+
+  if (doc.type.indexOf('image') !== -1) {
+    body.innerHTML = '<img src="' + doc.data + '" style="max-width:100%;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.1);">';
+  } else if (doc.type.indexOf('pdf') !== -1) {
+    body.innerHTML = '<iframe src="' + doc.data + '" style="width:100%;height:calc(100vh - 160px);border:1px solid var(--border);border-radius:8px;"></iframe>';
+  } else if (doc.type.indexOf('text') !== -1 || doc.type.indexOf('csv') !== -1) {
+    // Decode base64 text
+    try {
+      var text = atob(doc.data.split(',')[1]);
+      body.innerHTML = '<pre style="background:var(--bg);padding:16px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;max-height:calc(100vh - 160px);overflow-y:auto;">' + text.replace(/</g,'&lt;') + '</pre>';
+    } catch(e) {
+      body.innerHTML = '<div style="color:var(--text-2);">Cannot preview this file type. <a href="' + doc.data + '" download="' + doc.name + '" style="color:var(--accent);font-weight:700;">Download instead</a></div>';
+    }
+  } else {
+    body.innerHTML = '<div style="text-align:center;padding:40px;">'
+      + '<div style="font-size:48px;margin-bottom:12px;">' + getDocIcon(doc.type) + '</div>'
+      + '<div style="font-size:14px;color:var(--text-2);margin-bottom:8px;">' + doc.name + ' (' + formatFileSize(doc.size) + ')</div>'
+      + '<div style="font-size:12px;color:var(--text-3);margin-bottom:16px;">Preview not available for this file type.</div>'
+      + '<a href="' + doc.data + '" download="' + doc.name + '" style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">&#11015; Download File</a>'
+      + '</div>';
+  }
+
+  panel.style.display = 'block';
+}
+
+function closeDocViewer() {
+  document.getElementById('docViewerPanel').style.display = 'none';
+}
+
+function deleteDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  var docs = getStoredDocs();
+  docs = docs.filter(function(d) { return d.id !== id; });
+  saveStoredDocs(docs);
+  renderDocList();
+}
+
+// Initialize doc count on load
+(function() {
+  var docs = getStoredDocs();
+  var countEl = document.getElementById('docCount');
+  if (countEl) countEl.textContent = docs.length + ' file' + (docs.length !== 1 ? 's' : '');
+})();
 </script>
 <script>
 // Register Service Worker for PWA
